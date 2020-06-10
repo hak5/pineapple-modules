@@ -1,0 +1,25 @@
+.cabinet-control-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-self: flex-start;
+}
+
+.control-button {
+    margin-top: 16px;
+    margin-right: 4px;
+}
+
+.action-button {
+    margin-top: 4px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+}
+
+.cabinet-loading-centered {
+    display: flex;
+    justify-content: center;
+    align-self: center;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}

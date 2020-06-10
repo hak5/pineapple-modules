@@ -1,0 +1,37 @@
+.file-editor-title-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-self: flex-start;
+}
+
+.file-editor-title {
+    font-size: 24px;
+}
+
+.file-editor-body-container {
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
+.new-portal-buttons {
+    margin-top: 16px;
+}
+
+.new-portal-button-first {
+    margin-right: 10px;
+}
+
+.file-editor-text-area {
+    width: 100%;
+    min-height: 320px;
+    max-height: 400px;
+    resize: none;
+    margin: 0 0 5px;
+    padding: 0;
+    background-color: #efefef;
+    border-radius: 2px;
+    border-color: #cecece;
+    max-lines: 50;
+}

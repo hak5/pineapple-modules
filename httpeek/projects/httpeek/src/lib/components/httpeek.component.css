@@ -1,0 +1,42 @@
+.right-left-split-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-self: flex-start;
+}
+
+.card-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.control-card {
+    max-width: 100%;
+}
+
+.container {
+    display: flex;
+}
+
+.right-controls {
+    flex: 1;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    max-width: 50%;
+    padding-left: 10px;
+}
+
+.left-controls {
+    flex: 1;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    max-width: 50%;
+    padding-right: 10px;
+}
+
+.data-container {
+    max-height: 250px;
+    max-width: 100%;
+    overflow-y: auto;
+}

@@ -1,0 +1,15 @@
+<div class="right-left-split-container">
+    <h1 mat-dialog-title>Scan Output</h1>
+    <span *ngIf="isBusy"><mat-spinner [diameter]="24" color="accent" style="margin-left: 8px"></mat-spinner></span>
+    <span fxFlex></span>
+    <button mat-icon-button (click)="closeDialog();">
+        <mat-icon>close</mat-icon>
+    </button>
+</div>
+
+<mat-divider></mat-divider>
+<br />
+
+<div class="result-body-container">
+    <textarea class="output-textarea" [(ngModel)]="content" placeholder="Scan Results..." readonly></textarea>
+</div>

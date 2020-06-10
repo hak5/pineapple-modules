@@ -1,0 +1,213 @@
+<div class="dependency-card-centered" *ngIf="!hasDependencies">
+    <mat-card class="dependency-card">
+        <mat-card-content>
+            <mat-card-title>Welcome To Nmap</mat-card-title>
+            <mat-card-subtitle>Lets get started.</mat-card-subtitle>
+
+            <mat-divider></mat-divider>
+            <br />
+
+            <p>You need to install some dependencies before you can use this module.</p>
+            <p>This will make an request to the internet.</p>
+
+            <br/>
+            <br/>
+            <div class="dependency-card-centered">
+                <button mat-raised-button color="accent"
+                        class="dependency-card-button"
+                        (click)="installDependencies()"
+                        [disabled]="isInstalling">
+                    <span *ngIf="isInstalling">
+                        <mat-spinner [diameter]="20" class="spinner-padding" color="accent"></mat-spinner>
+                    </span>
+                    <span *ngIf="!isInstalling">
+                        Install Dependencies
+                    </span>
+                </button>
+            </div>
+            <br/>
+            <div class="dependency-card-centered">
+                <button mat-button color="accent" (click)="showLicenseDialog();">View Nmap License</button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<div *ngIf="hasDependencies" class="controls-container" fxLayoutGap="20px" fxLayout="row" fxLayout.xs="column" fxLayout.sm="column">
+    <mat-card class="control-item">
+        <mat-card-content>
+            <div class="right-left-split-container">
+                <mat-card-title>Nmap</mat-card-title>
+                <span *ngIf="isScanning"><mat-spinner [diameter]="24" color="accent" style="margin-left: 8px"></mat-spinner></span>
+                <span fxFlex></span>
+                <mat-menu #nmapMenu>
+                    <button mat-menu-item (click)="showUninstall();">Uninstall Dependencies</button>
+                    <button mat-menu-item (click)="showLicenseDialog();">Nmap License</button>
+                </mat-menu>
+
+                <button mat-icon-button [matMenuTriggerFor]="nmapMenu">
+                    <mat-icon>more_vert</mat-icon>
+                </button>
+            </div>
+            <br/>
+            <form>
+                <mat-form-field style="width: 100%;">
+                    <mat-label>Nmap Command</mat-label>
+                    <input class="control-input" matInput [(ngModel)]="nmapOptions.command" name="command"/>
+                </mat-form-field>
+                <mat-form-field style="width: 100%;">
+                    <mat-label>Target</mat-label>
+                    <input class="control-input" matInput [(ngModel)]="nmapOptions.target" (ngModelChange)="update();" name="target"/>
+                </mat-form-field>
+                <mat-form-field style="width: 100%;">
+                    <mat-label>Profile</mat-label>
+                    <mat-select [(ngModel)]="nmapOptions.profile" (ngModelChange)="update();" name="profile">
+                        <mat-option>--</mat-option>
+                        <mat-option value="-T4 -A -v">Intense scan</mat-option>
+                        <mat-option value="-sS -sU -T4 -A -v">Intense scan plus UDP</mat-option>
+                        <mat-option value="-p 1-65535 -T4 -A -v">Intense scan, all TCP ports</mat-option>
+                        <mat-option value="-T4 -A -v -Pn">Intense scan, no ping</mat-option>
+                        <mat-option value="-sn">Ping scan</mat-option>
+                        <mat-option value="-T4 -F">Quick scan</mat-option>
+                        <mat-option value="-sV -T4 -O -F --version-light">Quick scan plus</mat-option>
+                        <mat-option value="-sn --traceroute">Quick traceroute</mat-option>
+                        <mat-option value="-sS -sU -T4 -A -v -PE -PP -PS80,443 -PA3389 -PU40125 -PY -g 53">Slow
+                            comprehensive scan
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <button mat-raised-button color="accent" (click)="startScan();" style="width: 100%;" *ngIf="!isScanning">Scan</button>
+                <button mat-raised-button color="warn" (click)="stopScan();" style="width: 100%;" *ngIf="isScanning">Stop</button>
+            </form>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card class="control-item" *ngIf="nmapOptions.profile === '' || nmapOptions.profile === undefined;">
+        <mat-card-content>
+            <div>
+                <mat-card-title>Scan Options</mat-card-title>
+            </div>
+            <form>
+                <mat-form-field style="width: 100%;">
+                    <mat-label>Timing</mat-label>
+                    <mat-select [(ngModel)]="nmapOptions.timing" (selectionChange)="update();" name="timing">
+                        <mat-option>--</mat-option>
+                        <mat-option value="-T0">Paranoid</mat-option>
+                        <mat-option value="-T1">Sneaky</mat-option>
+                        <mat-option value="-T2">Polite</mat-option>
+                        <mat-option value="-T3">Normal</mat-option>
+                        <mat-option value="-T4">Aggresive</mat-option>
+                        <mat-option value="-T5">Insane</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field style="width: 100%;">
+                    <mat-label>TCP Scan</mat-label>
+                    <mat-select [(ngModel)]="nmapOptions.tcp" (selectionChange)="update();" name="tcp">
+                        <mat-option>--</mat-option>
+                        <mat-option value="-sA">ACK scan</mat-option>
+                        <mat-option value="-sF">FIN scan</mat-option>
+                        <mat-option value="-sM">Maimon scan</mat-option>
+                        <mat-option value="-sN">Null scan</mat-option>
+                        <mat-option value="-sS">TCP SYN scan</mat-option>
+                        <mat-option value="-sT">TCP connect scan</mat-option>
+                        <mat-option value="-sW">Window scan</mat-option>
+                        <mat-option value="-sX">Xmas Tree scan</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field style="width: 100%;">
+                    <mat-label>Non-TCP Scan</mat-label>
+                    <mat-select [(ngModel)]="nmapOptions.nontcp" (selectionChange)="update();" name="non-tcp">
+                        <mat-option>--</mat-option>
+                        <mat-option value="-sU">UDP scan</mat-option>
+                        <mat-option value="-sO">IP protocol scan</mat-option>
+                        <mat-option value="-sL">List scan</mat-option>
+                        <mat-option value="-sn">No port scan</mat-option>
+                        <mat-option value="-sY">SCTP INIT port scan</mat-option>
+                        <mat-option value="-sZ">SCTP cookie-echo port scan</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </form>
+
+            <div class="right-left-split-container">
+                <span>
+                    <mat-checkbox class="control-item" [(ngModel)]="scanOptions.osDetection.toggled" (ngModelChange)="update();">OS Detection</mat-checkbox>
+                    <mat-checkbox class="control-item" [(ngModel)]="scanOptions.versionDetection.toggled" (ngModelChange)="update();">Version Detection</mat-checkbox>
+                    <mat-checkbox class="control-item" [(ngModel)]="scanOptions.ipv6.toggled" (ngModelChange)="update();">IPv6 Support</mat-checkbox>
+                </span>
+                <span fxFlex></span>
+                <span>
+                    <mat-checkbox class="control-item" [(ngModel)]="scanOptions.advancedOptions.toggled" (ngModelChange)="update();">Advanced/Aggressive options</mat-checkbox>
+                    <mat-checkbox class="control-item" [(ngModel)]="scanOptions.disableDNS.toggled" (ngModelChange)="update();">Disable reverse DNS resolution</mat-checkbox>
+                </span>
+            </div>
+
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card class="control-item" *ngIf="nmapOptions.profile === '' || nmapOptions.profile === undefined;">
+        <mat-card-content>
+            <div>
+                <mat-card-title>Ping Options</mat-card-title>
+            </div>
+            <div class="right-left-split-container">
+                <span>
+                    <mat-checkbox class="control-item" [(ngModel)]="pingOptions.noPingBeforeScanning.toggled" (ngModelChange)="update();">No ping before scanning</mat-checkbox>
+                    <mat-checkbox class="control-item" [(ngModel)]="pingOptions.icmpPing.toggled" (ngModelChange)="update();">ICMP ping</mat-checkbox>
+                </span>
+                <span fxFlex></span>
+                <span>
+                    <mat-checkbox class="control-item" [(ngModel)]="pingOptions.icmpTimeStamp.toggled" (ngModelChange)="update();">ICMP timestamp request</mat-checkbox>
+                    <mat-checkbox class="control-item" [(ngModel)]="pingOptions.icmpNetmask.toggled" (ngModelChange)="update();">ICMP netmask request</mat-checkbox>
+                </span>
+            </div>
+            <br/>
+            <mat-divider></mat-divider>
+            <br/>
+            <div>
+                <mat-card-title>Target Options</mat-card-title>
+            </div>
+            <div class="controls-container">
+                <mat-checkbox class="control-item" [(ngModel)]="targetOptions.toggled" (ngModelChange)="update();">Fast Scan</mat-checkbox>
+            </div>
+            <br/>
+            <mat-divider></mat-divider>
+            <br/>
+            <div>
+                <mat-card-title>Other Options</mat-card-title>
+            </div>
+            <div class="right-left-split-container">
+                <span>
+                    <mat-checkbox class="control-item" [(ngModel)]="otherOptions.fragmentPackets.toggled" (ngModelChange)="update();">Fragment IP packets</mat-checkbox>
+                    <mat-checkbox class="control-item" [(ngModel)]="otherOptions.packetTrace.toggled" (ngModelChange)="update();">Packet Trace</mat-checkbox>
+                </span>
+                <span fxFlex></span>
+                <span>
+                    <mat-checkbox class="control-item" [(ngModel)]="otherOptions.disableRandomized.toggled" (ngModelChange)="update();">Disable randomizing scanned ports</mat-checkbox>
+                    <mat-checkbox class="control-item" [(ngModel)]="otherOptions.traceRoutes.toggled" (ngModelChange)="update();">Trace routes</mat-checkbox>
+                </span>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+</div>
+
+<br/>
+
+<mat-card *ngIf="hasDependencies">
+    <mat-card-content>
+        <div class="output-container">
+            <div class="right-left-split-container">
+                <mat-card-title>Output</mat-card-title>
+                <span fxFlex></span>
+                <button mat-icon-button [disabled]="isFetchingOutput || !isScanning" (click)="getScanOutput(scanOutputFileName);"><mat-icon>refresh</mat-icon></button>
+                <button mat-icon-button [disabled]="scanOutputFileName == null || isScanning" (click)="downloadOutput();"><mat-icon>cloud_download</mat-icon></button>
+            </div>
+            <textarea class="output-textarea" [(ngModel)]="scanOutput" placeholder="No output to display..." readonly></textarea>
+            <div class="right-left-split-container">
+                <span *ngIf="isScanning" style="margin-right: 8px;"><i>Refreshes every 5 seconds...</i></span>
+                <span *ngIf="isFetchingOutput"><mat-spinner [diameter]="24" color="accent"></mat-spinner></span>
+                <span fxFlex></span>
+            </div>
+        </div>
+    </mat-card-content>
+</mat-card>

@@ -1,0 +1,7 @@
+{
+    "name": "tcpdump",
+    "title": "TCPDump",
+    "description": "Web GUI for the tcpdump packet analyzer tool.",
+    "version": "1.0",
+    "author": "newbi3"
+}

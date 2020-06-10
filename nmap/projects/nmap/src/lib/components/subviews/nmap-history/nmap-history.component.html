@@ -1,0 +1,38 @@
+<mat-card>
+    <mat-card-content>
+        <div class="right-left-split-container">
+            <mat-card-title>History</mat-card-title>
+            <span *ngIf="isBusy"><mat-spinner [diameter]="24" color="accent" style="margin-left: 8px"></mat-spinner></span>
+            <span fxFlex></span>
+            <mat-menu #historyMenu>
+                <button mat-menu-item (click)="loadHistory();">Refresh</button>
+                <button mat-menu-item (click)="showClearHistoryDialog();">Delete History</button>
+            </mat-menu>
+
+            <button mat-icon-button [matMenuTriggerFor]="historyMenu">
+                <mat-icon>more_vert</mat-icon>
+            </button>
+        </div>
+
+        <br/>
+        <mat-divider></mat-divider>
+        <br/>
+
+        <mat-table style="display: none;">
+            <mat-header-row *matHeaderRowDef="[]"></mat-header-row>
+        </mat-table>
+        <table class="mat-table" style="min-width: 100%; overflow-x: auto; justify-content: center;">
+            <tbody>
+            <ng-container *ngFor="let item of scanHistory">
+                <tr class="mat-row">
+                    <td class="mat-cell">{{ item }}</td>
+                    <td class="mat-cell"><button mat-icon-button (click)="showScanResults(item);"><mat-icon>folder</mat-icon></button></td>
+                    <td class="mat-cell"><button mat-icon-button (click)="downloadItem(item);"><mat-icon>cloud_download</mat-icon></button></td>
+                    <td class="mat-cell"><button mat-icon-button (click)="showDeleteDialog(item);"><mat-icon>delete</mat-icon></button></td>
+                </tr>
+            </ng-container>
+            </tbody>
+        </table>
+        <i *ngIf="scanHistory.length == 0;">No scan history to display.</i>
+    </mat-card-content>
+</mat-card>
