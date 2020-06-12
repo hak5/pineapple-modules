@@ -50,7 +50,6 @@ class Module:
         decoded_data = data.decode('utf-8')
 
         try:
-            self.logger.debug('Received valid json')
             return json.loads(decoded_data)
         except ValueError:
             self.logger.warning('Non-JSON Received')
