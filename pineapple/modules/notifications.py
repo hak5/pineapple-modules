@@ -2,6 +2,10 @@ import socket
 import json
 
 class Notifications:
+    INFO  = 0
+    WARN  = 1
+    ERROR = 2
+    OTHER = 3
 
     def __init__(self):
         self._notify_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
