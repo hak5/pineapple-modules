@@ -9,6 +9,7 @@ from typing import Tuple, Any, Callable, Optional
 
 from pineapple.logger import get_logger
 from pineapple.modules.request import Request
+from pineapple.helpers import Helpers
 
 class Module:
 
@@ -55,20 +56,6 @@ class Module:
             self.logger.warning('Non-JSON Received')
 
         return None
-
-    def _json_to_bytes(self, message) -> bytes:
-        """
-        json deserialize a message and then decode it.
-        Use this to convert your json message to bytes before publishing it over the socket
-        :param message: A json serializable list or a dict
-        :return: bytes
-        """
-        if not (type(message) is list or type(message) is dict):
-            self.logger.error(f'Expected a list or dict but got {type(message)} instead.')
-            raise TypeError(f'Expected a list or dict but got {type(message)} instead.')
-
-        d = json.dumps(message)
-        return d.encode('utf-8')
 
     def _publish(self, message: bytes):
         """
@@ -181,7 +168,7 @@ class Module:
             else:
                 response_dict['error'] = data
 
-            message_bytes = module._json_to_bytes(response_dict)
+            message_bytes = Helpers.json_to_bytes(response_dict)
             module._publish(message_bytes)
 
         return wrapper
