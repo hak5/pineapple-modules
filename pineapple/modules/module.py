@@ -9,7 +9,7 @@ from typing import Tuple, Any, Callable, Optional
 
 from pineapple.logger import get_logger
 from pineapple.modules.request import Request
-
+from pineapple.helpers import Helpers
 
 class Module:
 
@@ -24,6 +24,7 @@ class Module:
         self.logger.debug(f'Initializing module {name}.')
 
         self._running: bool = False  # set to False to stop the module loop
+
         self._module_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)  # api requests will be received over this socket
         self._module_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self._module_socket_path = f'/tmp/{name}.sock'  # apth to the socket
@@ -56,20 +57,6 @@ class Module:
 
         return None
 
-    def _json_to_bytes(self, message) -> bytes:
-        """
-        json deserialize a message and then decode it.
-        Use this to convert your json message to bytes before publishing it over the socket
-        :param message: A json serializable list or a dict
-        :return: bytes
-        """
-        if not (type(message) is list or type(message) is dict):
-            self.logger.error(f'Expected a list or dict but got {type(message)} instead.')
-            raise TypeError(f'Expected a list or dict but got {type(message)} instead.')
-
-        d = json.dumps(message)
-        return d.encode('utf-8')
-
     def _publish(self, message: bytes):
         """
         Publish a message `message` to over `_module_socket`.
@@ -77,10 +64,12 @@ class Module:
         :param message: Bytes of a message that should be sent
         :return: None
         """
-        self.logger.debug(f'Sending response {str(message, "utf-8")}')
 
+        self.logger.debug('Accepting on module socket')
         connection, _ = self._module_socket.accept()
+
         try:
+            self.logger.debug(f'Sending response {str(message, "utf-8")}')
             connection.sendall(message)
         except ValueError:
             self.logger.error('Could not send response!')
@@ -179,8 +168,7 @@ class Module:
             else:
                 response_dict['error'] = data
 
-            message_bytes = module._json_to_bytes(response_dict)
+            message_bytes = Helpers.json_to_bytes(response_dict)
             module._publish(message_bytes)
-            func(*args, **kwargs)
 
         return wrapper
