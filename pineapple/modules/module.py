@@ -10,7 +10,6 @@ from typing import Tuple, Any, Callable, Optional
 from pineapple.logger import get_logger
 from pineapple.modules.request import Request
 
-
 class Module:
 
     def __init__(self, name: str, log_level: int = logging.WARNING):
@@ -138,38 +137,6 @@ class Module:
         self.logger.info(f'Shutting down module. Signal: {sig}')
         self._running = False
         self._module_socket.close()
-
-    def notify(self, level: int, message: str) -> bool:
-        """
-        Send a notification over the WiFi Pineapples notification socket
-
-        :param level: Notification level
-        :param message: Notification message
-        :return: bool
-        """
-        notify_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        notify_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        notify_socket_path = '/tmp/notifications.sock'
-
-        module_notification = {'level': level, 'message': message, 'module_name': self.name}
-        socket_message = self._json_to_bytes(module_notification)
-        status = True
-
-        try:
-            notify_socket.connect(notify_socket_path)
-        except ValueError:
-            self.logger.error('Could not connect to notifications socket!')
-            return False
-
-        try:
-            notify_socket.sendall(socket_message)
-        except ValueError:
-            self.logger.error('Could not send notification!')
-            status = False
-
-        notify_socket.close()
-
-        return status
 
     @abc.abstractmethod
     def handle_request(self, request: Request):
