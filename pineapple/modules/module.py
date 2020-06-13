@@ -24,6 +24,7 @@ class Module:
         self.logger.debug(f'Initializing module {name}.')
 
         self._running: bool = False  # set to False to stop the module loop
+
         self._module_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)  # api requests will be received over this socket
         self._module_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self._module_socket_path = f'/tmp/{name}.sock'  # apth to the socket
@@ -77,10 +78,12 @@ class Module:
         :param message: Bytes of a message that should be sent
         :return: None
         """
-        self.logger.debug(f'Sending response {str(message, "utf-8")}')
 
+        self.logger.debug('Accepting on module socket')
         connection, _ = self._module_socket.accept()
+
         try:
+            self.logger.debug(f'Sending response {str(message, "utf-8")}')
             connection.sendall(message)
         except ValueError:
             self.logger.error('Could not send response!')
@@ -136,6 +139,39 @@ class Module:
         self._running = False
         self._module_socket.close()
 
+    def notify(self, level: int, message: str) -> bool:
+        """
+        Send a notification over the WiFi Pineapples notification socket
+
+        :param level: Notification level
+        :param message: Notification message
+        :param module_name: The name of the calling module
+        :return: bool
+        """
+        notify_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        notify_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        notify_socket_path = '/tmp/notifications.sock'
+
+        module_notification = {'level': level, 'message': message, 'module_name': self.name}
+        socket_message = self._json_to_bytes(module_notification)
+        status = True
+
+        try:
+            notify_socket.connect(notify_socket_path)
+        except ValueError:
+            self.logger.error('Could not connect to notifications socket!')
+            return False
+
+        try:
+            notify_socket.sendall(socket_message)
+        except ValueError:
+            self.logger.error('Could not send notification!')
+            status = False
+
+        notify_socket.close()
+
+        return status
+
     @abc.abstractmethod
     def handle_request(self, request: Request):
         """
@@ -181,6 +217,5 @@ class Module:
 
             message_bytes = module._json_to_bytes(response_dict)
             module._publish(message_bytes)
-            func(*args, **kwargs)
 
         return wrapper
