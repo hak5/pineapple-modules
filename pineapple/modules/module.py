@@ -145,7 +145,6 @@ class Module:
 
         :param level: Notification level
         :param message: Notification message
-        :param module_name: The name of the calling module
         :return: bool
         """
         notify_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
