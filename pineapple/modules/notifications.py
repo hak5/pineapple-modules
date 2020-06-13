@@ -22,7 +22,7 @@ class Notifications:
         d = json.dumps(message)
         return d.encode('utf-8')
 
-    def notify(self, level: int, message: str, module_name: str) -> bool:
+    def send_notification(self, level: int, message: str, module_name: str) -> bool:
         """
         Send a notification over the WiFi Pineapples notification socket
 
