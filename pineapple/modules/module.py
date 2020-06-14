@@ -1,15 +1,14 @@
 import os
 import socket
 import json
-import abc
 import logging
-import functools
 import signal
-from typing import Tuple, Any, Callable, Optional
+from typing import Tuple, Any, Callable, Optional, Dict
 
 from pineapple.logger import get_logger
 from pineapple.modules.request import Request
-from pineapple.helpers import Helpers
+from pineapple.helpers import json_to_bytes
+
 
 class Module:
 
@@ -23,6 +22,7 @@ class Module:
 
         self.logger.debug(f'Initializing module {name}.')
 
+        self._action_handlers: Dict[str, Callable[[Request], Tuple[bool, Any]]] = {}
         self._running: bool = False  # set to False to stop the module loop
 
         self._module_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)  # api requests will be received over this socket
@@ -64,7 +64,6 @@ class Module:
         :param message: Bytes of a message that should be sent
         :return: None
         """
-
         self.logger.debug('Accepting on module socket')
         connection, _ = self._module_socket.accept()
 
@@ -73,6 +72,51 @@ class Module:
             connection.sendall(message)
         except ValueError:
             self.logger.error('Could not send response!')
+
+    def _handle_request(self, request: Request):
+        """
+        Attempt to find an handle for the requests actions and call it.
+        If there is no action registered for the request `request`, an error will be sent back over `module_socket`.
+
+        If there is a handler registered the following will happen:
+        * the action handler will be called
+        * if the action handler returns an error, an error will be sent back over `module_socket`
+        * if the action handler returns success, the data will be sent back over `module_socket`
+        :param request: The request instance to handle
+        :return: None
+        """
+        handler: Callable[[Request], Tuple[bool, Any]] = self._action_handlers.get(request.action)
+        if not handler:
+            self._publish(json_to_bytes({'error': f'No action handler registered for action {request.action}'}))
+            self.logger.error(f'No action handler registered for action {request.action}')
+            return
+
+        success, data = handler(request)
+        response_dict = {}
+
+        if success:
+            response_dict['payload'] = data
+        else:
+            response_dict['error'] = data
+
+        message_bytes = json_to_bytes(response_dict)
+        self._publish(message_bytes)
+
+    def shutdown(self, sig=None, frame=None):
+        """
+        Attempt to clean shutdown the module.
+        If your module has anything it needs to close or otherwise cleanup upon shutdown, please override this
+        and do what you need to here. Be sure you call `super.shutdown()` in your new implementation.
+
+        This method may also be called to handle signals such as SIGINT. If it was called as a signal handler the
+        signal `sig` and frame `frame` will be passed into this method.
+        :param sig: Optional signal that triggered a signal handler
+        :param frame: Optional frame
+        :return: None
+        """
+        self.logger.info(f'Shutting down module. Signal: {sig}')
+        self._running = False
+        self._module_socket.close()
 
     def start(self):
         """
@@ -102,73 +146,31 @@ class Module:
                 self.logger.debug('Processing request.')
                 request = Request()
                 request.__dict__ = request_dict
-                self.handle_request(request)
+                self._handle_request(request)
             except OSError as os_error:
                 self.logger.warning(f'An os error occurred: {os_error}')
             except Exception as e:
                 self.logger.critical(f'A fatal `{type(e)}` exception was thrown: {e}')
                 self.shutdown()
 
-    def shutdown(self, sig=None, frame=None):
+    def handles_action(self, action: str):
         """
-        Attempt to clean shutdown the module.
-        If your module has anything it needs to close or otherwise cleanup upon shutdown, please override this
-        and do what you need to here. Be sure you call `super.shutdown()` in your new implementation.
+        A decorator that registers a function as an handler for a given action `action` in a request.
+        The decorated function is expected take an instance of `Request` as its first argument
+        and to return a Tuple with two values - bool, Any - in that order.
 
-        This method may also be called to handle signals such as SIGINT. If it was called as a signal handler the
-        signal `sig` and frame `frame` will be passed into this method.
-        :param sig: Optional signal that triggered a signal handler
-        :param frame: Optional frame
-        :return: None
+        The returned boolean value indicates whether or not the function completed successfully.
+        The next value is whatever data you want returned in the response.
+        This can be anything as long as it's json serializable.
+
+        Usage Example:
+            @handles_action("save_file")
+            def save_file(request: Request) -> Tuple[bool, Any]:
+                ...
+
+        :param action: The request action to handle
         """
-        self.logger.info(f'Shutting down module. Signal: {sig}')
-        self._running = False
-        self._module_socket.close()
-
-    @abc.abstractmethod
-    def handle_request(self, request: Request):
-        """
-        Each time a request is made, this method will be invoked with that request passed in.
-        Your module MUST Implement this method to handle requests.
-
-        The request object `request` will have an `action`, `module` and whatever other fields are passed from the
-        web app on it.
-        :param request: The request to handle
-        :return: None
-        """
-        raise NotImplementedError()
-
-    @staticmethod
-    def respond(func: Callable[[Any], Tuple[bool, Any]]):
-        """
-        A decorator to automatically publish the return value of a function to the socket.
-        Simply add `@respond` to use it.
-
-        The decorated function must return a tuple with a boolean as the first value and
-        whatever your response data is as the second value.
-
-        If the value of the boolean is True then `payload` will be in response object with your data in it.
-        Example: { "payload": {"directories": ["/var", "/lib", "/root"]}}
-
-        If the value if the boolean is False then `error` will be in the object with your data as the value.
-        Example: { "error": "No directory found with that name" }
-        :param func: The function to decorate
-        :return:
-        """
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            module: Module = args[0]
-            module.logger.debug('Picked up response...')
-            success, data = func(*args, **kwargs)
-
-            response_dict = {}
-
-            if success:
-                response_dict['payload'] = data
-            else:
-                response_dict['error'] = data
-
-            message_bytes = Helpers.json_to_bytes(response_dict)
-            module._publish(message_bytes)
-
+        def wrapper(func: Callable[[Any], Tuple[bool, Any]]):
+            self._action_handlers[action] = func
+            return func
         return wrapper
