@@ -1,7 +1,7 @@
 import socket
-import json
 
-from pineapple.helpers import Helpers
+from pineapple.helpers import json_to_bytes
+
 
 class Notifications:
     INFO  = 0
@@ -23,7 +23,7 @@ class Notifications:
         notify_socket_path = '/tmp/notifications.sock'
 
         module_notification = {'level': level, 'message': message, 'module_name': module_name}
-        socket_message = Helpers.json_to_bytes(module_notification)
+        socket_message = json_to_bytes(module_notification)
         status = True
 
         try:

@@ -2,4 +2,4 @@ __pycache__/
 .DS_Store
 *.pyc
 venv
-
+.idea/*
