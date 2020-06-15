@@ -1,0 +1,27 @@
+.delete-dialog-title-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-self: flex-start;
+}
+
+.delete-dialog-title {
+    font-size: 24px;
+}
+
+.delete-dialog-body-container {
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
+.delete-dialog-close-button-container {
+    display: flex;
+}
+
+.delete-dialog-centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}

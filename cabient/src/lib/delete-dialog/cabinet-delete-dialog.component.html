@@ -1,0 +1,23 @@
+<div>
+    <div class="delete-dialog-body-container">
+        <div class="delete-dialog-title-container">
+            <h1 class="delete-dialog-title">Delete File?</h1>
+            <div fxFlex></div>
+            <div>
+                <button mat-icon-button>
+                    <mat-icon>
+                        close
+                    </mat-icon>
+                </button>
+            </div>
+        </div>
+
+        <div class="delete-dialog-centered">
+            <p>You are about to delete {{ pathToDelete }}. This action can not be undone.</p>
+            <p>Do you wish to continue?</p>
+            <br />
+            <button mat-raised-button color="warn">Delete</button>
+            <button mat-raised-button color="accent">Cancel</button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,41 @@
+<mat-card>
+    <mat-card-content>
+        <mat-card-title>Cabinet {{ currentDirectory }}</mat-card-title>
+        <button mat-stroked-button (click)="getDirectoryContents(currentDirectory, true);" [disabled]="currentDirectory == '/'">Back</button>
+        <button mat-stroked-button>New Folder</button>
+        <button mat-stroked-button>New File</button>
+        <button mat-stroked-button (click)="getDirectoryContents(currentDirectory);">Refresh</button>
+        <hr>
+        <table class="mat-table" style="min-width: 100%; overflow-x: auto; justify-content: center">
+            <thead>
+            <tr class="mat-header-row">
+                <th class="mat-header-cell">File Name</th>
+                <th class="mat-header-cell">Location</th>
+                <th class="mat-header-cell">Permissions</th>
+                <th class="mat-header-cell">Size</th>
+                <th class="mat-header-cell">Delete</th>
+                <th class="mat-header-cell">Edit</th>
+            </tr>
+            </thead>
+            <tbody style="text-align: center">
+            <ng-container *ngFor="let item of directoryContents">
+                <tr class="mat-row">
+                    <td class="mat-cell" *ngIf="!item.is_directory">{{ item.name }}</td>
+                    <td class="mat-cell" *ngIf="item.is_directory">
+                        <button mat-button color="accent" (click)="getDirectoryContents(item.path);">
+                            {{ item.name }}
+                        </button>
+                    </td>
+                    <td class="mat-cell">{{ item.path }}</td>
+                    <td class="mat-cell">{{ item.permissions }}</td>
+                    <td class="mat-cell">{{ item.size }}</td>
+                    <td class="mat-cell">
+                        <button mat-button color="warn" (click)="showDeleteConfirmation();">Delete</button>
+                    </td>
+                    <td class="mat-cell" *ngIf="!item.is_directory"><button mat-button color="accent">Edit</button></td>
+                </tr>
+            </ng-container>
+            </tbody>
+        </table>
+    </mat-card-content>
+</mat-card>
