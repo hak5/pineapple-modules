@@ -1,23 +1,25 @@
-<div>
-    <div class="delete-dialog-body-container">
-        <div class="delete-dialog-title-container">
-            <h1 class="delete-dialog-title">Delete File?</h1>
-            <div fxFlex></div>
-            <div>
-                <button mat-icon-button>
-                    <mat-icon>
-                        close
-                    </mat-icon>
-                </button>
-            </div>
-        </div>
+<div class="delete-file-title-container">
+    <h1 mat-dialog-title>Delete File</h1>
+    <span fxFlex></span>
+    <button mat-icon-button (click)="closeDialog();">
+        <mat-icon>close</mat-icon>
+    </button>
+</div>
 
-        <div class="delete-dialog-centered">
-            <p>You are about to delete {{ pathToDelete }}. This action can not be undone.</p>
-            <p>Do you wish to continue?</p>
-            <br />
-            <button mat-raised-button color="warn">Delete</button>
-            <button mat-raised-button color="accent">Cancel</button>
-        </div>
+<mat-divider></mat-divider>
+
+<div>
+    <p>
+        Are you sure you want to delete this file?
+    </p>
+
+    <div class="delete-file-buttons">
+        <span fxFlex></span>
+        <button mat-raised-button class="delete-file-button-first" (click)="closeDialog()">
+            Cancel
+        </button>
+        <button mat-raised-button color="warn" (click)="doThing()">
+            <span>Logout</span>
+        </button>
     </div>
 </div>

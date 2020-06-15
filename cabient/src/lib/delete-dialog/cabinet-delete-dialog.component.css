@@ -1,27 +1,24 @@
-.delete-dialog-title-container {
+.delete-file-title-container {
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
     align-self: flex-start;
 }
 
-.delete-dialog-title {
+.delete-file-title {
     font-size: 24px;
 }
 
-.delete-dialog-body-container {
+.delete-file-body-container {
     height: 500px;
     display: flex;
     flex-direction: column;
 }
 
-.delete-dialog-close-button-container {
-    display: flex;
+.delete-file-buttons {
+    margin-top: 16px;
 }
 
-.delete-dialog-centered {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
+.delete-file-button-first {
+    margin-right: 10px;
 }

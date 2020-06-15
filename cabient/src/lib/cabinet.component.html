@@ -22,7 +22,7 @@
                 <tr class="mat-row">
                     <td class="mat-cell" *ngIf="!item.is_directory">{{ item.name }}</td>
                     <td class="mat-cell" *ngIf="item.is_directory">
-                        <button mat-button color="accent" (click)="getDirectoryContents(item.path);">
+                        <button mat-flat-button color="accent" (click)="getDirectoryContents(item.path);">
                             {{ item.name }}
                         </button>
                     </td>

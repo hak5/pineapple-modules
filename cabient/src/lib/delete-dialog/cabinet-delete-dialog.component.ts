@@ -18,6 +18,10 @@ export class CabinetDeleteDialogComponent implements OnInit {
     pathToDelete: string = "";
     pathIsDirectory: boolean = false;
 
+    closeDialog(): void {
+        this.dialogRef.close()
+    }
+
     ngOnInit() {
     }
 }
