@@ -47,7 +47,7 @@ class Module:
         :return: A dictionary containing the data received over the socket or None if json deserialization fails.
         """
         connection, _ = self._module_socket.accept()
-        data = connection.recv(4096)
+        data = connection.recv(10485760)
         decoded_data = data.decode('utf-8')
 
         try:
@@ -100,6 +100,7 @@ class Module:
             response_dict['error'] = data
 
         message_bytes = json_to_bytes(response_dict)
+        self.logger.debug(f'Response is {len(message_bytes)} bytes long.')
         self._publish(message_bytes)
 
     def shutdown(self, sig=None, frame=None):
