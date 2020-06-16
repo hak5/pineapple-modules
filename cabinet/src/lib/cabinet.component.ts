@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {CabinetDeleteDialogComponent} from "./delete-dialog/cabinet-delete-dialog.component";
-import {ApiService} from "api";
+import {ApiService} from './api.service';
 import {NewFolderDialogComponent} from "./new-folder-dialog/new-folder-dialog.component";
 import {FileEditorDialogComponent} from "./file-editor-dialog/file-editor-dialog.component";
 import {CabinetErrorDialogComponent} from "./error-dialog/error-dialog.component";
