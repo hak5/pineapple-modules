@@ -1,10 +1,10 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {Router} from '@angular/router';
 import {ApiService} from 'api';
 
 @Component({
-    selector: "file-editor-dialog-component",
+    selector: 'file-editor-dialog-component',
     templateUrl: './file-editor-dialog.component.html',
     styleUrls: ['./file-editor-dialog.component.css']
 })
