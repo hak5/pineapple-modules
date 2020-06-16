@@ -13,10 +13,21 @@ export class CabinetDeleteDialogComponent implements OnInit {
                 @Inject(MAT_DIALOG_DATA) public data: any,
                 private router: Router,
                 private API: ApiService) {
+
+        this.path = data.item.path;
+        this.name = data.item.name;
+        this.isDirectory = data.item.is_directory;
     }
 
-    pathToDelete: string = "";
-    pathIsDirectory: boolean = false;
+    public path: string;
+    public name: string;
+    public isDirectory: boolean
+
+    preformDelete(): void {
+        let onDelete = this.data.onDelete;
+        onDelete();
+        this.closeDialog();
+    }
 
     closeDialog(): void {
         this.dialogRef.close()

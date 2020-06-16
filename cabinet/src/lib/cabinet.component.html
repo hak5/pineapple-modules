@@ -1,0 +1,50 @@
+<mat-card>
+    <mat-card-content>
+        <div class="cabinet-control-container">
+            <h1>Cabinet {{ currentDirectory }}</h1>
+            <span fxFlex></span>
+            <div class="cabinet-control-buttons">
+                <button mat-stroked-button (click)="getDirectoryContents(currentDirectory, true);" [disabled]="currentDirectory == '/'">Back</button>
+                <button mat-stroked-button (click)="showCreateDirectory();">New Folder</button>
+                <button mat-stroked-button (click)="showEditDialog(null);">New File</button>
+                <button mat-stroked-button (click)="getDirectoryContents(currentDirectory);">Refresh</button>
+            </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <mat-table style="display: none">
+            <mat-header-row *matHeaderRowDef="[]"></mat-header-row>
+        </mat-table>
+        <table class="mat-table" style="min-width: 100%; overflow-x: auto; justify-content: left">
+            <thead>
+            <tr class="mat-header-row">
+                <th class="mat-header-cell">File Name</th>
+                <th class="mat-header-cell">Location</th>
+                <th class="mat-header-cell">Permissions</th>
+                <th class="mat-header-cell">Size</th>
+                <th class="mat-header-cell">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <ng-container *ngFor="let item of directoryContents">
+                <tr class="mat-row">
+                    <td class="mat-cell" *ngIf="!item.is_directory">{{ item.name }}</td>
+                    <td class="mat-cell" *ngIf="item.is_directory">
+                        <button mat-button color="accent" (click)="getDirectoryContents(item.path);">
+                            {{ item.name }}
+                        </button>
+                    </td>
+                    <td class="mat-cell">{{ item.path }}</td>
+                    <td class="mat-cell">{{ item.permissions }}</td>
+                    <td class="mat-cell">{{ item.size }}</td>
+                    <td class="mat-cell">
+                        <button mat-flat-button color="warn" (click)="showDeleteConfirmation(item);">Delete</button>
+                        <button mat-flat-button color="accent" *ngIf="!item.is_directory" (click)="showEditDialog(item)">Edit</button>
+                    </td>
+                </tr>
+            </ng-container>
+            </tbody>
+        </table>
+    </mat-card-content>
+</mat-card>

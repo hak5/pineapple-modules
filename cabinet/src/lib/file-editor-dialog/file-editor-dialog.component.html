@@ -1,0 +1,29 @@
+<div class="file-editor-title-container">
+    <h1 mat-dialog-title>{{ title }}</h1>
+    <span fxFlex></span>
+    <button mat-icon-button (click)="closeDialog();">
+        <mat-icon>close</mat-icon>
+    </button>
+</div>
+
+<mat-divider></mat-divider>
+
+<div>
+    <form>
+        <mat-form-field style="width: 100%;">
+            <mat-label>File Name</mat-label>
+            <input style="width: 100%" matInput [(ngModel)]="fileName" name="fileName" [disabled]="!isNew"/>
+        </mat-form-field>
+    </form>
+    <textarea matInput placeholder="File Content" class="file-editor-text-area" matTextareaAutosize [(ngModel)]="fileContent" name="fileContent"></textarea>
+
+    <div class="file-editor-buttons">
+        <span fxFlex></span>
+        <button mat-raised-button class="file-editor-button-first" (click)="closeDialog();">
+            Cancel
+        </button>
+        <button mat-raised-button color="accent" (click)="preformSave();">
+            Save
+        </button>
+    </div>
+</div>

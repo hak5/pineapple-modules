@@ -34,7 +34,6 @@ def _delete_directory_tree(directory: pathlib.Path) -> bool:
         else:
             item.unlink()
 
-    directory.rmdir()
     return True
 
 
@@ -64,9 +63,11 @@ def delete_item(request: Request) -> Tuple[bool, str]:
     if not path.is_absolute():
         return False, 'Absolute path expected.'
 
-    if path.is_dir:
+    if path.is_dir():
         success = _delete_directory_tree(path)
-        if not success:
+        if success:
+            path.rmdir()
+        else:
             return False, 'An error occurred deleting the directory.'
     else:
         path.unlink()
@@ -85,8 +86,8 @@ def write_file(request: Request) -> Tuple[bool, str]:
     return True, 'File saved.'
 
 
-@module.handles_action('get_file_contents')
-def get_file_contents(request: Request) -> Tuple[bool, str]:
+@module.handles_action('read_file')
+def read_file(request: Request) -> Tuple[bool, str]:
     path = pathlib.Path(request.file)
 
     if not path.exists or not path.is_file:
@@ -98,8 +99,9 @@ def get_file_contents(request: Request) -> Tuple[bool, str]:
 
 @module.handles_action('create_directory')
 def create_directory(request: Request) -> Tuple[bool, str]:
-    path = pathlib.Path(request.directory)
+    path = pathlib.Path(f'{request.path}/{request.name}')
 
+    module.logger.debug(f'CREATE FOLDER {request.name} IN PATH {request.path}. SHOULD BE {str(path)}')
     try:
         path.mkdir()
         return True, "Directory created."

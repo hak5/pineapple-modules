@@ -1,0 +1,10 @@
+.cabinet-control-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-self: flex-start;
+}
+
+.cabinet-control-buttons {
+    margin: 16px;
+}

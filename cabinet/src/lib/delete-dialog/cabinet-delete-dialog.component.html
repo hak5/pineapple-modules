@@ -1,5 +1,5 @@
 <div class="delete-file-title-container">
-    <h1 mat-dialog-title>Delete File</h1>
+    <h1 mat-dialog-title>Delete {{ path }}?</h1>
     <span fxFlex></span>
     <button mat-icon-button (click)="closeDialog();">
         <mat-icon>close</mat-icon>
@@ -9,17 +9,17 @@
 <mat-divider></mat-divider>
 
 <div>
-    <p>
-        Are you sure you want to delete this file?
-    </p>
+    <p *ngIf="!isDirectory">You are about to delete a file named `{{ name }}`. This action can not be undone.</p>
+    <p *ngIf="isDirectory">You are about to delete a directory named `{{ name }}` and all of its contents. This action not not be undone.</p>
+    <p>Are you sure you want to continue?</p>
 
     <div class="delete-file-buttons">
         <span fxFlex></span>
         <button mat-raised-button class="delete-file-button-first" (click)="closeDialog()">
             Cancel
         </button>
-        <button mat-raised-button color="warn" (click)="doThing()">
-            <span>Logout</span>
+        <button mat-raised-button color="warn" (click)="preformDelete()">
+            Delete
         </button>
     </div>
 </div>
