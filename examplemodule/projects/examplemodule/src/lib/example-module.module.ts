@@ -18,4 +18,4 @@ const routes: Routes = [
     ],
     exports: [ExampleModuleComponent]
 })
-export class ExamplemoduleModule { }
+export class ExampleModuleModule { }
