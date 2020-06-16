@@ -24,10 +24,14 @@
 }
 
 .file-editor-text-area {
-    margin-top: 16px;
-    min-height: 100px;
     width: 100%;
-    height: 500px;
-    max-width: 100%;
-    border: solid 1px black;
+    min-height: 320px;
+    max-height: 400px;
+    resize: none;
+    margin: 0 0 5px;
+    padding: 0;
+    background-color: #efefef;
+    border-radius: 2px;
+    border-color: #cecece;
+    max-lines: 50;
 }

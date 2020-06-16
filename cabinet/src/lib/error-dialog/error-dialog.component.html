@@ -1,0 +1,19 @@
+<div class="error-dialog-title-container">
+    <h1 mat-dialog-title>Error</h1>
+    <span fxFlex></span>
+    <button mat-icon-button (click)="closeDialog();">
+        <mat-icon>close</mat-icon>
+    </button>
+</div>
+
+<mat-divider></mat-divider>
+
+<div>
+    <p>{{ errorMessage }}</p>
+    <div class="error-dialog-buttons">
+        <span fxFlex></span>
+        <button mat-raised-button color="accent" class="error-dialog-button-first" (click)="closeDialog();">
+            Okay
+        </button>
+    </div>
+</div>

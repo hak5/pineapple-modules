@@ -90,7 +90,7 @@ def write_file(request: Request) -> Tuple[bool, str]:
 def read_file(request: Request) -> Tuple[bool, str]:
     path = pathlib.Path(request.file)
 
-    if not path.exists or not path.is_file:
+    if not path.exists() or not path.is_file():
         return False, 'Unable to open file.'
 
     with open(str(path), 'r') as f:

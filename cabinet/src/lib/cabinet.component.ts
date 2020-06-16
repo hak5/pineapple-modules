@@ -4,6 +4,7 @@ import {CabinetDeleteDialogComponent} from "./delete-dialog/cabinet-delete-dialo
 import {ApiService} from "api";
 import {NewFolderDialogComponent} from "./new-folder-dialog/new-folder-dialog.component";
 import {FileEditorDialogComponent} from "./file-editor-dialog/file-editor-dialog.component";
+import {CabinetErrorDialogComponent} from "./error-dialog/error-dialog.component";
 
 @Component({
   selector: 'lib-cabinet',
@@ -15,8 +16,24 @@ export class CabinetComponent implements OnInit {
   constructor(private API: ApiService,
               private dialog: MatDialog) { }
 
-  currentDirectory = '/';
-  directoryContents = [];
+  currentDirectory: string = '/';
+  directoryContents: Array<object> = [];
+
+  humanFileSize(byteLength: number): string {
+    let kiloBytes = 1024;
+    let megaBytes = kiloBytes * kiloBytes;
+    let gigaBytes = megaBytes * megaBytes;
+
+    if (byteLength >= kiloBytes && byteLength < megaBytes) {
+      return Math.round(byteLength / kiloBytes) + ' KB';
+    } else if (byteLength >= megaBytes && byteLength < gigaBytes) {
+      return Math.round(byteLength / megaBytes) + ' MB';
+    } else if (byteLength >= gigaBytes) {
+      return Math.round(byteLength / gigaBytes) + ' GB';
+    } else {
+      return byteLength + ' bytes';
+    }
+  }
 
   getDirectoryContents(path: string, getParent: boolean = false): void {
     this.API.request({
@@ -25,10 +42,16 @@ export class CabinetComponent implements OnInit {
       directory: path,
       get_parent: getParent
     }, (response) => {
-      if (response.error != undefined) { return } // TODO: Handle errors
+      if (response.error != undefined) {
+        this.showErrorDialog(response.error);
+        return
+      }
+
       this.currentDirectory = response.working_directory;
-      this.directoryContents = response.contents;
-      console.log("CURRENT DIRECTORY: " + this.currentDirectory + " | ITEMS: " + this.directoryContents);
+      this.directoryContents = response.contents.map((item) => {
+        item['size'] = this.humanFileSize(item['size']);
+        return item;
+      });
     });
   }
 
@@ -38,7 +61,11 @@ export class CabinetComponent implements OnInit {
       action: 'delete_item',
       file_to_delete: path
     }, (response) => {
-      if (response.error != undefined) { return } // TODO: Handle errors
+      if (response.error != undefined) {
+        this.showErrorDialog(response.error);
+        return
+      }
+
       this.getDirectoryContents(this.currentDirectory);
     })
   }
@@ -50,7 +77,11 @@ export class CabinetComponent implements OnInit {
       path: this.currentDirectory,
       name: name
     }, (response) => {
-      if (response.error != undefined) { return } // TODO: Handle errors
+      if (response.error != undefined) {
+        this.showErrorDialog(response.error);
+        return
+      }
+
       this.getDirectoryContents(this.currentDirectory);
     })
   }
@@ -62,7 +93,11 @@ export class CabinetComponent implements OnInit {
       file: path,
       content: content
     }, (response) => {
-      if (response.error != undefined) { return } // TODO: Handle errors
+      if (response.error != undefined) {
+        this.showErrorDialog(response.error);
+        return
+      }
+
       this.getDirectoryContents(this.currentDirectory);
     })
   }
@@ -118,6 +153,16 @@ export class CabinetComponent implements OnInit {
     })
   }
 
+  showErrorDialog(msg: string): void {
+    this.dialog.closeAll();
+    this.dialog.open(CabinetErrorDialogComponent, {
+      hasBackdrop: true,
+      width: '900px',
+      data: {
+        errorMessage: msg
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.getDirectoryContents("/")

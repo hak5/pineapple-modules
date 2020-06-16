@@ -5,6 +5,13 @@
     align-self: flex-start;
 }
 
-.cabinet-control-buttons {
-    margin: 16px;
+.control-button {
+    margin-top: 16px;
+    margin-right: 4px;
+}
+
+.action-button {
+    margin-top: 4px;
+    margin-right: 4px;
+    margin-bottom: 4px;
 }

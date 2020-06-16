@@ -23,6 +23,7 @@ export class FileEditorDialogComponent implements OnInit {
     public title: string = '';
     public fileName: string = '';
     public fileContent: string = '';
+    public error: string = null;
 
     loadFileContent(): void {
         this.API.request({
@@ -30,7 +31,10 @@ export class FileEditorDialogComponent implements OnInit {
             action: 'read_file',
             file: this.path
         }, (response) => {
-            if (response.error != undefined) { return } // TODO: Handle errors
+            if (response.error != undefined) {
+                this.error = response.error;
+                return
+            }
             this.fileContent = response;
         })
     }
@@ -40,6 +44,17 @@ export class FileEditorDialogComponent implements OnInit {
         let onSave = this.data.onSave;
         onSave(fileToSave, this.fileContent);
         this.closeDialog();
+    }
+
+    handleTabKey(e: KeyboardEvent): boolean {
+        if (e.code.toLowerCase() === 'tab') {
+            e.preventDefault();
+            const target = e.target as HTMLTextAreaElement;
+            let start = target.selectionStart;
+            let end = target.selectionEnd;
+            this.fileContent = this.fileContent.substring(0, start) + '    ' + this.fileContent.substring(end);
+            return false;
+        }
     }
 
     closeDialog(): void {

@@ -9,11 +9,13 @@ import {CabinetDeleteDialogComponent} from "./delete-dialog/cabinet-delete-dialo
 import {NewFolderDialogComponent} from "./new-folder-dialog/new-folder-dialog.component";
 import {ReactiveFormsModule} from "@angular/forms";
 import {FileEditorDialogComponent} from "./file-editor-dialog/file-editor-dialog.component";
+import {CabinetErrorDialogComponent} from "./error-dialog/error-dialog.component";
 
 const routes: Routes = [{path: '', component: CabinetComponent}]
 
 @NgModule({
-  declarations: [CabinetComponent, CabinetDeleteDialogComponent, NewFolderDialogComponent, FileEditorDialogComponent],
+  declarations: [CabinetComponent, CabinetDeleteDialogComponent,
+      NewFolderDialogComponent, FileEditorDialogComponent, CabinetErrorDialogComponent],
     imports: [
         RouterModule.forChild(routes),
         MaterialModule,
@@ -23,7 +25,8 @@ const routes: Routes = [{path: '', component: CabinetComponent}]
         ReactiveFormsModule
     ],
   exports: [CabinetComponent],
-  entryComponents: [CabinetDeleteDialogComponent, NewFolderDialogComponent, FileEditorDialogComponent]
+  entryComponents: [CabinetDeleteDialogComponent, NewFolderDialogComponent,
+      FileEditorDialogComponent, CabinetErrorDialogComponent]
 })
 
 export class CabinetModule { }
