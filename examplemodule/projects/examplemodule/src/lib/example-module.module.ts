@@ -7,10 +7,10 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  declarations: [ExampleModuleComponent],
-  imports: [
-      RouterModule.forChild(routes)
-  ],
-  exports: [ExampleModuleComponent]
+    declarations: [ExampleModuleComponent],
+    imports: [
+        RouterModule.forChild(routes)
+    ],
+    exports: [ExampleModuleComponent]
 })
 export class ExamplemoduleModule { }
