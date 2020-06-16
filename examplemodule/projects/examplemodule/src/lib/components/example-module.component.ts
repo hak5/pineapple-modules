@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ApiService} from '../services/api.service';
+import { ApiService } from '../services/api.service';
 
 @Component({
     selector: 'lib-example-module',
@@ -9,11 +9,6 @@ import { ApiService} from '../services/api.service';
 export class ExampleModuleComponent implements OnInit {
     constructor(private API: ApiService) { }
 
-    testfunc(): void {
-        console.log(this.API);
-    }
-
     ngOnInit() {
-        this.testfunc();
     }
 }
