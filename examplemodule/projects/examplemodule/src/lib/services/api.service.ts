@@ -28,7 +28,12 @@ export class ApiService {
             if (r === undefined || r === null) {
                 resp = this.emptyResponse;
             }
-            resp = r.payload;
+
+            if (r.payload) {
+                resp = r.payload;
+            } else {
+                resp = r;
+            }
         }, (err) => {
             resp = err.error;
             if (err.status === 401) {
