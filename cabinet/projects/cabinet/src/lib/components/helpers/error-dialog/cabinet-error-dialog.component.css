@@ -1,0 +1,24 @@
+.error-dialog-title-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-self: flex-start;
+}
+
+.error-dialog-title {
+    font-size: 24px;
+}
+
+.error-dialog-body-container {
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
+.error-dialog-buttons {
+    margin-top: 16px;
+}
+
+.error-dialog-button-first {
+    margin-right: 10px;
+}
