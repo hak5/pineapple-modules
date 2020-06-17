@@ -1,4 +1,6 @@
 import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
 import { ExampleModuleComponent } from './components/example-module.component';
 import { RouterModule, Routes } from '@angular/router';
 
@@ -12,6 +14,7 @@ const routes: Routes = [
 @NgModule({
     declarations: [ExampleModuleComponent],
     imports: [
+        CommonModule,
         RouterModule.forChild(routes),
         MaterialModule,
         FlexLayoutModule
