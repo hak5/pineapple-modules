@@ -29,7 +29,7 @@ export class ApiService {
                 resp = this.emptyResponse;
             }
 
-            if (r.payload) {
+            if (r.payload !== undefined) {
                 resp = r.payload;
             } else {
                 resp = r;
