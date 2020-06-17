@@ -1,0 +1,24 @@
+.new-folder-title-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-self: flex-start;
+}
+
+.new-folder-title {
+    font-size: 24px;
+}
+
+.new-folder-body-container {
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
+.new-folder-buttons {
+    margin-top: 16px;
+}
+
+.new-folder-button-first {
+    margin-right: 10px;
+}
