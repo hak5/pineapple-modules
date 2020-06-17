@@ -28,6 +28,7 @@ class Module:
         self._module_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)  # api requests will be received over this socket
         self._module_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self._module_socket_path = f'/tmp/{name}.sock'  # apth to the socket
+        self._buffer_size = 10485760
 
         # if the socket already exists attempt to delete it.
         try:
@@ -47,7 +48,7 @@ class Module:
         :return: A dictionary containing the data received over the socket or None if json deserialization fails.
         """
         connection, _ = self._module_socket.accept()
-        data = connection.recv(10485760)
+        data = connection.recv(self._buffer_size)
         decoded_data = data.decode('utf-8')
 
         try:
@@ -91,7 +92,19 @@ class Module:
             self.logger.error(f'No action handler registered for action {request.action}')
             return
 
-        success, data = handler(request)
+        try:
+            result = handler(request)
+        except Exception as e:
+            self.logger.error(f'Handler raised exception: {e}')
+            self._publish(json_to_bytes({'error': f'Handler raised exception: {e}'}))
+            return
+
+        if type(result) is not Tuple:
+            self.logger.error(f'Expected tuple but received {type(result)} instead.')
+            self._publish(json_to_bytes({'error': f'Expected tuple but received {type(result)} instead.'}))
+            return
+
+        success, data = result
         response_dict = {}
 
         if success:
@@ -100,7 +113,14 @@ class Module:
             response_dict['error'] = data
 
         message_bytes = json_to_bytes(response_dict)
-        self.logger.debug(f'Response is {len(message_bytes)} bytes long.')
+
+        # if the message is to big to be sent over the socket - return an error instead.
+        if len(message_bytes) > self._buffer_size:
+            self.logger.error(f'Response of {len(message_bytes)} bytes exceeds limit of {self._buffer_size}')
+            message_bytes = json_to_bytes({
+                'error': 'Response of {len(message_bytes)} bytes exceeds limit of {self._buffer_size}'
+            })
+
         self._publish(message_bytes)
 
     def shutdown(self, sig=None, frame=None):
