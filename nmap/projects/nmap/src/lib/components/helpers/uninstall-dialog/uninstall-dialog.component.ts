@@ -1,0 +1,76 @@
+import {Component, Inject, OnInit} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
+import {JobResultDTO} from "../../../interfaces/jobresult.interface";
+import {ApiService} from "../../../services/api.service";
+
+@Component({
+    selector: 'lib-uninstall-dialog',
+    templateUrl: './uninstall-dialog.component.html',
+    styleUrls: ['./uninstall-dialog.component.css']
+})
+export class UninstallDialogComponent implements OnInit {
+
+    constructor(public dialogRef: MatDialogRef<UninstallDialogComponent>,
+                private API: ApiService,
+                @Inject(MAT_DIALOG_DATA) public data: any) {
+    }
+
+    public isBusy: boolean = false;
+    private backgroundJobInterval = null;
+
+    handleError(msg: string): void {
+        console.log('ERROR: ' + msg);
+    }
+
+    private pollBackgroundJob<T>(jobId: string, onComplete: (result: JobResultDTO<T>) => void): void {
+        this.backgroundJobInterval = setInterval(() => {
+            console.log('CHECKING FOR JOB');
+            this.API.request({
+                module: 'nmap',
+                action: 'check_background_job',
+                job_id: jobId
+            }, (response: JobResultDTO<T>) => {
+                console.log('JOB RESPONSE: ' + response);
+                if (response.is_complete) {
+                    onComplete(response);
+                    clearInterval(this.backgroundJobInterval);
+                }
+            });
+        }, 5000);
+    }
+
+    closeDialog(): void {
+        if (this.isBusy) { return; }
+        this.dialogRef.close();
+    }
+
+    removeDependencies(): void {
+        this.API.request({
+            module: 'nmap',
+            action: 'manage_dependencies',
+            install: false
+        }, (response) => {
+            if (response.error) {
+                this.handleError(response.error);
+                return;
+            }
+
+            this.isBusy = true;
+            this.pollBackgroundJob(response.job_id, (result: JobResultDTO<boolean>) => {
+                this.isBusy = false;
+
+                if (result.job_error !== null) {
+                    this.handleError(result.job_error);
+                    return;
+                }
+
+                this.data.onComplete();
+                this.closeDialog();
+            });
+        });
+    }
+
+    ngOnInit(): void {
+    }
+
+}

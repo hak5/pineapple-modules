@@ -99,7 +99,7 @@ class Module:
             self._publish(json_to_bytes({'error': f'Handler raised exception: {e}'}))
             return
 
-        if type(result) is not Tuple:
+        if type(result) is not tuple:
             self.logger.error(f'Expected tuple but received {type(result)} instead.')
             self._publish(json_to_bytes({'error': f'Expected tuple but received {type(result)} instead.'}))
             return
