@@ -1,0 +1,31 @@
+<div class="delete-file-title-container">
+    <h1 mat-dialog-title>Create New Directory</h1>
+    <span fxFlex></span>
+    <button mat-icon-button (click)="closeDialog();">
+        <mat-icon>close</mat-icon>
+    </button>
+</div>
+
+<mat-divider></mat-divider>
+
+<br/>
+
+<div>
+    <form>
+        <mat-form-field style="width: 100%;">
+            <mat-label>Directory Name</mat-label>
+            <input style="width: 100%;" matInput [(ngModel)]="directoryName" name="directoryName" />
+            <br/>
+        </mat-form-field>
+    </form>
+
+    <div class="new-folder-buttons">
+        <span fxFlex></span>
+        <button mat-raised-button class="new-folder-button-first" (click)="closeDialog()">
+            Cancel
+        </button>
+        <button mat-raised-button color="accent" (click)="preformCreate()">
+            Done
+        </button>
+    </div>
+</div>
