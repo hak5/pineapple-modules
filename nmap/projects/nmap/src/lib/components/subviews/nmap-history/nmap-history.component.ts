@@ -3,6 +3,7 @@ import {ApiService} from "../../../services/api.service";
 import {MatDialog} from "@angular/material/dialog";
 import {ScanResultDialogComponent} from "../../helpers/scan-result-dialog/scan-result-dialog.component";
 import {ConfirmationDialogComponent} from "../../helpers/confirmation-dialog/confirmation-dialog.component";
+import {ErrorDialogComponent} from "../../helpers/error-dialog/error-dialog.component";
 
 @Component({
     selector: 'lib-nmap-history',
@@ -19,7 +20,14 @@ export class NmapHistoryComponent implements OnInit {
     public scanHistory: Array<string> = [];
 
     private handleError(msg: string): void {
-        console.log('ERROR: ' + msg);
+        this.dialog.closeAll();
+        this.dialog.open(ErrorDialogComponent, {
+            hasBackdrop: true,
+            width: '900px',
+            data: {
+                message: msg
+            }
+        });
     }
 
     loadHistory(): void {

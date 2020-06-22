@@ -74,7 +74,6 @@ export class NmapMainComponent implements OnInit {
     }
 
     update(): void {
-        console.log('UPDATING COMMAND');
         if (this.updateProfile() !== '') {
             this.nmapOptions.command = 'nmap ' + this.updateProfile() + this.updateTarget();
         } else {
@@ -158,7 +157,6 @@ export class NmapMainComponent implements OnInit {
                 action: 'check_background_job',
                 job_id: jobId
             }, (response: JobResultDTO<T>) => {
-                console.log('JOB RESPONSE: ' + response);
                 if (response.is_complete) {
                     onComplete(response);
                     clearInterval(this.backgroundJobInterval);
@@ -180,8 +178,6 @@ export class NmapMainComponent implements OnInit {
             }
 
             this.hasDependencies = response;
-            console.log('HAS DEPS RESPONSE: ' + response);
-            console.log('THIS HAS DEPS: ' + this.hasDependencies);
         });
     }
 

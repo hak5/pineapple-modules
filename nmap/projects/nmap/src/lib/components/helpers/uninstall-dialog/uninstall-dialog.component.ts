@@ -33,13 +33,11 @@ export class UninstallDialogComponent implements OnInit {
 
     private pollBackgroundJob<T>(jobId: string, onComplete: (result: JobResultDTO<T>) => void): void {
         this.backgroundJobInterval = setInterval(() => {
-            console.log('CHECKING FOR JOB');
             this.API.request({
                 module: 'nmap',
                 action: 'check_background_job',
                 job_id: jobId
             }, (response: JobResultDTO<T>) => {
-                console.log('JOB RESPONSE: ' + response);
                 if (response.is_complete) {
                     onComplete(response);
                     clearInterval(this.backgroundJobInterval);
