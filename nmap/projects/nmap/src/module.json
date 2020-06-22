@@ -1,0 +1,7 @@
+{
+    "name": "nmap",
+    "title": "Nmap",
+    "description": "A web interface for nmap",
+    "author": "newbi3",
+    "version": "1.0"
+}
