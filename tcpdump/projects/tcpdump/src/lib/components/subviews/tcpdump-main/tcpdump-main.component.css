@@ -1,0 +1,6 @@
+.right-left-split-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-self: flex-start;
+}

@@ -1,0 +1,19 @@
+<div class="right-left-split-container">
+    <mat-card-title>Error</mat-card-title>
+    <span fxFlex></span>
+    <button mat-icon-button>
+        <mat-icon (click)="closeDialog();">close</mat-icon>
+    </button>
+</div>
+
+<mat-divider></mat-divider>
+
+<div>
+    <p>{{ message }}</p>
+    <div class="error-dialog-buttons">
+        <span fxFlex></span>
+        <button mat-raised-button color="accent" class="error-dialog-button-first" (click)="closeDialog();">
+            Okay
+        </button>
+    </div>
+</div>
