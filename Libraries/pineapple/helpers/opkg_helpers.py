@@ -20,8 +20,10 @@ def update_repository(logger: Optional[Logger] = None) -> Tuple[bool, str]:
     if logger:
         logger.debug(out.stdout)
 
-    # return out.returncode == 0  # opkg can't currently resolve the hak5 repo so it always fails.
-    return True, 'Success'
+    if out.returncode == 0:
+        return True, 'Success'
+    else:
+        return False, f'Opkg update failed with code {out.returncode}'
 
 
 def check_if_installed(package: str, logger: Optional[Logger] = None) -> bool:

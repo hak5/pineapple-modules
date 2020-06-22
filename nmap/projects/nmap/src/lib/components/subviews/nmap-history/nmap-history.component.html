@@ -26,7 +26,7 @@
             <ng-container *ngFor="let item of scanHistory">
                 <tr class="mat-row">
                     <td class="mat-cell">{{ item }}</td>
-                    <td class="mat-cell"><button mat-icon-button (click)="showScanResults(item);"><mat-icon>cloud_download</mat-icon></button></td>
+                    <td class="mat-cell"><button mat-icon-button (click)="showScanResults(item);"><mat-icon>folder</mat-icon></button></td>
                     <td class="mat-cell"><button mat-icon-button><mat-icon>cloud_download</mat-icon></button></td>
                     <td class="mat-cell"><button mat-icon-button (click)="showDeleteDialog(item);"><mat-icon>delete</mat-icon></button></td>
                 </tr>
