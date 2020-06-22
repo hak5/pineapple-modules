@@ -1,0 +1,83 @@
+.dependency-card {
+    max-width: 600px;
+    min-height: 246px;
+}
+
+.dependency-card-centered {
+    display: flex;
+    justify-content: center;
+    align-self: center;
+}
+
+.dependency-card-button {
+    width: 75%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.spinner-padding {
+    margin-top: 6px;
+    margin-bottom: 7px;
+}
+
+.dependency-module-button {
+    min-width: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.right-left-split-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-self: flex-start;
+}
+
+.module-body-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.controls-container {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.options-box {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.control-item {
+    flex: 1;
+    margin-right: 2px;
+    margin-left: 2px;
+}
+
+.output-container {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.control-input {
+    width: 100%;
+}
+
+.output-textarea {
+    width: 100%;
+    height: 300px;
+    min-height: 200px;
+    max-height: 600px;
+    resize: vertical;
+    margin: 0 0 5px;
+    padding: 0;
+    background-color: #efefef;
+    border-radius: 2px;
+    border-color: #cecece;
+    max-lines: 50;
+}

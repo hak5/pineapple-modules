@@ -1,0 +1,10 @@
+.control-card-container {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.control-item {
+    flex: 1;
+}

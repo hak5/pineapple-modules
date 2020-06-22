@@ -1,0 +1,12 @@
+.confirmation-dialog-body-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.confirmation-dialog-buttons {
+    margin-top: 16px;
+}
+
+.confirmation-dialog-button-first {
+    margin-right: 10px;
+}
