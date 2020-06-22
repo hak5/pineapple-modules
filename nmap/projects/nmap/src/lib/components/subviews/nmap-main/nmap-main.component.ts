@@ -10,6 +10,7 @@ import {
     ScanOptions,
     ToggleOption,
 } from '../../../interfaces/optionstate.interface';
+import {ErrorDialogComponent} from "../../helpers/error-dialog/error-dialog.component";
 
 @Component({
   selector: 'lib-nmap-main',
@@ -62,7 +63,14 @@ export class NmapMainComponent implements OnInit {
     }
 
     private handleError(msg: string): void {
-        console.log('ERROR: ' + msg);
+        this.dialog.closeAll();
+        this.dialog.open(ErrorDialogComponent, {
+            hasBackdrop: true,
+            width: '900px',
+            data: {
+                message: msg
+            }
+        });
     }
 
     update(): void {
@@ -246,12 +254,12 @@ export class NmapMainComponent implements OnInit {
             this.isScanning = true;
             this.scanOutputFileName = response.output_file;
             this.pollBackgroundJob(response.job_id, (result: JobResultDTO<boolean>) => {
-                if (result.job_error) {
-                    this.handleError(result.job_error);
-                    return;
-                }
                 this.isScanning = false;
                 this.getScanOutput(this.scanOutputFileName);
+
+                if (result.job_error) {
+                    this.handleError(result.job_error);
+                }
             }, () => {
                 this.getScanOutput(this.scanOutputFileName);
             });

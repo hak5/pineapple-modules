@@ -16,7 +16,7 @@ import pineapple.helpers.opkg_helpers as opkg
 module = Module('nmap', logging.DEBUG)
 job_manager = JobManager('nmap', logging.DEBUG)
 
-history_directory_path = '/root/nmap_history'
+history_directory_path = '/root/.nmap'
 history_directory = pathlib.Path(history_directory_path)
 
 
@@ -71,7 +71,7 @@ def start_scan(request: Request) -> Tuple[bool, dict]:
     _make_history_directory()
     command = request.command.split(' ')
 
-    filename = f"{datetime.now().strftime('%Y-%m-%dT%H-%M-%S')}.scan"
+    filename = f"{datetime.now().strftime('%Y-%m-%dT%H-%M-%S')}"
     output_file = f'{history_directory_path}/{filename}'
     job_id = job_manager.execute_job(ScanJob(command, output_file))
 

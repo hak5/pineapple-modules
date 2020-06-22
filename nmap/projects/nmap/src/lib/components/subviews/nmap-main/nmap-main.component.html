@@ -82,7 +82,6 @@
             <div>
                 <mat-card-title>Scan Options</mat-card-title>
             </div>
-            <br/>
             <form>
                 <mat-form-field style="width: 100%;">
                     <mat-label>Timing</mat-label>
@@ -124,12 +123,17 @@
                 </mat-form-field>
             </form>
 
-            <div class="controls-container">
-                <mat-checkbox class="control-item" [(ngModel)]="scanOptions.osDetection.toggled" (ngModelChange)="update();">OS Detection</mat-checkbox>
-                <mat-checkbox class="control-item" [(ngModel)]="scanOptions.versionDetection.toggled" (ngModelChange)="update();">Version Detection</mat-checkbox>
-                <mat-checkbox class="control-item" [(ngModel)]="scanOptions.ipv6.toggled" (ngModelChange)="update();">IPv6 Support</mat-checkbox>
-                <mat-checkbox class="control-item" [(ngModel)]="scanOptions.advancedOptions.toggled" (ngModelChange)="update();">Advanced/Aggressive options</mat-checkbox>
-                <mat-checkbox class="control-item" [(ngModel)]="scanOptions.disableDNS.toggled" (ngModelChange)="update();">Disable reverse DNS resolution</mat-checkbox>
+            <div class="right-left-split-container">
+                <span>
+                    <mat-checkbox class="control-item" [(ngModel)]="scanOptions.osDetection.toggled" (ngModelChange)="update();">OS Detection</mat-checkbox>
+                    <mat-checkbox class="control-item" [(ngModel)]="scanOptions.versionDetection.toggled" (ngModelChange)="update();">Version Detection</mat-checkbox>
+                    <mat-checkbox class="control-item" [(ngModel)]="scanOptions.ipv6.toggled" (ngModelChange)="update();">IPv6 Support</mat-checkbox>
+                </span>
+                <span fxFlex></span>
+                <span>
+                    <mat-checkbox class="control-item" [(ngModel)]="scanOptions.advancedOptions.toggled" (ngModelChange)="update();">Advanced/Aggressive options</mat-checkbox>
+                    <mat-checkbox class="control-item" [(ngModel)]="scanOptions.disableDNS.toggled" (ngModelChange)="update();">Disable reverse DNS resolution</mat-checkbox>
+                </span>
             </div>
 
         </mat-card-content>
@@ -140,11 +144,16 @@
             <div>
                 <mat-card-title>Ping Options</mat-card-title>
             </div>
-            <div class="controls-container">
-                <mat-checkbox class="control-item" [(ngModel)]="pingOptions.noPingBeforeScanning.toggled" (ngModelChange)="update();">No ping before scanning</mat-checkbox>
-                <mat-checkbox class="control-item" [(ngModel)]="pingOptions.icmpPing.toggled" (ngModelChange)="update();">ICMP ping</mat-checkbox>
-                <mat-checkbox class="control-item" [(ngModel)]="pingOptions.icmpTimeStamp.toggled" (ngModelChange)="update();">ICMP timestamp request</mat-checkbox>
-                <mat-checkbox class="control-item" [(ngModel)]="pingOptions.icmpNetmask.toggled" (ngModelChange)="update();">ICMP netmask request</mat-checkbox>
+            <div class="right-left-split-container">
+                <span>
+                    <mat-checkbox class="control-item" [(ngModel)]="pingOptions.noPingBeforeScanning.toggled" (ngModelChange)="update();">No ping before scanning</mat-checkbox>
+                    <mat-checkbox class="control-item" [(ngModel)]="pingOptions.icmpPing.toggled" (ngModelChange)="update();">ICMP ping</mat-checkbox>
+                </span>
+                <span fxFlex></span>
+                <span>
+                    <mat-checkbox class="control-item" [(ngModel)]="pingOptions.icmpTimeStamp.toggled" (ngModelChange)="update();">ICMP timestamp request</mat-checkbox>
+                    <mat-checkbox class="control-item" [(ngModel)]="pingOptions.icmpNetmask.toggled" (ngModelChange)="update();">ICMP netmask request</mat-checkbox>
+                </span>
             </div>
             <br/>
             <mat-divider></mat-divider>
@@ -161,11 +170,16 @@
             <div>
                 <mat-card-title>Other Options</mat-card-title>
             </div>
-            <div class="controls-container">
-                <mat-checkbox class="control-item" [(ngModel)]="otherOptions.fragmentPackets.toggled" (ngModelChange)="update();">Fragment IP packets</mat-checkbox>
-                <mat-checkbox class="control-item" [(ngModel)]="otherOptions.packetTrace.toggled" (ngModelChange)="update();">Packet Trace</mat-checkbox>
-                <mat-checkbox class="control-item" [(ngModel)]="otherOptions.disableRandomized.toggled" (ngModelChange)="update();">Disable randomizing scanned ports</mat-checkbox>
-                <mat-checkbox class="control-item" [(ngModel)]="otherOptions.traceRoutes.toggled" (ngModelChange)="update();">Trace routes</mat-checkbox>
+            <div class="right-left-split-container">
+                <span>
+                    <mat-checkbox class="control-item" [(ngModel)]="otherOptions.fragmentPackets.toggled" (ngModelChange)="update();">Fragment IP packets</mat-checkbox>
+                    <mat-checkbox class="control-item" [(ngModel)]="otherOptions.packetTrace.toggled" (ngModelChange)="update();">Packet Trace</mat-checkbox>
+                </span>
+                <span fxFlex></span>
+                <span>
+                    <mat-checkbox class="control-item" [(ngModel)]="otherOptions.disableRandomized.toggled" (ngModelChange)="update();">Disable randomizing scanned ports</mat-checkbox>
+                    <mat-checkbox class="control-item" [(ngModel)]="otherOptions.traceRoutes.toggled" (ngModelChange)="update();">Trace routes</mat-checkbox>
+                </span>
             </div>
         </mat-card-content>
     </mat-card>
@@ -180,8 +194,8 @@
             <div class="right-left-split-container">
                 <mat-card-title>Output</mat-card-title>
                 <span fxFlex></span>
-                <button mat-icon-button [disabled]="isFetchingOutput" (click)="getScanOutput(scanOutputFileName);"><mat-icon>refresh</mat-icon></button>
-                <button mat-icon-button><mat-icon>cloud_download</mat-icon></button>
+                <button mat-icon-button [disabled]="isFetchingOutput || !isScanning" (click)="getScanOutput(scanOutputFileName);"><mat-icon>refresh</mat-icon></button>
+                <button mat-icon-button [disabled]="scanOutputFileName == null || isScanning"><mat-icon>cloud_download</mat-icon></button>
             </div>
             <textarea class="output-textarea" [(ngModel)]="scanOutput" placeholder="No output to display..." readonly></textarea>
             <div class="right-left-split-container">

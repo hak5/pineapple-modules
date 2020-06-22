@@ -13,6 +13,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { UninstallDialogComponent } from './components/helpers/uninstall-dialog/uninstall-dialog.component';
 import { ScanResultDialogComponent } from './components/helpers/scan-result-dialog/scan-result-dialog.component';
 import { ConfirmationDialogComponent } from './components/helpers/confirmation-dialog/confirmation-dialog.component';
+import { ErrorDialogComponent } from './components/helpers/error-dialog/error-dialog.component';
 
 const routes: Routes = [
     {
@@ -32,7 +33,8 @@ const routes: Routes = [
         NmapHistoryComponent,
         UninstallDialogComponent,
         ScanResultDialogComponent,
-        ConfirmationDialogComponent]
+        ConfirmationDialogComponent,
+        ErrorDialogComponent]
     ,
     imports: [
         CommonModule,
@@ -48,7 +50,8 @@ const routes: Routes = [
     entryComponents: [
         UninstallDialogComponent,
         ScanResultDialogComponent,
-        ConfirmationDialogComponent
+        ConfirmationDialogComponent,
+        ErrorDialogComponent
     ]
 })
 export class nmapModule { }
