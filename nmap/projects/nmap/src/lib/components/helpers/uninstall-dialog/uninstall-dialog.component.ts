@@ -1,7 +1,8 @@
 import {Component, Inject, OnInit} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
+import {MAT_DIALOG_DATA, MatDialog, MatDialogRef} from "@angular/material/dialog";
 import {JobResultDTO} from "../../../interfaces/jobresult.interface";
 import {ApiService} from "../../../services/api.service";
+import {ErrorDialogComponent} from "../error-dialog/error-dialog.component";
 
 @Component({
     selector: 'lib-uninstall-dialog',
@@ -12,14 +13,22 @@ export class UninstallDialogComponent implements OnInit {
 
     constructor(public dialogRef: MatDialogRef<UninstallDialogComponent>,
                 private API: ApiService,
+                private dialog: MatDialog,
                 @Inject(MAT_DIALOG_DATA) public data: any) {
     }
 
     public isBusy: boolean = false;
     private backgroundJobInterval = null;
 
-    handleError(msg: string): void {
-        console.log('ERROR: ' + msg);
+    private handleError(msg: string): void {
+        this.closeDialog();
+        this.dialog.open(ErrorDialogComponent, {
+            hasBackdrop: true,
+            width: '900px',
+            data: {
+                message: msg
+            }
+        });
     }
 
     private pollBackgroundJob<T>(jobId: string, onComplete: (result: JobResultDTO<T>) => void): void {
