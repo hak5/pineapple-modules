@@ -151,7 +151,6 @@ export class NmapMainComponent implements OnInit {
 
     pollBackgroundJob<T>(jobId: string, onComplete: (result: JobResultDTO<T>) => void, onInterval?: Function): void {
         this.backgroundJobInterval = setInterval(() => {
-            console.log('CHECKING FOR JOB');
             this.API.request({
                 module: 'nmap',
                 action: 'check_background_job',
