@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 from datetime import datetime
+from time import sleep
 import logging
 import pathlib
 import subprocess
 import os
+import json
 
 from pineapple.modules import Module, Request
 from pineapple.jobs import Job, JobManager
@@ -22,10 +24,11 @@ history_directory = pathlib.Path(history_directory_path)
 
 class ScanJob(Job[bool]):
 
-    def __init__(self, command: List[str], output_file: str):
+    def __init__(self, command: List[str], file_name: str):
         super().__init__()
         self.command = command
-        self.output_file = output_file
+        self.file_name = file_name
+        self.output_file = f'{history_directory_path}/{file_name}'
 
     def do_work(self, logger: logging.Logger) -> bool:
         logger.debug('Scan job started.')
@@ -55,6 +58,28 @@ def check_background_job(request: Request) -> Tuple[bool, dict]:
     return True, {'is_complete': job.is_complete, 'result': job.result, 'job_error': job.error}
 
 
+@module.handles_action('rebind_last_job')
+def rebind_last_job(request: Request) -> Tuple[bool, dict]:
+    module.logger.debug('GETTING LAST BACKGROUND JOB')
+    last_job_id: Optional[str] = None
+    last_job_type: Optional[str] = None
+    job_info: Optional[str] = None
+
+    if len(job_manager.jobs) >= 1:
+        last_job_id = list(job_manager.jobs.keys())[-1]
+        if type(job_manager.jobs[last_job_id].job) is ScanJob:
+            last_job_type = 'scan'
+            job_info = job_manager.jobs[last_job_id].job.file_name
+
+        elif type(job_manager.jobs[last_job_id].job) is OpkgJob:
+            last_job_type = 'opkg'
+        else:
+            last_job_type = 'unknown'
+
+    module.logger.debug('BACKGROUND: ' + json.dumps(({'job_id': last_job_id, 'job_type': last_job_type, 'job_info': job_info})))
+    return True, {'job_id': last_job_id, 'job_type': last_job_type, 'job_info': job_info}
+
+
 @module.handles_action('check_dependencies')
 def check_dependencies(request: Request) -> Tuple[bool, bool]:
     return True, opkg.check_if_installed('nmap', module.logger)
@@ -72,8 +97,7 @@ def start_scan(request: Request) -> Tuple[bool, dict]:
     command = request.command.split(' ')
 
     filename = f"{datetime.now().strftime('%Y-%m-%dT%H-%M-%S')}"
-    output_file = f'{history_directory_path}/{filename}'
-    job_id = job_manager.execute_job(ScanJob(command, output_file))
+    job_id = job_manager.execute_job(ScanJob(command, filename))
 
     return True, {'job_id': job_id, 'output_file': filename}
 

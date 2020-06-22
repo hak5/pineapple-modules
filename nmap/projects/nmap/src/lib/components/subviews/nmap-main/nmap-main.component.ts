@@ -180,6 +180,19 @@ export class NmapMainComponent implements OnInit {
         });
     }
 
+    private monitorInstall(jobId: string): void {
+        this.isInstalling = true;
+        this.pollBackgroundJob(jobId, (result: JobResultDTO<boolean>) => {
+            this.isInstalling = false;
+
+            if (result.job_error !== null) {
+                this.handleError(result.job_error);
+            }
+
+            this.checkForDependencies();
+        });
+    }
+
     installDependencies(): void {
         this.API.request({
             module: 'nmap',
@@ -191,16 +204,7 @@ export class NmapMainComponent implements OnInit {
                 return;
             }
 
-            this.isInstalling = true;
-            this.pollBackgroundJob(response.job_id, (result: JobResultDTO<boolean>) => {
-                this.isInstalling = false;
-
-                if (result.job_error !== null) {
-                    this.handleError(result.job_error);
-                }
-
-                this.checkForDependencies();
-            });
+            this.monitorInstall(response.job_id);
         });
     }
 
@@ -235,6 +239,21 @@ export class NmapMainComponent implements OnInit {
         });
     }
 
+    private monitorScan(jobId: string, outputFile: string): void {
+        this.isScanning = true;
+        this.scanOutputFileName = outputFile;
+        this.pollBackgroundJob(jobId, (result: JobResultDTO<boolean>) => {
+            this.isScanning = false;
+            this.getScanOutput(this.scanOutputFileName);
+
+            if (result.job_error) {
+                this.handleError(result.job_error);
+            }
+        }, () => {
+            this.getScanOutput(this.scanOutputFileName);
+        });
+    }
+
     startScan(): void {
         this.API.request({
             module: 'nmap',
@@ -246,18 +265,7 @@ export class NmapMainComponent implements OnInit {
                 return;
             }
 
-            this.isScanning = true;
-            this.scanOutputFileName = response.output_file;
-            this.pollBackgroundJob(response.job_id, (result: JobResultDTO<boolean>) => {
-                this.isScanning = false;
-                this.getScanOutput(this.scanOutputFileName);
-
-                if (result.job_error) {
-                    this.handleError(result.job_error);
-                }
-            }, () => {
-                this.getScanOutput(this.scanOutputFileName);
-            });
+            this.monitorScan(response.job_id, response.output_file);
         });
     }
 
@@ -274,8 +282,50 @@ export class NmapMainComponent implements OnInit {
         });
     }
 
+    rebindLastJob(): void {
+        this.API.request({
+            module: 'nmap',
+            action: 'rebind_last_job'
+        }, (response) => {
+           if (response.error) {
+               this.handleError(response.error);
+               return;
+           }
+
+           if (response.job_id && response.job_type) {
+               switch (response.job_type) {
+                   case 'scan':
+                       this.monitorScan(response.job_id, response.job_info);
+                       break;
+                   case 'opkg':
+                       this.monitorInstall(response.job_id);
+                       break;
+               }
+           }
+        });
+    }
+
+    private startUp(): void {
+        this.API.request({
+            module: 'nmap',
+            action: 'check_dependencies'
+        }, (response) => {
+            if (response.error) {
+                this.handleError(response.error);
+                return
+            }
+
+            this.hasDependencies = response;
+            this.rebindLastJob();
+        });
+    }
+
     ngOnInit() {
-        this.checkForDependencies();
+        this.startUp();  // temporary - the bellow code should be used when it can.
+
+        // uncomment these for the bug:
+        // this.checkForDependencies();
+        // this.rebindLastJob();
     }
 
 }
