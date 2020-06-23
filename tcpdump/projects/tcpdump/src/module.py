@@ -32,11 +32,14 @@ class PcapJob(Job[bool]):
     def do_work(self, logger: Logger) -> bool:
         logger.debug('tcpdump job started.')
         output_file = open(self.pcap_file, 'w')
+        stderr_file = open('/tmp/tcpdump.log', 'w')
 
         logger.debug(f'Calling nmap and writing output to {self.pcap_file}')
-        subprocess.call(self.command, stdout=output_file)
+        self.command += ['-w', self.pcap_file]
+        subprocess.call(self.command, stdout=output_file, stderr=stderr_file)
 
         logger.debug('Scan completed.')
+
         return True
 
 
@@ -96,10 +99,9 @@ def start_capture(request: Request) -> Tuple[bool, dict]:
     _make_history_directory()
     command = request.command.split(' ')
 
-    filename = f"{datetime.now().strftime('%Y-%m-%dT%H-%M-%S')}"
-    output_file = f'{PCAP_DIRECTORY_PATH}/{filename}'
-    job_id = job_manager.execute_job(PcapJob(command, output_file))
+    filename = f"{datetime.now().strftime('%Y-%m-%dT%H-%M-%S')}.pcap"
 
+    job_id = job_manager.execute_job(PcapJob(command, filename))
     return True, {'job_id': job_id, 'output_file': filename}
 
 
@@ -123,6 +125,15 @@ def get_capture_output(request: Request) -> Tuple[bool, str]:
         return False, 'Could not find scan output.'
 
     with open(output_path, 'r') as f:
+        return True, f.read()
+
+
+@module.handles_action('get_log_content')
+def get_log_content(request: Request) -> Tuple[bool, str]:
+    if not os.path.exists('/tmp/tcpdump.log'):
+        return False, 'Could not find log output: /tmp/tcpdump.log'
+
+    with open('/tmp/tcpdump.log', 'r') as f:
         return True, f.read()
 
 

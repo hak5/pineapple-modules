@@ -9,9 +9,9 @@ import {FlexLayoutModule} from '@angular/flex-layout';
 import { TcpdumpMainComponent } from './components/subviews/tcpdump-main/tcpdump-main.component';
 import { TcpdumpHistoryComponent } from './components/subviews/tcpdump-history/tcpdump-history.component';
 import { ConfirmationDialogComponent } from './components/helpers/confirmation-dialog/confirmation-dialog.component';
-import { CaptureResultDialogComponent } from './components/helpers/capture-result-dialog/capture-result-dialog.component';
 import {FormsModule} from "@angular/forms";
 import { ErrorDialogComponent } from './components/helpers/error-dialog/error-dialog.component';
+import { UninstallDialogComponent } from './components/helpers/uninstall-dialog/uninstall-dialog.component';
 
 const routes: Routes = [
     {
@@ -30,8 +30,8 @@ const routes: Routes = [
         TcpdumpMainComponent,
         TcpdumpHistoryComponent,
         ConfirmationDialogComponent,
-        CaptureResultDialogComponent,
-        ErrorDialogComponent],
+        ErrorDialogComponent,
+        UninstallDialogComponent],
     imports: [
         CommonModule,
         RouterModule.forChild(routes),
@@ -42,8 +42,8 @@ const routes: Routes = [
     exports: [TcpdumpComponent],
     entryComponents: [
         ConfirmationDialogComponent,
-        CaptureResultDialogComponent,
-        ErrorDialogComponent
+        ErrorDialogComponent,
+        UninstallDialogComponent
     ]
 })
 export class tcpdumpModule { }

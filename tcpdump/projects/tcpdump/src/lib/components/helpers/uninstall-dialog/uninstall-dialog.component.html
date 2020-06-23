@@ -1,0 +1,31 @@
+<div class="right-left-split-container">
+    <h1 mat-dialog-title>Uninstall Dependencies?</h1>
+    <span fxFlex></span>
+    <button mat-icon-button (click)="closeDialog();" [disabled]="isBusy">
+        <mat-icon>close</mat-icon>
+    </button>
+</div>
+
+<mat-divider></mat-divider>
+<br/>
+
+<div>
+    <p>You are about to uninstall dependencies for this module. You'll still be able to access your history
+        but will be unable to preform new packet captures.</p>
+    <p>Do you want to continue?</p>
+
+    <br/>
+    <div class="dependency-card-centered">
+        <button mat-raised-button color="warn"
+                class="dependency-card-button"
+                (click)="removeDependencies();"
+                [disabled]="isBusy">
+                    <span *ngIf="isBusy">
+                        <mat-spinner [diameter]="20" class="spinner-padding" color="accent"></mat-spinner>
+                    </span>
+            <span *ngIf="!isBusy">
+                        Uninstall Dependencies
+                    </span>
+        </button>
+    </div>
+</div>

@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import {MatDialog} from "@angular/material/dialog";
 import {ApiService} from "../../../services/api.service";
 import {ConfirmationDialogComponent} from "../../helpers/confirmation-dialog/confirmation-dialog.component";
-import {CaptureResultDialogComponent} from "../../helpers/capture-result-dialog/capture-result-dialog.component";
 import {ErrorDialogComponent} from "../../helpers/error-dialog/error-dialog.component";
 
 @Component({
@@ -76,16 +75,6 @@ export class TcpdumpHistoryComponent implements OnInit {
             }
 
             this.loadHistory();
-        });
-    }
-
-    showScanResults(item: string): void {
-        this.dialog.open(CaptureResultDialogComponent, {
-            hasBackdrop: true,
-            width: '900px',
-            data: {
-                historyFile: item
-            }
         });
     }
 
