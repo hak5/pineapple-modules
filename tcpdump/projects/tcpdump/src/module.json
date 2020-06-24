@@ -1,6 +1,6 @@
 {
     "name": "tcpdump",
-    "title": "TCP Dump",
+    "title": "TCPDump",
     "description": "Web interface for tcpdump.",
     "author": "newbi3",
     "version": "1.0"
