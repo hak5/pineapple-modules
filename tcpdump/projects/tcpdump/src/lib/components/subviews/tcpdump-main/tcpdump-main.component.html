@@ -1,0 +1,220 @@
+<div class="dependency-card-centered" *ngIf="!hasDependencies">
+    <mat-card class="dependency-card">
+        <mat-card-content>
+            <mat-card-title>Welcome To TCPDump</mat-card-title>
+            <mat-card-subtitle>Lets get started.</mat-card-subtitle>
+
+            <mat-divider></mat-divider>
+            <br />
+
+            <p>You need to install some dependencies before you can use this module.</p>
+            <p>This will make an request to the internet.</p>
+
+            <br/>
+            <br/>
+            <div class="dependency-card-centered">
+                <button mat-raised-button color="accent"
+                        class="dependency-card-button"
+                        (click)="installDependencies()"
+                        [disabled]="isInstalling">
+                    <span *ngIf="isInstalling">
+                        <mat-spinner [diameter]="20" class="spinner-padding" color="accent"></mat-spinner>
+                    </span>
+                    <span *ngIf="!isInstalling">
+                        Install Dependencies
+                    </span>
+                </button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<div *ngIf="hasDependencies" class="controls-container" fxLayoutGap="20px" fxLayout="row" fxLayout.xs="column" fxLayout.sm="column">
+    <mat-card class="control-item">
+        <mat-card-content>
+            <div class="right-left-split-container">
+                <mat-card-title>TCPDump</mat-card-title>
+                <span *ngIf="isCapturing"><mat-spinner [diameter]="24" color="accent" style="margin-left: 8px"></mat-spinner></span>
+                <span fxFlex></span>
+                <mat-menu #tcpdumpMenu>
+                    <button mat-menu-item (click)="showUninstallDialog();">Uninstall Dependencies</button>
+                </mat-menu>
+
+                <button mat-icon-button [matMenuTriggerFor]="tcpdumpMenu">
+                    <mat-icon>more_vert</mat-icon>
+                </button>
+            </div>
+            <form>
+                <mat-form-field style="width: 100%;">
+                    <mat-label>Command</mat-label>
+                    <input matInput class="control-input" name="command" [(ngModel)]="tcpDumpState.command"/>
+                </mat-form-field>
+                <div class="right-left-split-container">
+                    <mat-form-field style="width: 100%; margin-right: 8px;">
+                        <mat-label>Interface</mat-label>
+                        <mat-select name="interface" [(ngModel)]="tcpDumpState.selectedInterface" (ngModelChange)="update();">
+                            <mat-option>--</mat-option>
+                            <mat-option *ngFor="let iface of interfaces" value="{{ iface }}">{{ iface }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <span fxFlex></span>
+                    <mat-form-field style="width: 100%; margin-left: 8px;">
+                        <mat-label>Verbose</mat-label>
+                        <mat-select name="verbose" [(ngModel)]="tcpDumpState.verbose" (ngModelChange)="update();">
+                            <mat-option>--</mat-option>
+                            <mat-option value="-v">Verbose</mat-option>
+                            <mat-option value="-vv">Very verbose</mat-option>
+                            <mat-option value="-vvv">Very very verbose</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <mat-form-field style="width: 100%;">
+                    <mat-label>Resolve</mat-label>
+                    <mat-select name="resolve" [(ngModel)]="tcpDumpState.resolve" (ngModelChange)="update();">
+                        <mat-option>--</mat-option>
+                        <mat-option value="-n">Don't resolve hostnames</mat-option>
+                        <mat-option value="-nn">Don't resolve hostnames or port names</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field style="width: 100%;">
+                    <mat-label>Timestamp</mat-label>
+                    <mat-select name="timestamp" [(ngModel)]="tcpDumpState.timestamp" (ngModelChange)="update();">
+                        <mat-option>--</mat-option>
+                        <mat-option value="-t">Don't print a timestamp on each dump line</mat-option>
+                        <mat-option value="-tt">Print an unformatted timestamp on each dump line</mat-option>
+                        <mat-option value="-ttt">Print a delta (micro-second resolution) between current and previous line on each dump line</mat-option>
+                        <mat-option value="-tttt">Print a timestamp in default format proceeded by date on each dump line</mat-option>
+                        <mat-option value="-ttttt">Print a delta (micro-second resolution) between current and first line on each dump line</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <button mat-raised-button color="accent" style="width: 100%;" *ngIf="!isCapturing" (click)="startCapture();">Capture</button>
+                <button mat-raised-button color="warn" style="width: 100%;" *ngIf="isCapturing" (click)="stopCapture();">Stop</button>
+            </form>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card class="control-item">
+        <mat-card-content>
+            <div>
+                <mat-card-title>Filter</mat-card-title>
+            </div>
+
+            <form>
+                <mat-form-field style="width: 100%;">
+                    <mat-label>Filter</mat-label>
+                    <input matInput class="control-input" name="filter" [(ngModel)]="tcpDumpState.filter"/>
+                </mat-form-field>
+                <div class="right-left-split-container">
+                    <mat-form-field style="width: 100%; margin-right: 8px;">
+                        <mat-label>Type</mat-label>
+                        <mat-select name="filterType" (selectionChange)="appendFilter($event.value);">
+                            <mat-option value="host">Host</mat-option>
+                            <mat-option value="net">Net</mat-option>
+                            <mat-option value="portrange">Port Range</mat-option>
+                            <mat-option value="port">Port</mat-option>
+                            <mat-option value="gateway">Gateway</mat-option>
+                            <mat-option value="mask">Mask</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <span fxFlex></span>
+                    <mat-form-field style="width: 100%; margin-left: 8px;">
+                        <mat-label>Dir</mat-label>
+                        <mat-select name="filterDir" (selectionChange)="appendFilter($event.value);">
+                            <mat-option value="src">Src</mat-option>
+                            <mat-option value="dst">Dst</mat-option>
+                            <mat-option value="src or dst">Src or Dst</mat-option>
+                            <mat-option value="src and dst">Src and Dst</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div class="right-left-split-container">
+                    <mat-form-field style="width: 100%; margin-right: 8px;">
+                        <mat-label>Protocol</mat-label>
+                        <mat-select name="filterProtocol" (selectionChange)="appendFilter($event.value);">
+                            <mat-option value="ip">Ip</mat-option>
+                            <mat-option value="proto">Proto</mat-option>
+                            <mat-option value="icmp">ICMP</mat-option>
+                            <mat-option value="tcp">TCP</mat-option>
+                            <mat-option value="udp">UDP</mat-option>
+                            <mat-option value="arp">ARP</mat-option>
+                            <mat-option value="ether">Ether</mat-option>
+                            <mat-option value="http">HTTP</mat-option>
+                            <mat-option value="ftp">FTP</mat-option>
+                            <mat-option value="smtp">SMTP</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <span fxFlex></span>
+                    <mat-form-field style="width: 100%; margin-left: 8px;">
+                        <mat-label>Length</mat-label>
+                        <mat-select name="filterLength" (selectionChange)="appendFilter($event.value);">
+                            <mat-option value="less">Less</mat-option>
+                            <mat-option value="greater">Greater</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div class="right-left-split-container">
+                    <mat-form-field style="width: 100%; margin-right: 8px;">
+                        <mat-label>Kind</mat-label>
+                        <mat-select name="filterKind" (selectionChange)="appendFilter($event.value);">
+                            <mat-option value="broadcast">Broadcast</mat-option>
+                            <mat-option value="multicast">Multicast</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <span fxFlex></span>
+                    <mat-form-field style="width: 100%; margin-left: 8px;">
+                        <mat-label>Operator</mat-label>
+                        <mat-select name="filterOperator" (selectionChange)="appendFilter($event.value);">
+                            <mat-option value="not">not</mat-option>
+                            <mat-option value="and">and</mat-option>
+                            <mat-option value="or">or</mat-option>
+                            <mat-option value="(">(</mat-option>
+                            <mat-option value=")">)</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card class="control-item">
+        <mat-card-content>
+            <div>
+                <mat-card-title>Options</mat-card-title>
+            </div>
+            <mat-checkbox [(ngModel)]="optionsState.dontPrintHostName.toggled" (ngModelChange)="update();">Don't print domain name qualification of host names</mat-checkbox>
+            <br/>
+            <mat-checkbox [(ngModel)]="optionsState.showHexAndASCII.toggled" (ngModelChange)="update();">Show the packet's contents in both hex and ASCII</mat-checkbox>
+            <br/>
+            <mat-checkbox [(ngModel)]="optionsState.printAbsoluteNumbers.toggled" (ngModelChange)="update();">Print absolute sequence numbers</mat-checkbox>
+            <br/>
+            <mat-checkbox [(ngModel)]="optionsState.getEthernetHeaders.toggled" (ngModelChange)="update();">Get the ethernet header as well</mat-checkbox>
+            <br/>
+            <mat-checkbox [(ngModel)]="optionsState.lessProtocolInfo.toggled" (ngModelChange)="update();">Show less protocol information</mat-checkbox>
+            <br/>
+            <mat-checkbox [(ngModel)]="optionsState.monitorMode.toggled" (ngModelChange)="update();">Monitor mode</mat-checkbox>
+        </mat-card-content>
+    </mat-card>
+
+</div>
+
+<br/>
+
+<mat-card *ngIf="hasDependencies">
+    <mat-card-content>
+        <div class="output-container">
+            <div class="right-left-split-container">
+                <mat-card-title>Output</mat-card-title>
+                <span fxFlex></span>
+                <button mat-icon-button [disabled]="isFetchingOutput || !isCapturing" (click)="getLogContent();"><mat-icon>refresh</mat-icon></button>
+                <button mat-icon-button [disabled]="captureFileName == null || isCapturing"><mat-icon>cloud_download</mat-icon></button>
+            </div>
+            <textarea class="output-textarea" [(ngModel)]="captureOutput" placeholder="No output to display..." readonly></textarea>
+            <div class="right-left-split-container">
+                <span *ngIf="isCapturing" style="margin-right: 8px;"><i>Refreshes every 5 seconds...</i></span>
+                <span *ngIf="isFetchingOutput"><mat-spinner [diameter]="24" color="accent"></mat-spinner></span>
+                <span fxFlex></span>
+            </div>
+        </div>
+    </mat-card-content>
+</mat-card>
+

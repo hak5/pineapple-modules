@@ -2,7 +2,7 @@ from logging import Logger
 from typing import Optional, Tuple
 import subprocess
 
-from pineapple.helpers.helpers import check_for_internet
+from pineapple.helpers.network_helpers import check_for_internet
 from pineapple.jobs.job import Job, TResult
 
 
