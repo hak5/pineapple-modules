@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ApiService} from "../../../services/api.service";
 import {MatDialog} from "@angular/material/dialog";
 import {StartupDTO, StartupLastJob} from "../../../interfaces/startupdto.interface";
@@ -12,7 +12,7 @@ import {OtherOptions, TCPDumpState} from "../../../interfaces/optionstate.interf
     templateUrl: './tcpdump-main.component.html',
     styleUrls: ['./tcpdump-main.component.css']
 })
-export class TcpdumpMainComponent implements OnInit {
+export class TcpdumpMainComponent implements OnInit, OnDestroy {
 
     public hasDependencies: boolean = true;
     public isInstalling: boolean = false;
@@ -273,6 +273,10 @@ export class TcpdumpMainComponent implements OnInit {
 
     ngOnInit(): void {
         this.startup();
+    }
+
+    ngOnDestroy() {
+        clearInterval(this.backgroundJobInterval);
     }
 
 }
