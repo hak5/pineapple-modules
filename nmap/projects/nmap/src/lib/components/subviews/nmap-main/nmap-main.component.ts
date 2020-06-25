@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ApiService} from '../../../services/api.service';
 import { JobResultDTO } from '../../../interfaces/jobresult.interface';
 import {MatDialog} from '@angular/material/dialog';
@@ -17,7 +17,8 @@ import {ErrorDialogComponent} from "../../helpers/error-dialog/error-dialog.comp
   templateUrl: './nmap-main.component.html',
   styleUrls: ['./nmap-main.component.css']
 })
-export class NmapMainComponent implements OnInit {
+export class NmapMainComponent implements OnInit, OnDestroy {
+
     constructor(private API: ApiService,
                 private dialog: MatDialog) { }
 
@@ -305,27 +306,13 @@ export class NmapMainComponent implements OnInit {
         });
     }
 
-    private startUp(): void {
-        this.API.request({
-            module: 'nmap',
-            action: 'check_dependencies'
-        }, (response) => {
-            if (response.error) {
-                this.handleError(response.error);
-                return
-            }
-
-            this.hasDependencies = response;
-            this.rebindLastJob();
-        });
+    ngOnInit() {
+        this.checkForDependencies();
+        this.rebindLastJob();
     }
 
-    ngOnInit() {
-        this.startUp();  // temporary - the bellow code should be used when it can.
-
-        // uncomment these for the bug:
-        // this.checkForDependencies();
-        // this.rebindLastJob();
+    ngOnDestroy(): void {
+        clearInterval(this.backgroundJobInterval);
     }
 
 }
