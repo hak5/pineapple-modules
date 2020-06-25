@@ -25,6 +25,10 @@
                     </span>
                 </button>
             </div>
+            <br/>
+            <div class="dependency-card-centered">
+                <button mat-button color="accent" (click)="showLicenseDialog();">View TCPDump License</button>
+            </div>
         </mat-card-content>
     </mat-card>
 </div>
@@ -38,6 +42,7 @@
                 <span fxFlex></span>
                 <mat-menu #tcpdumpMenu>
                     <button mat-menu-item (click)="showUninstallDialog();">Uninstall Dependencies</button>
+                    <button mat-menu-item (click)="showLicenseDialog();">Show License</button>
                 </mat-menu>
 
                 <button mat-icon-button [matMenuTriggerFor]="tcpdumpMenu">

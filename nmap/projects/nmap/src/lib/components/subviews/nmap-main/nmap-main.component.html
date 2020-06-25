@@ -25,6 +25,10 @@
                     </span>
                 </button>
             </div>
+            <br/>
+            <div class="dependency-card-centered">
+                <button mat-button color="accent" (click)="showLicenseDialog();">View Nmap License</button>
+            </div>
         </mat-card-content>
     </mat-card>
 </div>
@@ -38,6 +42,7 @@
                 <span fxFlex></span>
                 <mat-menu #nmapMenu>
                     <button mat-menu-item (click)="showUninstall();">Uninstall Dependencies</button>
+                    <button mat-menu-item (click)="showLicenseDialog();">Nmap License</button>
                 </mat-menu>
 
                 <button mat-icon-button [matMenuTriggerFor]="nmapMenu">

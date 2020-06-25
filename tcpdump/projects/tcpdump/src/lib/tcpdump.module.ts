@@ -12,6 +12,7 @@ import { ConfirmationDialogComponent } from './components/helpers/confirmation-d
 import {FormsModule} from "@angular/forms";
 import { ErrorDialogComponent } from './components/helpers/error-dialog/error-dialog.component';
 import { UninstallDialogComponent } from './components/helpers/uninstall-dialog/uninstall-dialog.component';
+import { LicenseDialogComponent } from './components/helpers/license-dialog/license-dialog.component';
 
 const routes: Routes = [
     {
@@ -31,7 +32,8 @@ const routes: Routes = [
         TcpdumpHistoryComponent,
         ConfirmationDialogComponent,
         ErrorDialogComponent,
-        UninstallDialogComponent],
+        UninstallDialogComponent,
+        LicenseDialogComponent],
     imports: [
         CommonModule,
         RouterModule.forChild(routes),
@@ -43,7 +45,8 @@ const routes: Routes = [
     entryComponents: [
         ConfirmationDialogComponent,
         ErrorDialogComponent,
-        UninstallDialogComponent
+        UninstallDialogComponent,
+        LicenseDialogComponent
     ]
 })
 export class tcpdumpModule { }

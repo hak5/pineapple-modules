@@ -11,6 +11,7 @@ import {
     ToggleOption,
 } from '../../../interfaces/optionstate.interface';
 import {ErrorDialogComponent} from "../../helpers/error-dialog/error-dialog.component";
+import {LicenseDialogComponent} from "../../helpers/license-dialog/license-dialog.component";
 
 @Component({
   selector: 'lib-nmap-main',
@@ -216,7 +217,7 @@ export class NmapMainComponent implements OnInit, OnDestroy {
             data: {
                 onComplete: () => { this.checkForDependencies(); }
             }
-        })
+        });
     }
 
     getScanOutput(outputFile: string): void {
@@ -303,6 +304,13 @@ export class NmapMainComponent implements OnInit, OnDestroy {
                        break;
                }
            }
+        });
+    }
+
+    showLicenseDialog(): void {
+        this.dialog.open(LicenseDialogComponent, {
+            hasBackdrop: true,
+            width: '900px',
         });
     }
 

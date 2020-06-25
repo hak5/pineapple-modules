@@ -14,6 +14,7 @@ import { UninstallDialogComponent } from './components/helpers/uninstall-dialog/
 import { ScanResultDialogComponent } from './components/helpers/scan-result-dialog/scan-result-dialog.component';
 import { ConfirmationDialogComponent } from './components/helpers/confirmation-dialog/confirmation-dialog.component';
 import { ErrorDialogComponent } from './components/helpers/error-dialog/error-dialog.component';
+import { LicenseDialogComponent } from './components/helpers/license-dialog/license-dialog.component';
 
 const routes: Routes = [
     {
@@ -34,7 +35,8 @@ const routes: Routes = [
         UninstallDialogComponent,
         ScanResultDialogComponent,
         ConfirmationDialogComponent,
-        ErrorDialogComponent]
+        ErrorDialogComponent,
+        LicenseDialogComponent]
     ,
     imports: [
         CommonModule,
@@ -51,7 +53,8 @@ const routes: Routes = [
         UninstallDialogComponent,
         ScanResultDialogComponent,
         ConfirmationDialogComponent,
-        ErrorDialogComponent
+        ErrorDialogComponent,
+        LicenseDialogComponent
     ]
 })
 export class nmapModule { }

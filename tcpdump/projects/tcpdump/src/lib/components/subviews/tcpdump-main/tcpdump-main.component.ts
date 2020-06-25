@@ -6,6 +6,7 @@ import {ErrorDialogComponent} from "../../helpers/error-dialog/error-dialog.comp
 import {JobResultDTO} from "../../../interfaces/jobresult.interface";
 import {UninstallDialogComponent} from "../../helpers/uninstall-dialog/uninstall-dialog.component";
 import {OtherOptions, TCPDumpState} from "../../../interfaces/optionstate.interface";
+import {LicenseDialogComponent} from "../../helpers/license-dialog/license-dialog.component";
 
 @Component({
     selector: 'lib-tcpdump-main',
@@ -185,7 +186,7 @@ export class TcpdumpMainComponent implements OnInit, OnDestroy {
                     this.checkForDependencies();
                 }
             }
-        })
+        });
     }
 
     update(): void {
@@ -268,6 +269,13 @@ export class TcpdumpMainComponent implements OnInit, OnDestroy {
             if (response.last_job.job_id !== null) {
                 this.rebind(response.last_job);
             }
+        });
+    }
+
+    showLicenseDialog(): void {
+        this.dialog.open(LicenseDialogComponent, {
+            hasBackdrop: true,
+            width: '900px',
         });
     }
 
