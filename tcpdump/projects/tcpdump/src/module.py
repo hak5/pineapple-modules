@@ -11,8 +11,10 @@ from typing import List, Tuple, Optional
 from pineapple.modules import Module, Request
 from pineapple.helpers.opkg_helpers import OpkgJob
 from pineapple.helpers import opkg_helpers as opkg
+import pineapple.helpers.notification_helpers as notifier
 from pineapple.helpers import network_helpers as net
 from pineapple.jobs import JobManager, Job
+
 
 module = Module('tcpdump', logging.DEBUG)
 job_manager = JobManager('tcpdump', logging.DEBUG)
@@ -73,6 +75,13 @@ def _get_last_background_job() -> dict:
     }
 
 
+def _notify_dependencies_finished(job: OpkgJob):
+    if not job.was_successful:
+        module.send_notification(job.error, notifier.ERROR)
+    elif job.install:
+        module.send_notification('TCPDump finished installing.', notifier.INFO)
+
+
 @module.handles_action('check_background_job')
 def check_background_job(request: Request) -> Tuple[bool, dict]:
     job = job_manager.get_job(request.job_id)
@@ -91,7 +100,7 @@ def check_dependencies(request: Request) -> Tuple[bool, bool]:
 @module.handles_action('manage_dependencies')
 def manage_dependencies(request: Request) -> Tuple[bool, dict]:
     _make_history_directory()
-    return True, {'job_id': job_manager.execute_job(OpkgJob('tcpdump', request.install))}
+    return True, {'job_id': job_manager.execute_job(OpkgJob('tcpdump', request.install), callbacks=[_notify_dependencies_finished])}
 
 
 @module.handles_action('start_capture')
