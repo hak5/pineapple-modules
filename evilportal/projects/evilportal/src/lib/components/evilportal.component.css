@@ -1,0 +1,90 @@
+.dependency-card {
+    max-width: 600px;
+    min-height: 246px;
+}
+
+.dependency-card-centered {
+    display: flex;
+    justify-content: center;
+    align-self: center;
+}
+
+.dependency-card-button {
+    width: 75%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.spinner-padding {
+    margin-top: 6px;
+    margin-bottom: 7px;
+}
+
+.module-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.card-container {
+    display: flex;
+}
+
+.left-half {
+    max-width: 100%;
+    min-width: 25%;
+    width: 33%;
+
+}
+
+.right-half {
+    flex: 1;
+}
+
+.right-left-split-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-self: flex-start;
+}
+
+.controls-container {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.control-item {
+    flex: 1;
+}
+
+.client-textarea {
+    width: 100%;
+    height: 150px;
+    min-height: 50px;
+    max-height: 200px;
+    resize: vertical;
+    margin: 0 0 5px;
+    padding: 0;
+    background-color: #efefef;
+    border-radius: 2px;
+    border-color: #cecece;
+    max-lines: 50;
+}
+
+.output-textarea {
+    width: 100%;
+    height: 300px;
+    min-height: 200px;
+    max-height: 600px;
+    resize: vertical;
+    margin: 0 0 5px;
+    padding: 0;
+    background-color: #efefef;
+    border-radius: 2px;
+    border-color: #cecece;
+    max-lines: 50;
+}
+

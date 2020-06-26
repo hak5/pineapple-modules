@@ -1,0 +1,118 @@
+<div class="dependency-card-centered" *ngIf="!hasDependencies">
+    <mat-card class="dependency-card">
+        <mat-card-content>
+            <mat-card-title>Welcome To Evil Portal</mat-card-title>
+            <mat-card-subtitle>Lets get started.</mat-card-subtitle>
+
+            <mat-divider></mat-divider>
+            <br />
+
+            <p>You need to install some dependencies before you can use this module.</p>
+            <p>This will make an request to the internet.</p>
+
+            <br/>
+            <br/>
+            <div class="dependency-card-centered">
+                <button mat-raised-button color="accent"
+                        class="dependency-card-button"
+                        (click)="installDependencies()"
+                        [disabled]="isInstalling">
+                    <span *ngIf="isInstalling">
+                        <mat-spinner [diameter]="20" class="spinner-padding" color="accent"></mat-spinner>
+                    </span>
+                    <span *ngIf="!isInstalling">
+                        Install Dependencies
+                    </span>
+                </button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<div class="module-container" *ngIf="hasDependencies">
+    <div class="card-container" fxLayoutGap="20px" fxLayout="row" fxLayout.xs="column" fxLayout.sm="column">
+        <div class="left-half" fxLayoutGap="20px" fxLayout="column" fxLayout.xs="column" fxLayout.sm="column">
+            <mat-card>
+                <mat-card-content>
+                    <div class="right-left-split-container">
+                        <mat-card-title>Evil Portal</mat-card-title>
+                        <span fxFlex></span>
+                        <mat-menu #evilportalMenu>
+                            <button mat-menu-item>Uninstall Dependencies</button>
+                        </mat-menu>
+
+                        <button mat-icon-button [matMenuTriggerFor]="evilportalMenu">
+                            <mat-icon>more_vert</mat-icon>
+                        </button>
+                    </div>
+                    <br/><mat-divider></mat-divider><br/>
+                    <button mat-raised-button color="accent" style="width: 100%;">Start</button>
+                    <br/><br/>
+                    <button mat-raised-button color="accent" style="width: 100%;">Enable on boot</button>
+                </mat-card-content>
+            </mat-card>
+
+            <mat-card>
+                <mat-card-content>
+                    <mat-card-title>Permanent Clients</mat-card-title>
+                    <br/><mat-divider></mat-divider><br/>
+                    <textarea class="client-textarea" readonly></textarea>
+                </mat-card-content>
+            </mat-card>
+
+            <mat-card>
+                <mat-card-content>
+                    <mat-card-title>Authorized Clients</mat-card-title>
+                    <br/><mat-divider></mat-divider><br/>
+                    <textarea class="client-textarea" readonly></textarea>
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+        <div class="right-half">
+            <mat-card>
+                <mat-card-content>
+                    <div class="right-left-split-container">
+                        <mat-card-title>Work Bench</mat-card-title>
+                        <span fxFlex></span>
+                        <button mat-raised-button color="accent">New Portal</button>
+                    </div>
+                    <br/><mat-divider></mat-divider><br/>
+
+                    <mat-table style="display: none">
+                        <mat-header-row *matHeaderRowDef="[]"></mat-header-row>
+                    </mat-table>
+                    <table class="mat-table" style="min-width: 100%; overflow-x: auto; justify-content: left;">
+                        <thead>
+                        <tr class="mat-header-row">
+                            <th class="mat-header-cell">Portal Name</th>
+                            <th class="mat-header-cell">Portal Type</th>
+                            <th class="mat-header-cell">Activate</th>
+                            <th class="mat-header-cell">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <ng-container *ngFor="let portal of portals">
+                            <tr class="mat-row">
+                                <td class="mat-cell">
+                                    <button mat-button color="accent">{{ portal.title }}</button>
+                                </td>
+                                <td class="mat-cell">{{ portal.type }}</td>
+                                <td class="mat-cell">
+                                    <button mat-button color="accent" *ngIf="!portal.active">Activate</button>
+                                    <button mat-button color="warn" *ngIf="portal.active">Deactivate</button>
+                                </td>
+                                <td class="mat-cell">
+                                    <button mat-raised-button color="warn" *ngIf="!portal.active">Delete</button>
+                                    <button mat-raised-button color="accent" *ngIf="portal.active">Preview</button>
+                                </td>
+                            </tr>
+                        </ng-container>
+                        </tbody>
+                    </table>
+
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>

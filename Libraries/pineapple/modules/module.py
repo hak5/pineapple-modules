@@ -175,6 +175,25 @@ class Module:
                 self.logger.critical(f'A fatal `{type(e)}` exception was thrown: {e}')
                 self.shutdown()
 
+    def register_action_handler(self, action: str, handler: Callable[[Request], Tuple[bool, Any]]):
+        """
+        Manually register an function `handler` to handle an action `action`.
+        This function will be called anytime a request with the matching action is received.
+        The action handler must take a positional argument of type `Request`. This must be the first argument.
+
+        Usage Example:
+            module = Module('example')
+
+            def save_file(request: Request) -> Tuple[bool, Any]:
+                ...
+
+            module.register_action_handler(save_file)
+
+        :param action: The request action to handle
+        :param handler: A function that takes `Request` that gets called when the matching `action` is received.
+        """
+        self._action_handlers[action] = handler
+
     def handles_action(self, action: str):
         """
         A decorator that registers a function as an handler for a given action `action` in a request.
@@ -192,8 +211,8 @@ class Module:
 
         :param action: The request action to handle
         """
-        def wrapper(func: Callable[[Any], Tuple[bool, Any]]):
-            self._action_handlers[action] = func
+        def wrapper(func: Callable[[Request], Tuple[bool, Any]]):
+            self.register_action_handler(action, func)
             return func
         return wrapper
 

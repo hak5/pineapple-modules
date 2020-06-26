@@ -1,6 +1,8 @@
-from typing import Dict, Optional, List, Callable
+from typing import Dict, Optional, List, Callable, Tuple, Union
 from uuid import uuid4
 
+from pineapple.modules.module import Module
+from pineapple.modules.request import Request
 from pineapple.jobs.job import Job
 from pineapple.jobs.job_runner import JobRunner
 from pineapple.logger import *
@@ -8,10 +10,17 @@ from pineapple.logger import *
 
 class JobManager:
 
-    def __init__(self, name: str, log_level: int = logging.ERROR):
+    def __init__(self, name: str, log_level: int = logging.ERROR, module: Optional[Module] = None):
+        """
+        :param name: The name of the job manager.
+        :param log_level: Optional level for logging. Default is ERROR
+        :param module: Optional instance of Module. If given some action handlers will be registered.
+                       Checkout `_register_action_handlers` for more details.
+        """
         self.name = name
         self.logger = get_logger(name, log_level)
         self.jobs: Dict[str, JobRunner] = {}
+        self._register_action_handlers(module)
 
     def get_job(self, job_id: str, remove_if_complete: bool = True) -> Optional[Job]:
         """
@@ -83,3 +92,37 @@ class JobManager:
         self.logger.debug('Job started!')
 
         return job_id
+
+    def _register_action_handlers(self, module: Optional[Module]):
+        """
+        If module is not None and is an instance of Module then register the following action handlers:
+            action: `poll_job` | handler: `self.poll_job`
+
+        :param module: an instance of Module
+        """
+        if not module or not isinstance(module, Module):
+            return
+
+        module.register_action_handler('poll_job', self._poll_job)
+
+    def _poll_job(self, request: Request) -> Tuple[bool, Union[dict, str]]:
+        """
+        A module action handler to be used for checking the status of a background job.
+        The request object must contain string `job_id` which is used to lookup the running job.
+        Optionally, the request can contain boolean `remove_if_complete`. If this is True then the job will
+        be deleted from memory if it is completed. If this value is False then the job will remain until manually deleted.
+        This default value is True.
+        :param request: An instance of Request
+        """
+        job_id = request.__dict__.get('job_id')
+        remove_if_complete = request.__dict__.get('remove_if_complete', True)
+
+        if not job_id:
+            return False, 'job_id was not found in request.'
+
+        job = self.get_job(job_id, remove_if_complete)
+
+        if not job:
+            return False, 'No job found by that id.'
+
+        return True, {'is_complete': job.is_complete, 'result': job.result, 'job_error': job.error}
