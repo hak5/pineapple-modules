@@ -12,6 +12,7 @@ import json
 from pineapple.modules import Module, Request
 from pineapple.jobs import Job, JobManager
 from pineapple.helpers.opkg_helpers import OpkgJob
+import pineapple.helpers.notification_helpers as notifier
 import pineapple.helpers.opkg_helpers as opkg
 
 
@@ -46,6 +47,20 @@ def _make_history_directory():
 
     if not path.exists():
         path.mkdir(parents=True)
+
+
+def _notify_scan_complete(job: ScanJob):
+    if not job.was_successful:
+        module.send_notification(job.error, notifier.ERROR)
+    else:
+        module.send_notification('Scan completed', notifier.INFO)
+
+
+def _notify_dependencies_finished(job: OpkgJob):
+    if not job.was_successful:
+        module.send_notification(job.error, notifier.ERROR)
+    elif job.install:
+        module.send_notification('Nmap finished installing.', notifier.INFO)
 
 
 @module.handles_action('check_background_job')
@@ -88,7 +103,9 @@ def check_dependencies(request: Request) -> Tuple[bool, bool]:
 @module.handles_action('manage_dependencies')
 def manage_dependencies(request: Request) -> Tuple[bool, dict]:
     _make_history_directory()
-    return True, {'job_id': job_manager.execute_job(OpkgJob('nmap', request.install))}
+    return True, {
+        'job_id': job_manager.execute_job(OpkgJob('nmap', request.install), callbacks=[_notify_dependencies_finished])
+    }
 
 
 @module.handles_action('start_scan')
@@ -97,7 +114,7 @@ def start_scan(request: Request) -> Tuple[bool, dict]:
     command = request.command.split(' ')
 
     filename = f"{datetime.now().strftime('%Y-%m-%dT%H-%M-%S')}"
-    job_id = job_manager.execute_job(ScanJob(command, filename))
+    job_id = job_manager.execute_job(ScanJob(command, filename), callbacks=[_notify_scan_complete])
 
     return True, {'job_id': job_id, 'output_file': filename}
 

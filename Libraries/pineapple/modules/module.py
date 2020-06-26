@@ -8,6 +8,7 @@ from typing import Tuple, Any, Callable, Optional, Dict
 from pineapple.logger import get_logger
 from pineapple.modules.request import Request
 from pineapple.helpers import json_to_bytes
+import pineapple.helpers.notification_helpers as notifier
 
 
 class Module:
@@ -195,3 +196,13 @@ class Module:
             self._action_handlers[action] = func
             return func
         return wrapper
+
+    def send_notification(self, message: str, level: int) -> bool:
+        """
+        Send a notification over the WiFi Pineapples notification socket
+
+        :param message: Notification message
+        :param level: Notification level
+        :return: bool
+        """
+        return notifier.send_notification(message, self.name, level)

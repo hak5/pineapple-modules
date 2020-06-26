@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, List, Callable
 from uuid import uuid4
 
 from pineapple.jobs.job import Job
@@ -62,17 +62,19 @@ class JobManager:
         del self.jobs[job_id]
         self.logger.debug(f'Removed job {job_id}.')
 
-    def execute_job(self, job: Job) -> str:
+    def execute_job(self, job: Job, callbacks: List[Callable[[Job], None]] = None) -> str:
         """
         Assign an id to a job and execute it in a background thread.
         The id will be returned and the job can be tracked by calling `get_job` and providing it the id.
         :param job: an instance of Job to start running.
+        :param callbacks: An optional list of functions that take `job` as a parameter to be called when completed.
+                          These will be called regardless if `job` raises an exception or not.
         :return: The id of the running job.
         """
         job_id = str(uuid4())
         self.logger.debug(f'Assign job the id: {job_id}')
 
-        job_runner = JobRunner(job, self.logger)
+        job_runner = JobRunner(job, self.logger, callbacks)
         self.jobs[job_id] = job_runner
 
         self.logger.debug('Starting job...')
