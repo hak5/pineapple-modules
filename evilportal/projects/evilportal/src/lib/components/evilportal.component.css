@@ -21,25 +21,15 @@
     margin-bottom: 7px;
 }
 
-.module-container {
+.controls-container {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
 }
 
 .card-container {
     display: flex;
-}
-
-.left-half {
-    max-width: 100%;
-    min-width: 25%;
-    width: 33%;
-
-}
-
-.right-half {
-    flex: 1;
 }
 
 .right-left-split-container {
@@ -47,13 +37,6 @@
     flex-direction: row;
     justify-content: flex-start;
     align-self: flex-start;
-}
-
-.controls-container {
-    display: flex;
-    width: 100%;
-    flex-wrap: wrap;
-    justify-content: space-between;
 }
 
 .control-item {
