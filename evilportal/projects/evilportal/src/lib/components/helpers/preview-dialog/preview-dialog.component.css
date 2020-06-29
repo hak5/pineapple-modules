@@ -1,0 +1,16 @@
+.previewBox {
+    width: 1200px;
+    height: 600px;
+}
+
+.previewContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.previewWindow {
+    border: none;
+    flex: 1;
+    height: 80%;
+    background: #FFFFFF;
+}

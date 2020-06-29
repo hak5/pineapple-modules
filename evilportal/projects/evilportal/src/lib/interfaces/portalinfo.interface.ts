@@ -1,6 +1,6 @@
 export interface PortalInfoDTO {
     title: string,
-    type: string,
+    portal_type: string,
     location: string,
     active: boolean
 }

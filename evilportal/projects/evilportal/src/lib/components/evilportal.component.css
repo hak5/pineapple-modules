@@ -71,3 +71,6 @@
     max-lines: 50;
 }
 
+.control-button {
+    margin-right: 4px;
+}

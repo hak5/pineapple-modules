@@ -7,22 +7,39 @@ import { RouterModule, Routes } from '@angular/router';
 import {MaterialModule} from './modules/material/material.module';
 import {FlexLayoutModule} from '@angular/flex-layout';
 import { ErrorDialogComponent } from './components/helpers/error-dialog/error-dialog.component';
+import { NewPortalDialogComponent } from './components/helpers/new-portal-dialog/new-portal-dialog.component';
+import {FormsModule} from "@angular/forms";
+import { PreviewDialogComponent } from './components/helpers/preview-dialog/preview-dialog.component';
+import { ConfirmationDialogComponent } from './components/helpers/confirmation-dialog/confirmation-dialog.component';
+import { EditFileDialogComponent } from './components/helpers/edit-file-dialog/edit-file-dialog.component';
 
 const routes: Routes = [
     { path: '', component: EvilPortalComponent }
 ];
 
 @NgModule({
-    declarations: [EvilPortalComponent, ErrorDialogComponent],
+    declarations: [
+        EvilPortalComponent,
+        ErrorDialogComponent,
+        NewPortalDialogComponent,
+        PreviewDialogComponent,
+        ConfirmationDialogComponent,
+        EditFileDialogComponent
+    ],
     imports: [
         RouterModule.forChild(routes),
         MaterialModule,
         FlexLayoutModule,
         CommonModule,
+        FormsModule,
     ],
     exports: [EvilPortalComponent],
     entryComponents: [
-        ErrorDialogComponent
+        ErrorDialogComponent,
+        NewPortalDialogComponent,
+        PreviewDialogComponent,
+        ConfirmationDialogComponent,
+        EditFileDialogComponent
     ]
 })
 export class evilportalModule { }

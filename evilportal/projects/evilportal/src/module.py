@@ -40,11 +40,14 @@ class PackageJob(OpkgJob):
 
 def _deactivate_portal(name: str) -> bool:
     # return false if the portal is not active
-    if not os.path.exists(f'/wwww/{name}.ep'):
+
+    if not os.path.exists(f'/www/{name}.ep'):
+        module.logger.error(f'NO EP FILE FOUND: /www/{name}.ep')
         return False
 
     # return false if the portal doesn't exist
     if not os.path.exists(f'{_PORTAL_PATH}/{name}'):
+        module.logger.error(f'COULD NOT FIND PORTAL: {_PORTAL_PATH}/{name}')
         return False
 
     # remove all associate portal file symbolic links
@@ -60,23 +63,39 @@ def _deactivate_portal(name: str) -> bool:
 
 
 def _activate_portal(name: str) -> bool:
-    pass
+    # check if there is a currently active portal and deactive it.
+    for item in pathlib.Path('/www').iterdir():
+        if item.name[-3:] == '.ep':
+            if not _deactivate_portal(item.name[:-3]):
+                return False
+
+    try:
+        os.symlink(f'{_INCLUDE_PATH}/api', '/www/captiveportal')
+    except FileExistsError:
+        module.logger.warning('Portal API already exists under /www/captiveportal. This is probably not an issue.')
+
+    for item in pathlib.Path(f'{_PORTAL_PATH}/{name}').iterdir():
+        if os.path.exists(f'/www/{item.name}'):
+            os.rename(f'/www/{item.name}', f'/www/{item.name}.ep_backup')
+        os.symlink(str(item), f'/www/{item.name}')
+
+    return True
 
 
 def _check_portal_activate(name: str) -> bool:
-    pass
+    return os.path.exists(f'/www/{name}.ep')
 
 
 def _disable_webserver_autostart() -> bool:
-    pass
+    return os.system('/etc/init.d/lighttpd disable') == 0
 
 
 def _autostart_webserver() -> bool:
-    pass
+    return os.system('/etc/init.d/lighttpd enable') == 0
 
 
 def _check_webserver_autostart() -> bool:
-    pass
+    return cmd.grep_output('ls /etc/rc.d/', 'lighttpd') != b''
 
 
 def _stop_webserver() -> bool:
@@ -112,7 +131,7 @@ def _disable_autostart() -> bool:
 
 
 def _check_autostart() -> bool:
-    pass
+    return cmd.grep_output('ls /etc/rc.d/', 'evilportal') != b''
 
 
 def _delete_directory_tree(directory: pathlib.Path) -> bool:
@@ -158,7 +177,7 @@ def _get_file_content(file_path: str) -> str:
 def _get_directory_content(dir_path: str) -> List[dict]:
     directory = pathlib.Path(dir_path)
 
-    if not not directory.exists():
+    if not directory.exists():
         raise FileNotFoundError()
     elif not directory.is_dir():
         raise NotADirectoryError()
@@ -177,10 +196,11 @@ def _get_directory_content(dir_path: str) -> List[dict]:
 
 
 def _create_portal_folders():
-    path = pathlib.Path(f'{_DATA_PATH}/portals')
+    if not os.path.isdir(f'{_DATA_PATH}/portals'):
+        os.mkdir(f'{_DATA_PATH}/portals')
 
-    if not path.exists():
-        path.mkdir(parents=True)
+    if not os.path.isdir(f'{_PORTAL_PATH}'):
+        os.mkdir(f'{_PORTAL_PATH}')
 
 
 @module.handles_action('authorize_client')
@@ -230,7 +250,7 @@ def toggle_evilportal(request: Request) -> Tuple[bool, str]:
 
 @module.handles_action('toggle_portal')
 def toggle_portal(request: Request) -> Tuple[bool, str]:
-    if _check_portal_activate(request.portal):
+    if not _check_portal_activate(request.portal):
         if _activate_portal(request.portal):
             return True, 'Portal has been activated.'
         else:
@@ -244,6 +264,7 @@ def toggle_portal(request: Request) -> Tuple[bool, str]:
 
 @module.handles_action('delete')
 def delete(request: Request) -> Tuple[bool, str]:
+    module.logger.debug(f'DELETING ITEM AT LOCATION: {request.file_path}')
     path = pathlib.Path(request.file_path)
 
     if not path.exists():
@@ -251,8 +272,11 @@ def delete(request: Request) -> Tuple[bool, str]:
 
     if path.is_dir():
         _delete_directory_tree(path)
+        path.rmdir()
     else:
         path.unlink()
+
+    return True, 'File deleted.'
 
 
 @module.handles_action('save_portal_rules')
@@ -295,6 +319,7 @@ def new_portal(request: Request) -> Tuple[bool, str]:
     portal_type = request.type
     skeleton = type_to_skeleton.get(portal_type, 'skeleton')
 
+    os.mkdir(f'{_PORTAL_PATH}/{name}')
     os.system(f'cp {_INCLUDE_PATH}/{skeleton}/* {_PORTAL_PATH}/{name}')
     os.system(f'cp {_INCLUDE_PATH}/{skeleton}/.* {_PORTAL_PATH}/{name}')
     os.system(f'mv {_PORTAL_PATH}/{name}/portal.info {_PORTAL_PATH}/{name}/{name}.ep')
@@ -314,18 +339,44 @@ def new_portal(request: Request) -> Tuple[bool, str]:
     return True, 'Portal created successfully.'
 
 
+@module.handles_action('save_file')
+def save_file(request: Request) -> Tuple[bool, str]:
+    with open(request.path, 'w') as f:
+        f.write(request.content)
+
+    return True, 'File saved.'
+
+
+@module.handles_action('load_file')
+def load_file(request: Request) -> Tuple[bool, str]:
+    try:
+        return True, _get_file_content(request.path)
+    except Exception as e:
+        module.logger.error(f'Exception occurred while reading file: {e}')
+        return False, str(e)
+
+
+@module.handles_action('load_directory')
+def load_directory(request: Request) -> Tuple[bool, List[dict]]:
+    return True, _get_directory_content(request.path)
+
+
 @module.handles_action('list_portals')
 def list_portals(request: Request) -> Tuple[bool, List[dict]]:
+    module.logger.debug('Creating portal folder')
     _create_portal_folders()
 
+    module.logger.debug('Listing directories')
     directories = [item for item in _get_directory_content(_PORTAL_PATH) if item.get('directory', False)]
 
+    module.logger.debug('Building list')
     return True, [
         {
             'title': item['name'],
-            'portal_type': _get_portal_info(item['path'], item['name']),
-            'size': '',
-            'active': os.path.exists(f'/www/{item["name"]}.ep')
+            'portal_type': _get_portal_info(item['path'], item['name']).get('type', 'basic'),
+            'size': item['size'],
+            'location': item['path'],
+            'active': _check_portal_activate(item['name'])
         }
         for item in directories
     ]

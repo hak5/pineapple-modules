@@ -29,7 +29,7 @@
     </mat-card>
 </div>
 
-<div class="controls-container" fxLayoutGap="20px" fxLayout="row" fxLayout.xs="column" fxLayout.sm="column">
+<div class="controls-container" fxLayoutGap="20px" fxLayout="row" fxLayout.xs="column" fxLayout.sm="column" *ngIf="hasDependencies">
     <mat-card class="control-item">
         <mat-card-content>
             <div class="right-left-split-container">
@@ -50,7 +50,7 @@
         </mat-card-content>
     </mat-card>
 
-    <mat-card>
+    <mat-card class="control-item">
         <mat-card-content>
             <mat-card-title>Permanent Clients</mat-card-title>
             <br/><mat-divider></mat-divider><br/>
@@ -58,55 +58,102 @@
         </mat-card-content>
     </mat-card>
 
-    <mat-card>
+    <mat-card class="control-item">
         <mat-card-content>
             <mat-card-title>Authorized Clients</mat-card-title>
             <br/><mat-divider></mat-divider><br/>
             <textarea class="client-textarea" readonly></textarea>
         </mat-card-content>
     </mat-card>
-
-    <mat-card>
-        <mat-card-content>
-            <div class="right-left-split-container">
-                <mat-card-title>Work Bench</mat-card-title>
-                <span fxFlex></span>
-                <button mat-raised-button color="accent">New Portal</button>
-            </div>
-            <br/><mat-divider></mat-divider><br/>
-
-            <mat-table style="display: none">
-                <mat-header-row *matHeaderRowDef="[]"></mat-header-row>
-            </mat-table>
-            <table class="mat-table" style="min-width: 100%; overflow-x: auto; justify-content: left;">
-                <thead>
-                <tr class="mat-header-row">
-                    <th class="mat-header-cell">Portal Name</th>
-                    <th class="mat-header-cell">Portal Type</th>
-                    <th class="mat-header-cell">Activate</th>
-                    <th class="mat-header-cell">Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                <ng-container *ngFor="let portal of portals">
-                    <tr class="mat-row">
-                        <td class="mat-cell">
-                            <button mat-button color="accent">{{ portal.title }}</button>
-                        </td>
-                        <td class="mat-cell">{{ portal.type }}</td>
-                        <td class="mat-cell">
-                            <button mat-button color="accent" *ngIf="!portal.active">Activate</button>
-                            <button mat-button color="warn" *ngIf="portal.active">Deactivate</button>
-                        </td>
-                        <td class="mat-cell">
-                            <button mat-raised-button color="warn" *ngIf="!portal.active">Delete</button>
-                            <button mat-raised-button color="accent" *ngIf="portal.active">Preview</button>
-                        </td>
-                    </tr>
-                </ng-container>
-                </tbody>
-            </table>
-
-        </mat-card-content>
-    </mat-card>
 </div>
+
+<br/>
+
+<mat-card *ngIf="hasDependencies && libraryState.showLibrary">
+    <mat-card-content>
+        <div class="right-left-split-container">
+            <mat-card-title>Portal Library</mat-card-title>
+            <span *ngIf="libraryState.isBusy"><mat-spinner [diameter]="24" color="accent" style="margin-left: 8px"></mat-spinner></span>
+            <span fxFlex></span>
+            <button mat-raised-button color="accent" (click)="showNewPortalDialog();">New Portal</button>
+        </div>
+        <br/><mat-divider></mat-divider><br/>
+
+        <mat-table style="display: none">
+            <mat-header-row *matHeaderRowDef="[]"></mat-header-row>
+        </mat-table>
+        <table class="mat-table" style="min-width: 100%; overflow-x: auto; justify-content: left;">
+            <thead>
+            <tr class="mat-header-row">
+                <th class="mat-header-cell">Portal Name</th>
+                <th class="mat-header-cell">Portal Type</th>
+                <th class="mat-header-cell">Activate</th>
+                <th class="mat-header-cell">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <ng-container *ngFor="let portal of libraryState.portals">
+                <tr class="mat-row">
+                    <td class="mat-cell">
+                        <button mat-button color="accent" (click)="loadPortal(portal);">{{ portal.title }}</button>
+                    </td>
+                    <td class="mat-cell">{{ portal.portal_type }}</td>
+                    <td class="mat-cell">
+                        <button mat-button color="accent" *ngIf="!portal.active" (click)="togglePortal(portal.title);">Activate</button>
+                        <button mat-button color="warn" *ngIf="portal.active" (click)="togglePortal(portal.title);">Deactivate</button>
+                    </td>
+                    <td class="mat-cell">
+                        <button mat-raised-button color="warn" *ngIf="!portal.active" (click)="showDeletePortalDialog(portal.location);">Delete</button>
+                        <button mat-raised-button color="accent" *ngIf="portal.active" (click)="showPreviewDialog();">Preview</button>
+                    </td>
+                </tr>
+            </ng-container>
+            </tbody>
+        </table>
+
+    </mat-card-content>
+</mat-card>
+
+<mat-card *ngIf="hasDependencies && !libraryState.showLibrary">
+    <mat-card-content>
+        <div class="right-left-split-container">
+            <mat-card-title>Work Bench: <i>{{ workbenchState.portal.title }}</i></mat-card-title>
+            <span *ngIf="workbenchState.isBusy"><mat-spinner [diameter]="24" color="accent" style="margin-left: 8px"></mat-spinner></span>
+            <span fxFlex></span>
+            <div>
+                <button mat-raised-button color="accent" class="control-button" (click)="libraryState.showLibrary = true;">Back</button>
+                <button mat-raised-button color="accent" class="control-button">View Log</button>
+                <button mat-raised-button color="accent" class="control-button" (click)="showFileEditor();">New File</button>
+                <button mat-raised-button color="accent" class="control-button" *ngIf="workbenchState.portal.portal_type === 'targeted';">Target Rule Editor</button>
+                <button mat-raised-button color="accent" class="control-button" (click)="loadPortal(workbenchState.portal);">Refresh</button>
+            </div>
+        </div>
+        <br/><mat-divider></mat-divider><br/>
+
+        <mat-table style="display: none">
+            <mat-header-row *matHeaderRowDef="[]"></mat-header-row>
+        </mat-table>
+
+        <table class="mat-table" style="min-width: 100%; overflow-x: auto; justify-content: left;">
+            <thead>
+            <tr class="mat-header-row">
+                <th class="mat-header-cell">Name</th>
+                <th class="mat-header-cell">Size</th>
+                <th class="mat-header-cell">Edit</th>
+                <th class="mat-header-cell">Delete</th>
+            </tr>
+            </thead>
+            <tbody>
+            <ng-container *ngFor="let file of workbenchState.dirContents">
+                <tr class="mat-row">
+                    <td class="mat-cell">{{ file.name }}</td>
+                    <td class="mat-cell">{{ file.size }}</td>
+                    <td class="mat-cell"><button mat-raised-button color="accent" *ngIf="!file.directory" (click)="showFileEditor(file.name);">Edit</button></td>
+                    <td class="mat-cell"><button mat-raised-button color="warn" *ngIf="file.deletable" (click)="showDeleteItemDialog(file.path);">Delete</button></td>
+                </tr>
+            </ng-container>
+            </tbody>
+        </table>
+
+    </mat-card-content>
+</mat-card>

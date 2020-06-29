@@ -1,0 +1,27 @@
+
+.portal-box {
+    display: flex;
+    height: 400px;
+    flex-direction: column;
+}
+
+.portal-dialog-centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.portal-element-centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.portal-seperator {
+    width: 480px;
+    display: flex;
+    flex-direction: column;
+    align-self: center;
+}
