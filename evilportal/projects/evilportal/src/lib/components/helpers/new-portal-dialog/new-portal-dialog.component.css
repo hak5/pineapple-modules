@@ -25,3 +25,11 @@
     flex-direction: column;
     align-self: center;
 }
+
+.new-portal-buttons {
+    margin-top: 16px;
+}
+
+.new-portal-button-first {
+    margin-right: 10px;
+}

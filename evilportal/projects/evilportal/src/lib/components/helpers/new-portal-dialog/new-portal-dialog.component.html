@@ -50,10 +50,13 @@
             </div>
         </div>
         <div *ngIf="step === 1;">
-            <form>
-                <mat-form-field style="width: 100%;">
+            <div class="portal-dialog-centered">
+                <h2>Name your Portal</h2>
+            </div>
+            <form class="portal-element-centered">
+                <mat-form-field style="width: 50%;">
                     <mat-label>Portal Name</mat-label>
-                    <input matInput style="width: 100%;" [(ngModel)]="portalName" name="portalName"/>
+                    <input matInput style="width: 50%;" [(ngModel)]="portalName" name="portalName"/>
                 </mat-form-field>
             </form>
         </div>
@@ -61,10 +64,10 @@
         <div fxFlex></div>
         <br/>
 
-        <div class="right-left-split-container">
+        <div class="new-portal-buttons">
             <span fxFlex></span>
-            <button mat-raised-button color="accent" (click)="step = 1;" *ngIf="step !== 1;">Next</button>
-            <button mat-raised-button color="warn" (click)="step = 0;" *ngIf="step !== 0;">Back</button>
+            <button mat-raised-button color="accent" class="new-portal-button-first" (click)="step = 1;" *ngIf="step !== 1;">Next</button>
+            <button mat-raised-button color="warn" class="new-portal-button-first" (click)="step = 0;" *ngIf="step !== 0;">Back</button>
             <button mat-raised-button color="accent" (click)="createPortal();" *ngIf="step !== 0;">Done</button>
         </div>
 

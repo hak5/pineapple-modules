@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import { ApiService } from '../services/api.service';
 import {ErrorDialogComponent} from "./helpers/error-dialog/error-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
@@ -22,6 +22,9 @@ import {UninstallDialogComponent} from "./helpers/uninstall-dialog/uninstall-dia
     styleUrls: ['./evilportal.component.css']
 })
 export class EvilPortalComponent implements OnInit, OnDestroy {
+
+    @ViewChild('allowedClients', {static: false}) macFilterPoolRef;
+    @ViewChild('permanentClients', {static: false}) ssidFilterPoolRef;
 
     public controlState: ControlState = { isBusy: false, running: false, autoStart: false };
     public permanentClientState: ClientListState = { isBusy: false, clients: '', selected: ''};
@@ -117,6 +120,50 @@ export class EvilPortalComponent implements OnInit, OnDestroy {
                 return
             }
             onComplete(true, response, undefined);
+        });
+    }
+
+    getLineNumber(target: string): void {
+        if (target === 'allowedClients') {
+            const el = this.macFilterPoolRef.nativeElement;
+            const lineNumber = el.value.substr(0, el.selectionStart).split('\n').length;
+            this.allowedClientState.selected = el.value.split('\n')[lineNumber - 1].trim();
+        } else if (target === 'permanentClients') {
+            const el = this.ssidFilterPoolRef.nativeElement;
+            const lineNumber = el.value.substr(0, el.selectionStart).split('\n').length;
+            this.permanentClientState.selected = el.value.split('\n')[lineNumber - 1].trim();
+        }
+    }
+
+    updateClientList(client: string, list: string, add: boolean): void {
+        if (list === 'allowedClients') {
+            this.allowedClientState.isBusy = true;
+        } else if (list == 'permanentClients') {
+            this.permanentClientState.isBusy = true;
+        } else {
+            return;
+        }
+
+        this.API.request({
+            module: 'evilportal',
+            action: 'update_client_list',
+            add: add,
+            client: client,
+            list: list
+        }, (response) => {
+            if (list === 'allowedClients') {
+                this.allowedClientState.isBusy = false;
+                this.allowedClientState.selected = '';
+                this.loadAllowedClients();
+            } else if (list == 'permanentClients') {
+                this.permanentClientState.isBusy = false;
+                this.permanentClientState.selected = '';
+            }
+
+            if (response.error !== undefined) {
+                this.handleError(response.error);
+                return;
+            }
         });
     }
 

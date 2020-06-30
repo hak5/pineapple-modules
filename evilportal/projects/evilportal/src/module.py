@@ -18,38 +18,33 @@ manager = JobManager('evilportal', log_level=logging.DEBUG, module=module)
 # CONSTANTS
 _DEPENDENCIES = ['php7-mod-curl', 'php7-mod-json', 'php7-cgi', 'php7', 'lighttpd-mod-cgi', 'lighttpd']
 _MODULE_PATH = '/pineapple/ui/modules/evilportal'
-_DATA_PATH = f'{_MODULE_PATH}/data'
+_DATA_PATH = f'{_MODULE_PATH}/assets'
 _INCLUDE_PATH = f'{_MODULE_PATH}/includes'
 _PORTAL_PATH = f'/root/portals'
 _CLIENTS_FILE = f'/tmp/EVILPORTAL_CLIENTS.txt'
 # CONSTANTS
 
 
-class PackageJob(OpkgJob):
+def _post_install(job: OpkgJob):
+    if not job.install:
+        return
 
-    def _configure_lighttpd(self):
-        with open('/etc/lighttpd/conf.d/30-cgi.conf', 'w') as f:
-            f.write(
-                '''
+    with open('/etc/lighttpd/conf.d/30-cgi.conf', 'w') as f:
+        f.write(
+            '''
 server.modules += ( "mod_cgi" )
 cgi.assign = ( ".pl"  => "/usr/bin/perl",
-               ".cgi" => "/usr/bin/perl",
-               ".rb"  => "/usr/bin/ruby",
-               ".erb" => "/usr/bin/eruby",
-               ".py"  => "/usr/bin/python",
-               ".php" => "/usr/bin/php-cgi" )
-                '''
-            )
-        os.system('/etc/init.d/lighttpd stop')
-        os.system('/etc/init.d/lighttpd start')
+           ".cgi" => "/usr/bin/perl",
+           ".rb"  => "/usr/bin/ruby",
+           ".erb" => "/usr/bin/eruby",
+           ".py"  => "/usr/bin/python",
+           ".php" => "/usr/bin/php-cgi" )
+            '''
+        )
 
-    def do_work(self, logger: logging.Logger) -> bool:
-        return_value = super().do_work(logger)
-
-        if return_value and self.install:
-            self._configure_lighttpd()
-
-        return return_value
+    os.system('/etc/init.d/lighttpd stop')
+    os.system(f'cp {_DATA_PATH}/evilportal.sh /etc/init.d/evilportal')
+    os.system('chmod +x /etc/init.d/evilportal')
 
 
 def _deactivate_portal(name: str) -> bool:
@@ -140,10 +135,12 @@ def _stop_evilportal() -> bool:
 
     os.unlink(_CLIENTS_FILE)
 
-    os.system('iptables -t nat -D PREROUTING -i br-lan -p tcp --dport 80 -j DNAT --to-destination 172.16.42.1:80')
-    os.system('iptables -D INPUT -p tcp --dport 53 -j ACCEPT')
-    os.system('iptables -D INPUT -j DROP')
-    os.system('iptables -t nat -D PREROUTING -i br-lan -p tcp --dport 443 -j DNAT --to-destination 172.16.42.1:80')
+    # os.system('iptables -t nat -D PREROUTING -i br-lan -p tcp --dport 80 -j DNAT --to-destination 172.16.42.1:80')
+    # os.system('iptables -D INPUT -p tcp --dport 53 -j ACCEPT')
+    # os.system('iptables -D INPUT -j DROP')
+    # os.system('iptables -t nat -D PREROUTING -i br-lan -p tcp --dport 443 -j DNAT --to-destination 172.16.42.1:80')
+
+    os.system('/etc/init.d/evilportal stop')
 
     return not _check_evilportal_running()
 
@@ -156,27 +153,32 @@ def _start_evilportal() -> bool:
     if os.path.exists(_CLIENTS_FILE):
         os.unlink(_CLIENTS_FILE)
 
-    os.system(f'cp {_DATA_PATH}/allowed.txt {_CLIENTS_FILE}')
-    os.system('echo 1 > /proc/sys/net/ipv4/ip_forward')
-    os.system(f'ln -s {_INCLUDE_PATH}/api /www/captiveportal')
+    os.system(f'cp {_DATA_PATH}/permanentclients.txt {_CLIENTS_FILE}')
 
-    # iptables
-    os.system('iptables -A INPUT -s 172.16.42.0/24 -j DROP')
-    os.system('iptables -A OUTPUT -s 172.16.42.0/24 -j DROP')
-    os.system('iptables -A INPUT -s 172.16.42.0/24 -p udp --dport 53 -j ACCEPT')
+    # os.system(f'cp {_DATA_PATH}/allowed.txt {_CLIENTS_FILE}')
+    # os.system('echo 1 > /proc/sys/net/ipv4/ip_forward')
+    # os.system(f'ln -s {_INCLUDE_PATH}/api /www/captiveportal')
+    #
+    # # iptables
+    # os.system('iptables -A INPUT -s 172.16.42.0/24 -j DROP')
+    # os.system('iptables -A OUTPUT -s 172.16.42.0/24 -j DROP')
+    # os.system('iptables -A INPUT -s 172.16.42.0/24 -p udp --dport 53 -j ACCEPT')
+    #
+    # # allow the pineapple
+    # os.system('iptables -A INPUT -s 172.16.42.1 -j ACCEPT')
+    # os.system('iptables -A OUTPUT -s 172.16.42.1 -j ACCEPT')
+    #
+    # # drop rules
+    # os.system('iptables -t nat -A PREROUTING -i br-lan -p tcp --dport 443 -j DNAT --to-destination 172.16.42.1:80')
+    # os.system('iptables -t nat -A PREROUTING -i br-lan -p tcp --dport 80 -j DNAT --to-destination 172.16.42.1:80')
+    # os.system('iptables -t nat -A POSTROUTING -j MASQUERADE')
 
-    # allow the pineapple
-    os.system('iptables -A INPUT -s 172.16.42.1 -j ACCEPT')
-    os.system('iptables -A OUTPUT -s 172.16.42.1 -j ACCEPT')
+    os.system('/etc/init.d/evilportal start')
 
-    # drop rules
-    os.system('iptables -t nat -A PREROUTING -i br-lan -p tcp --dport 443 -j DNAT --to-destination 172.16.42.1:80')
-    os.system('iptables -t nat -A PREROUTING -i br-lan -p tcp --dport 80 -j DNAT --to-destination 172.16.42.1:80')
-    os.system('iptables -t nat -A POSTROUTING -j MASQUERADE')
-
-    with open(_CLIENTS_FILE) as f:
-        for line in f.readlines():
-            _authorize_client(line)
+    if os.path.exists(_CLIENTS_FILE):
+        with open(_CLIENTS_FILE) as f:
+            for line in f.readlines():
+                _authorize_client(line)
 
     return _check_evilportal_running()
 
@@ -186,23 +188,28 @@ def _check_evilportal_running() -> bool:
 
 
 def _enable_autostart() -> bool:
-    pass
+    return os.system('/etc/init.d/evilportal enable') == 0
 
 
 def _disable_autostart() -> bool:
-    pass
+    return os.system('/etc/init.d/evilportal disable') == 0
 
 
 def _check_autostart() -> bool:
     return cmd.grep_output('ls /etc/rc.d/', 'evilportal') != b''
 
 
-def _authorize_client(ip: str) -> bool:
-    pass
+def _authorize_client(ip: str):
+    os.system(f'iptables -t nat -I PREROUTING -s {ip} -j ACCEPT')
+    with open(_CLIENTS_FILE, 'a') as f:
+        f.write(f'{ip}\n')
 
 
-def _revoke_client(ip: str) -> bool:
-    pass
+def _revoke_client(ip: str):
+    os.system(f'iptables -t nat -D PREROUTING -s {ip}')
+    os.system(f'iptables -t nat -D PREROUTING -s {ip} -j ACCEPT')
+    os.system(f'sed -i "s/{ip}//g" {_CLIENTS_FILE}')
+    os.system(f'sed -i "/^$/d" {_CLIENTS_FILE}')
 
 
 def _delete_directory_tree(directory: pathlib.Path) -> bool:
@@ -275,9 +282,18 @@ def _create_portal_folders():
         os.mkdir(f'{_PORTAL_PATH}')
 
 
-@module.handles_action('add_client_to_list')
-def add_client_to_list(request: Request) -> Tuple[bool, str]:
-    pass
+@module.handles_action('update_client_list')
+def update_client_list(request: Request) -> Tuple[bool, str]:
+    if request.list == 'allowedClients':
+        if request.add:
+            _authorize_client(request.client)
+        else:
+            _revoke_client(request.client)
+
+    elif request.list == 'permanentClients':
+        pass
+
+    return True, 'List updated.'
 
 
 @module.handles_action('status')
@@ -451,7 +467,7 @@ def manage_dependencies(request: Request) -> Tuple[bool, Dict[str, str]]:
         _stop_evilportal()
 
     return True, {
-        'job_id': manager.execute_job(PackageJob(_DEPENDENCIES, request.install))
+        'job_id': manager.execute_job(OpkgJob(_DEPENDENCIES, request.install), [_post_install])
     }
 
 

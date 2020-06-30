@@ -62,7 +62,12 @@
                 <span *ngIf="permanentClientState.isBusy"><mat-spinner [diameter]="24" color="accent" style="margin-left: 8px"></mat-spinner></span>
             </div>
             <br/><mat-divider></mat-divider><br/>
-            <textarea class="client-textarea" [(ngModel)]="permanentClientState.clients" readonly></textarea>
+            <textarea #permanentClients
+                      class="client-textarea"
+                      [(ngModel)]="permanentClientState.clients"
+                      (mouseup)="getLineNumber('permanentClients');"
+                      readonly></textarea>
+
             <div class="right-left-split-container">
                 <form>
                     <mat-form-field>
@@ -88,19 +93,31 @@
                 <span *ngIf="allowedClientState.isBusy"><mat-spinner [diameter]="24" color="accent" style="margin-left: 8px"></mat-spinner></span>
             </div>
             <br/><mat-divider></mat-divider><br/>
-            <textarea class="client-textarea" [(ngModel)]="allowedClientState.clients" readonly></textarea>
+            <textarea #allowedClients
+                      class="client-textarea"
+                      [(ngModel)]="allowedClientState.clients"
+                      (mouseup)="getLineNumber('allowedClients');"
+                      readonly></textarea>
             <div class="right-left-split-container">
                 <form>
                     <mat-form-field>
                         <mat-label>
                             Client IP
                         </mat-label>
-                        <input matInput [(ngModel)]="allowedClientState.selected" name="selectedAllowed" />
+                        <input matInput [(ngModel)]="allowedClientState.selected" [disabled]="!controlState.running" name="selectedAllowed" />
                     </mat-form-field>
                 </form>
                 <span fxFlex></span>
-                <button mat-button color="accent">Add</button>
-                <button mat-button color="warn">Remove</button>
+                <button mat-button color="accent"
+                        [disabled]="!controlState.running"
+                        (click)="updateClientList(allowedClientState.selected, 'allowedClients', true);">
+                    Add
+                </button>
+                <button mat-button color="warn"
+                        [disabled]="!controlState.running"
+                        (click)="updateClientList(allowedClientState.selected, 'allowedClients', false);">
+                    Remove
+                </button>
             </div>
         </mat-card-content>
     </mat-card>
