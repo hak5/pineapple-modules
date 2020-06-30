@@ -1,0 +1,59 @@
+<div class="right-left-split-container">
+    <mat-card-title>Editing Rules</mat-card-title>
+    <span *ngIf="isBusy"><mat-spinner [diameter]="24" color="accent" style="margin-left: 8px"></mat-spinner></span>
+    <span fxFlex></span>
+    <button mat-icon-button (click)="closeDialog();">
+        <mat-icon>close</mat-icon>
+    </button>
+</div>
+
+<br/><mat-divider></mat-divider><br/>
+
+<div class="rule-editor-box">
+    <div *ngFor="let item of workingRules | keyvalue">
+        <h3 style="text-transform: uppercase">{{ item.key }}</h3>
+        <mat-divider></mat-divider><br/>
+        <div *ngFor="let ruleContainer of item.value | keyvalue">
+            <span>
+                <b style="text-transform: capitalize">{{ ruleContainer.key }}</b>
+                <button mat-button color="accent" (click)="insertRule(item.key, ruleContainer.key);">Add Rule</button>
+            </span>
+            <div *ngIf="!isObjectEmpty(ruleContainer.value);">
+                <mat-table style="display: none">
+                    <mat-header-row *matHeaderRowDef="[]"></mat-header-row>
+                </mat-table>
+                <table class="mat-table" style="min-width: 100%; overflow-x: auto; justify-content: left;">
+                    <tbody>
+                    <ng-container *ngFor="let rule of ruleContainer.value | keyvalue">
+                        <tr class="mat-row">
+                            <td class="mat-cell">
+                                <form>
+                                    <mat-form-field>
+                                        <mat-label>Rule Value</mat-label>
+                                        <input matInput [(ngModel)]="rule.value.key" name="ruleKey"/>
+                                    </mat-form-field>
+                                </form>
+                            </td>
+                            <td class="mat-cell">
+                                <form>
+                                    <mat-form-field>
+                                        <mat-label>Destination.php</mat-label>
+                                        <input matInput [(ngModel)]="rule.value.destination" name="ruleValue"/>
+                                    </mat-form-field>
+                                </form>
+                            </td>
+                            <td class="mat-cell"><button mat-raised-button color="warn" (click)="deleteObject(item.key, ruleContainer.key, rule.key);">Remove</button></td>
+                        </tr>
+                    </ng-container>
+                    </tbody>
+                </table>
+                <br/>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="rule-editor-buttons">
+    <span fxFlex></span>
+    <button mat-raised-button color="accent" (click)="saveRules();">Save</button>
+</div>

@@ -17,7 +17,8 @@
             <input style="width: 100%" matInput [(ngModel)]="fileName" name="fileName" [disabled]="!isNew"/>
         </mat-form-field>
     </form>
-    <textarea placeholder="File Content" class="file-editor-text-area" matTextareaAutosize [(ngModel)]="fileContent" name="fileContent" (keydown)="handleTabKey($event);"></textarea>
+
+    <textarea placeholder="File Content" class="file-editor-text-area" matTextareaAutosize [(ngModel)]="fileContent" name="fileContent" (keydown)="handleTabKey($event);" [readOnly]="readonly"></textarea>
 
     <div class="file-editor-buttons">
         <span fxFlex></span>

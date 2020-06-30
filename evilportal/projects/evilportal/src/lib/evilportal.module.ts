@@ -12,6 +12,8 @@ import {FormsModule} from "@angular/forms";
 import { PreviewDialogComponent } from './components/helpers/preview-dialog/preview-dialog.component';
 import { ConfirmationDialogComponent } from './components/helpers/confirmation-dialog/confirmation-dialog.component';
 import { EditFileDialogComponent } from './components/helpers/edit-file-dialog/edit-file-dialog.component';
+import { RuleEditorDialogComponent } from './components/helpers/rule-editor-dialog/rule-editor-dialog.component';
+import { UninstallDialogComponent } from './components/helpers/uninstall-dialog/uninstall-dialog.component';
 
 const routes: Routes = [
     { path: '', component: EvilPortalComponent }
@@ -24,7 +26,9 @@ const routes: Routes = [
         NewPortalDialogComponent,
         PreviewDialogComponent,
         ConfirmationDialogComponent,
-        EditFileDialogComponent
+        EditFileDialogComponent,
+        RuleEditorDialogComponent,
+        UninstallDialogComponent
     ],
     imports: [
         RouterModule.forChild(routes),
@@ -39,7 +43,9 @@ const routes: Routes = [
         NewPortalDialogComponent,
         PreviewDialogComponent,
         ConfirmationDialogComponent,
-        EditFileDialogComponent
+        EditFileDialogComponent,
+        RuleEditorDialogComponent,
+        UninstallDialogComponent
     ]
 })
 export class evilportalModule { }

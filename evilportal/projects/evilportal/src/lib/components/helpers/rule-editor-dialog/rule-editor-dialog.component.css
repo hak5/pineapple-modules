@@ -1,0 +1,9 @@
+.rule-editor-box {
+    width: 800px;
+    max-height: 700px;
+    overflow-y: scroll;
+}
+
+.rule-editor-buttons {
+    margin-top: 16px;
+}

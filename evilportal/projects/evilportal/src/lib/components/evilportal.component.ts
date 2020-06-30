@@ -12,6 +12,9 @@ import {DirectoryDTO} from "../interfaces/directorydto.interface";
 import {WorkBenchState} from "../interfaces/workbenchstate.interface";
 import {LibraryState} from "../interfaces/librarystate.interface";
 import {EditFileDialogComponent} from "./helpers/edit-file-dialog/edit-file-dialog.component";
+import {RuleEditorDialogComponent} from "./helpers/rule-editor-dialog/rule-editor-dialog.component";
+import {ClientListState} from "../interfaces/clientliststate.interface";
+import {UninstallDialogComponent} from "./helpers/uninstall-dialog/uninstall-dialog.component";
 
 @Component({
     selector: 'lib-evilportal',
@@ -20,8 +23,10 @@ import {EditFileDialogComponent} from "./helpers/edit-file-dialog/edit-file-dial
 })
 export class EvilPortalComponent implements OnInit, OnDestroy {
 
+    public controlState: ControlState = { isBusy: false, running: false, autoStart: false };
+    public permanentClientState: ClientListState = { isBusy: false, clients: '', selected: ''};
+    public allowedClientState: ClientListState = { isBusy: false, clients: '', selected: ''};
     public libraryState: LibraryState = { showLibrary: true, isBusy: false, portals: [] };
-    public controlState: ControlState = { running: false, autoStart: false }
     public workbenchState: WorkBenchState = { isBusy: false, portal: null, dirContents: [], inRoot: true, rootDirectory: null };
 
     public hasDependencies: boolean = true;
@@ -98,6 +103,20 @@ export class EvilPortalComponent implements OnInit, OnDestroy {
             }
 
             onSuccess(response);
+        });
+    }
+
+    private loadFile(path: string, onComplete: (success: boolean, content: string, error: string) => void) {
+        this.API.request({
+            module: 'evilportal',
+            action: 'load_file',
+            path: path
+        }, (response) => {
+            if (response.error !== undefined) {
+                onComplete(false, undefined, response.error);
+                return
+            }
+            onComplete(true, response, undefined);
         });
     }
 
@@ -192,18 +211,44 @@ export class EvilPortalComponent implements OnInit, OnDestroy {
         });
     }
 
-    showFileEditor(fileName = null): void {
+    editFile(portal: PortalInfoDTO, fileName = null, readonly = false): void {
         this.dialog.open(EditFileDialogComponent, {
             hasBackdrop: true,
             width: '900px',
             data: {
-                path: this.workbenchState.portal.location,
+                readonly: readonly,
+                path: portal.location,
                 fileName: fileName,
                 isNew: fileName == null,
                 onSaved: () => {
                     this.loadPortal(this.workbenchState.portal);
                 }
             }
+        });
+    }
+
+    showPortalRules(portal: PortalInfoDTO): void {
+        this.dialog.open(RuleEditorDialogComponent, {
+            hasBackdrop: true,
+            data: {
+                portal: portal.title
+            }
+        });
+    }
+
+    toggleEvilPortal(): void {
+        this.controlState.isBusy = true;
+        this.API.request({
+            module: 'evilportal',
+            action: 'toggle_evilportal'
+        }, (response) => {
+            this.controlState.isBusy = false;
+            if (response.error !== undefined) {
+                this.handleError(response.error)
+                return;
+            }
+
+            this.loadControlState();
         });
     }
 
@@ -236,19 +281,46 @@ export class EvilPortalComponent implements OnInit, OnDestroy {
         })
     }
 
+    loadAllowedClients(): void {
+        this.allowedClientState.isBusy = true;
+        this.loadFile('/tmp/EVILPORTAL_CLIENTS.txt', (success, content, error) => {
+            this.allowedClientState.isBusy = false;
+            if (!success) {
+                return;
+            }
+            this.allowedClientState.clients = content;
+        });
+    }
+
     loadControlState(): void {
+        this.controlState.isBusy = true;
         this.API.request({
             module: 'evilportal',
             action: 'status'
         }, (response) => {
+            this.controlState.isBusy = false;
             if (response.error !== undefined) {
                 this.handleError(response.error);
                 return;
             }
 
             this.controlState = {
+                isBusy: false,
                 running: response.running,
                 autoStart: response.start_on_boot
+            }
+        })
+    }
+
+    showUninstallDependencies(): void {
+        this.dialog.open(UninstallDialogComponent, {
+            disableClose: true,
+            hasBackdrop: true,
+            width: '700px',
+            data: {
+                onComplete: () => {
+                    this.checkForDependencies();
+                }
             }
         })
     }
@@ -285,6 +357,7 @@ export class EvilPortalComponent implements OnInit, OnDestroy {
         this.checkForDependencies();
         this.loadControlState();
         this.loadPortals();
+        this.loadAllowedClients();
     }
 
     ngOnDestroy() {

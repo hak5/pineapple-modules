@@ -12,11 +12,13 @@ export class EditFileDialogComponent implements OnInit {
     constructor(public dialogRef: MatDialogRef<EditFileDialogComponent>,
                 @Inject(MAT_DIALOG_DATA) public data: any,
                 private API: ApiService) {
+        this.readonly = data.readonly;
         this.path = data.path;
         this.fileName = data.fileName;
         this.isNew = data.isNew;
     }
 
+    public readonly: boolean = false;
     public isBusy: boolean = false;
     public path: string = null;
     public isNew = false;
@@ -38,7 +40,7 @@ export class EditFileDialogComponent implements OnInit {
                 return
             }
             this.fileContent = response;
-        })
+        });
     }
 
     private saveFileContent(path: string): void {

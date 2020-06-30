@@ -16,18 +16,32 @@ module = Module('evilportal', logging.DEBUG)
 manager = JobManager('evilportal', log_level=logging.DEBUG, module=module)
 
 # CONSTANTS
-_DEPENDENCIES = ['php7', 'php7-cgi', 'lighttpd', 'lighttpd-mod-cgi']
+_DEPENDENCIES = ['php7-mod-curl', 'php7-mod-json', 'php7-cgi', 'php7', 'lighttpd-mod-cgi', 'lighttpd']
 _MODULE_PATH = '/pineapple/ui/modules/evilportal'
 _DATA_PATH = f'{_MODULE_PATH}/data'
 _INCLUDE_PATH = f'{_MODULE_PATH}/includes'
 _PORTAL_PATH = f'/root/portals'
+_CLIENTS_FILE = f'/tmp/EVILPORTAL_CLIENTS.txt'
 # CONSTANTS
 
 
 class PackageJob(OpkgJob):
 
     def _configure_lighttpd(self):
-        pass
+        with open('/etc/lighttpd/conf.d/30-cgi.conf', 'w') as f:
+            f.write(
+                '''
+server.modules += ( "mod_cgi" )
+cgi.assign = ( ".pl"  => "/usr/bin/perl",
+               ".cgi" => "/usr/bin/perl",
+               ".rb"  => "/usr/bin/ruby",
+               ".erb" => "/usr/bin/eruby",
+               ".py"  => "/usr/bin/python",
+               ".php" => "/usr/bin/php-cgi" )
+                '''
+            )
+        os.system('/etc/init.d/lighttpd stop')
+        os.system('/etc/init.d/lighttpd start')
 
     def do_work(self, logger: logging.Logger) -> bool:
         return_value = super().do_work(logger)
@@ -99,10 +113,16 @@ def _check_webserver_autostart() -> bool:
 
 
 def _stop_webserver() -> bool:
+    if not _check_webserver_running():
+        return True
+
     return os.system('/etc/init.d/lighttpd stop') == 0
 
 
 def _start_webserver() -> bool:
+    if _check_webserver_running():
+        return True
+
     return os.system('/etc/init.d/lighttpd start') == 1
 
 
@@ -111,11 +131,54 @@ def _check_webserver_running() -> bool:
 
 
 def _stop_evilportal() -> bool:
-    pass
+    if not _check_evilportal_running():
+        return True
+
+    with open(_CLIENTS_FILE) as f:
+        for line in f.readlines():
+            _revoke_client(line)
+
+    os.unlink(_CLIENTS_FILE)
+
+    os.system('iptables -t nat -D PREROUTING -i br-lan -p tcp --dport 80 -j DNAT --to-destination 172.16.42.1:80')
+    os.system('iptables -D INPUT -p tcp --dport 53 -j ACCEPT')
+    os.system('iptables -D INPUT -j DROP')
+    os.system('iptables -t nat -D PREROUTING -i br-lan -p tcp --dport 443 -j DNAT --to-destination 172.16.42.1:80')
+
+    return not _check_evilportal_running()
 
 
 def _start_evilportal() -> bool:
-    pass
+    if _check_evilportal_running():
+        return True
+
+    # delete client racking file if it exists.
+    if os.path.exists(_CLIENTS_FILE):
+        os.unlink(_CLIENTS_FILE)
+
+    os.system(f'cp {_DATA_PATH}/allowed.txt {_CLIENTS_FILE}')
+    os.system('echo 1 > /proc/sys/net/ipv4/ip_forward')
+    os.system(f'ln -s {_INCLUDE_PATH}/api /www/captiveportal')
+
+    # iptables
+    os.system('iptables -A INPUT -s 172.16.42.0/24 -j DROP')
+    os.system('iptables -A OUTPUT -s 172.16.42.0/24 -j DROP')
+    os.system('iptables -A INPUT -s 172.16.42.0/24 -p udp --dport 53 -j ACCEPT')
+
+    # allow the pineapple
+    os.system('iptables -A INPUT -s 172.16.42.1 -j ACCEPT')
+    os.system('iptables -A OUTPUT -s 172.16.42.1 -j ACCEPT')
+
+    # drop rules
+    os.system('iptables -t nat -A PREROUTING -i br-lan -p tcp --dport 443 -j DNAT --to-destination 172.16.42.1:80')
+    os.system('iptables -t nat -A PREROUTING -i br-lan -p tcp --dport 80 -j DNAT --to-destination 172.16.42.1:80')
+    os.system('iptables -t nat -A POSTROUTING -j MASQUERADE')
+
+    with open(_CLIENTS_FILE) as f:
+        for line in f.readlines():
+            _authorize_client(line)
+
+    return _check_evilportal_running()
 
 
 def _check_evilportal_running() -> bool:
@@ -132,6 +195,14 @@ def _disable_autostart() -> bool:
 
 def _check_autostart() -> bool:
     return cmd.grep_output('ls /etc/rc.d/', 'evilportal') != b''
+
+
+def _authorize_client(ip: str) -> bool:
+    pass
+
+
+def _revoke_client(ip: str) -> bool:
+    pass
 
 
 def _delete_directory_tree(directory: pathlib.Path) -> bool:
@@ -192,6 +263,7 @@ def _get_directory_content(dir_path: str) -> List[dict]:
             'deletable': _file_is_deletable(item.name)
         }
         for item in sorted(directory.iterdir(), key=lambda i: not i.is_dir())
+        if not item.name[-3:] == '.ep' and not item.name[:1] == '.'
     ]
 
 
@@ -201,16 +273,6 @@ def _create_portal_folders():
 
     if not os.path.isdir(f'{_PORTAL_PATH}'):
         os.mkdir(f'{_PORTAL_PATH}')
-
-
-@module.handles_action('authorize_client')
-def authorize_client(request: Request) -> Tuple[bool, str]:
-    pass
-
-
-@module.handles_action('remove_client_from_list')
-def remove_client_from_list(request: Request) -> Tuple[bool, str]:
-    pass
 
 
 @module.handles_action('add_client_to_list')
@@ -239,12 +301,13 @@ def toggle_autostart(request: Request) -> Tuple[bool, str]:
 @module.handles_action('toggle_evilportal')
 def toggle_evilportal(request: Request) -> Tuple[bool, str]:
     if _check_evilportal_running():
-        _stop_webserver()
-        _stop_evilportal()
+        if False in [_stop_webserver(), _stop_evilportal()]:
+            return False, 'Error stopping Evil Portal.'
         return True, 'Evil Portal stopped.'
     else:
-        _start_webserver()
-        _start_evilportal()
+        if False in [_start_webserver(), _start_evilportal()]:
+            return False, 'Error starting Evil Portal.'
+
         return True, 'Evil Portal started.'
 
 
@@ -282,7 +345,7 @@ def delete(request: Request) -> Tuple[bool, str]:
 @module.handles_action('save_portal_rules')
 def save_portal_rules(request: Request) -> Tuple[bool, str]:
     portal = request.portal
-    new_rules = json.loads(request.rules)
+    new_rules = request.rules
 
     portal_info = _get_portal_info(f'{_PORTAL_PATH}/{portal}', portal)
     portal_type = portal_info.get('type', 'unknown')
@@ -290,10 +353,10 @@ def save_portal_rules(request: Request) -> Tuple[bool, str]:
     if portal_type != 'targeted':
         return False, 'Can not get rules for non-targeted portal.'
 
-    portal_info['targeted_rules'] = new_rules
+    portal_info['targeted_rules']['rules'] = new_rules
 
     with open(f'{_PORTAL_PATH}/{portal}/{portal}.ep', 'w') as f:
-        json.dump(portal_info, f)
+        json.dump(portal_info, f, indent=2)
 
     return True, 'Portal rules updated.'
 
@@ -304,7 +367,7 @@ def get_portal_rules(request: Request) -> Tuple[bool, dict]:
 
     portal_info = _get_portal_info(f'{_PORTAL_PATH}/{portal}', portal)
     portal_type = portal_info.get('type', 'unknown')
-    portal_rules = portal_info.get('targeted_rules', {})
+    portal_rules = portal_info.get('targeted_rules', {}).get('rules', {})
 
     if portal_type != 'targeted':
         return False, 'Can not get rules for non-targeted portal.'
@@ -322,7 +385,7 @@ def new_portal(request: Request) -> Tuple[bool, str]:
     os.mkdir(f'{_PORTAL_PATH}/{name}')
     os.system(f'cp {_INCLUDE_PATH}/{skeleton}/* {_PORTAL_PATH}/{name}')
     os.system(f'cp {_INCLUDE_PATH}/{skeleton}/.* {_PORTAL_PATH}/{name}')
-    os.system(f'mv {_PORTAL_PATH}/{name}/portal.info {_PORTAL_PATH}/{name}/{name}.ep')
+    os.system(f'mv {_PORTAL_PATH}/{name}/portalinfo.json {_PORTAL_PATH}/{name}/{name}.ep')
     os.system(f'chmod +x {_PORTAL_PATH}/{name}/.enable')
     os.system(f'chmod +x {_PORTAL_PATH}/{name}/.disable')
 
@@ -384,6 +447,9 @@ def list_portals(request: Request) -> Tuple[bool, List[dict]]:
 
 @module.handles_action('manage_dependencies')
 def manage_dependencies(request: Request) -> Tuple[bool, Dict[str, str]]:
+    if not request.install and _check_evilportal_running():
+        _stop_evilportal()
+
     return True, {
         'job_id': manager.execute_job(PackageJob(_DEPENDENCIES, request.install))
     }
