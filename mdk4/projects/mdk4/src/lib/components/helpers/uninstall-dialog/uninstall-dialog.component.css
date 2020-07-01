@@ -1,0 +1,24 @@
+.right-left-split-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-self: flex-start;
+}
+
+.dependency-card-centered {
+    display: flex;
+    justify-content: center;
+    align-self: center;
+}
+
+.dependency-card-button {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.spinner-padding {
+    margin-top: 6px;
+    margin-bottom: 7px;
+}
