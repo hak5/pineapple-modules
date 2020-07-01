@@ -1,7 +1,7 @@
 {
     "name": "mdk4",
     "title": "Mdk4",
-    "description": "Web interface for mdk4 wireless tool",
+    "description": "Web GUI for the MDK4 wireless testing tool.",
     "version": "1.0",
     "author": "newbi3"
 }
