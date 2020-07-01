@@ -1,7 +1,7 @@
 {
     "name": "nmap",
     "title": "Nmap",
-    "description": "A web interface for nmap",
+    "description": "Web GUI for Nmap, the popular network mapping tool.",
     "author": "newbi3",
     "version": "1.0"
 }
