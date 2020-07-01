@@ -1,0 +1,101 @@
+<div class="controls-container" fxLayoutGap="20px" fxLayout="row" fxLayout.xs="column" fxLayout.sm="column">
+    <mat-card class="control-item">
+        <mat-card-content>
+            <div class="right-left-split-container">
+                <mat-card-title>Mdk4</mat-card-title>
+                <span><mat-spinner [diameter]="24" color="accent" style="margin-left: 8px" *ngIf="isBusy"></mat-spinner></span>
+                <span fxFlex></span>
+                <mat-menu #mdk4Menu>
+                    <button mat-menu-item>Mdk4 License</button>
+                    <button mat-menu-item>Uninstall Dependencies</button>
+                </mat-menu>
+                <button mat-icon-button [matMenuTriggerFor]="mdk4Menu">
+                    <mat-icon>more_vert</mat-icon>
+                </button>
+            </div>
+
+            <form>
+                <mat-form-field style="width: 100%">
+                    <mat-label>Command</mat-label>
+                    <input matInput class="control-input" name="command" [(ngModel)]="command"/>
+                </mat-form-field>
+                <mat-form-field style="width: 100%">
+                    <mat-label>Attack Mode</mat-label>
+                    <mat-select name="attackMode" [(ngModel)]="attackMode" (ngModelChange)="update();">
+                        <mat-option>--</mat-option>
+                        <mat-option *ngFor="let mode of attackModes | keyvalue" value="{{ mode.key }}">{{ mode.value }}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <div class="right-left-split-container">
+                    <mat-form-field style="width: 100%">
+                        <mat-label>Input Interface</mat-label>
+                        <mat-select name="inputIface" [(ngModel)]="interfaceIn" (ngModelChange)="update();">
+                            <mat-option>--</mat-option>
+                            <mat-option *ngFor="let iface of interfaces" value="{{ iface }}">{{ iface }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <span fxFlex style="margin-right: 8px; margin-left: 8px;"></span>
+                    <mat-form-field style="width: 100%">
+                        <mat-label>Output Interface</mat-label>
+                        <mat-select name="outputIface" [(ngModel)]="interfaceOut" (ngModelChange)="update();">
+                            <mat-option>--</mat-option>
+                            <mat-option *ngFor="let iface of interfaces" value="{{ iface }}">{{ iface }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </form>
+            <button mat-raised-button color="accent" style="width: 100%;" *ngIf="!isBusy">Start</button>
+            <button mat-raised-button color="warn" style="width: 100%;" *ngIf="isBusy">Stop</button>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card class="control-item">
+        <mat-card-content>
+            <mat-card-title>Attack Options</mat-card-title>
+            <i *ngIf="!attackMode">No attack mode selected.</i>
+            <div *ngIf="attackMode">
+                <ng-container *ngFor="let option of attackOptions[attackMode]">
+                    <div style="width: 100%;">
+                        <mat-checkbox [(ngModel)]="option.toggled"
+                                      (ngModelChange)="update();"
+                                      class="control-input">{{ option.description }}
+                        </mat-checkbox>
+
+                        <form *ngIf="option.hasInput && option.toggled" style="width: 100%;">
+                            <mat-form-field>
+                                <mat-label>{{ option.inputLabel }}</mat-label>
+                                <input matInput
+                                       [(ngModel)]="option.input"
+                                       (ngModelChange)="update();"
+                                       class="control-input"
+                                       name="{{option.value}}input"/>
+                            </mat-form-field>
+                        </form>
+                    </div>
+                </ng-container>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+</div>
+
+<br/>
+
+<mat-card>
+    <mat-card-content>
+        <div class="output-container">
+            <div class="right-left-split-container">
+                <mat-card-title>Output</mat-card-title>
+                <span fxFlex></span>
+                <button mat-icon-button><mat-icon>refresh</mat-icon></button>
+                <button mat-icon-button><mat-icon>cloud_download</mat-icon></button>
+            </div>
+            <textarea class="output-textarea" placeholder="No output to display..." [(ngModel)]="output" readonly></textarea>
+            <div class="right-left-split-container">
+                <span><i>Refreshes every 5 seconds...</i></span>
+                <span><mat-spinner [diameter]="24" color="accent" *ngIf="refreshingOutput"></mat-spinner></span>
+                <span fxFlex></span>
+            </div>
+        </div>
+    </mat-card-content>
+</mat-card>
