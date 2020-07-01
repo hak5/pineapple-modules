@@ -1,14 +1,21 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ApiService} from "../../../services/api.service";
 import {MatDialog} from "@angular/material/dialog";
 import {ErrorDialogComponent} from "../../helpers/error-dialog/error-dialog.component";
+import {JobResultDTO} from "../../../interfaces/jobresultdto.interface";
+import {StartupDTO, StartupLastJob} from "../../../interfaces/startup.interface";
+import {LicenseDialogComponent} from "../../helpers/license-dialog/license-dialog.component";
+import {UninstallDialogComponent} from "../../helpers/uninstall-dialog/uninstall-dialog.component";
 
 @Component({
     selector: 'lib-mdk4-main',
     templateUrl: './mdk4-main.component.html',
     styleUrls: ['./mdk4-main.component.css']
 })
-export class Mdk4MainComponent implements OnInit {
+export class Mdk4MainComponent implements OnInit, OnDestroy {
+
+    public hasDependencies: boolean = true;
+    public isInstalling: boolean = false;
 
     public isBusy: boolean = false;
     public refreshingOutput: boolean = false;
@@ -84,6 +91,9 @@ export class Mdk4MainComponent implements OnInit {
              ]
     };
 
+    private backgroundJobInterval = null;
+    public outputFile: string = null;
+
     constructor(private API: ApiService,
                 private dialog: MatDialog) {
     }
@@ -128,21 +138,180 @@ export class Mdk4MainComponent implements OnInit {
         });
     }
 
-    startup(): void {
+    private pollBackgroundJob<T>(jobId: string, onComplete: (result: JobResultDTO<T>) => void, onInterval?: Function): void {
+        this.backgroundJobInterval = setInterval(() => {
+            this.API.request({
+                module: 'mdk4',
+                action: 'poll_job',
+                job_id: jobId
+            }, (response: JobResultDTO<T>) => {
+                if (response.is_complete) {
+                    onComplete(response);
+                    clearInterval(this.backgroundJobInterval);
+                } else if (onInterval) {
+                    onInterval();
+                }
+            });
+        }, 5000);
+    }
+
+    private monitorMdk4(jobId: string, outputFile: string): void {
+        this.isBusy = true;
+        this.outputFile = outputFile;
+        this.pollBackgroundJob(jobId, (result: JobResultDTO<boolean>) => {
+            this.isBusy = false;
+            this.loadOutput(this.outputFile);
+
+            if (result.job_error) {
+                this.handleError(result.job_error);
+            }
+        }, () => {
+            this.loadOutput(this.outputFile);
+        });
+    }
+
+    private rebind(lastJob: StartupLastJob): void {
+        switch (lastJob.job_type) {
+            case 'mdk4':
+                this.monitorMdk4(lastJob.job_id, lastJob.job_info)
+                this.loadOutput(lastJob.job_info);
+                break;
+            case 'opkg':
+                this.monitorDependencies(lastJob.job_id);
+                break;
+        }
+    }
+
+    private monitorDependencies(jobId: string) {
+        this.isInstalling = true;
+        this.pollBackgroundJob(jobId, (result: JobResultDTO<boolean>) => {
+            this.isInstalling = false;
+            if (result.job_error !== null) {
+                this.handleError(result.job_error);
+            }
+            this.checkForDependencies();
+        });
+    }
+
+    showUninstallDialog(): void {
+        this.dialog.open(UninstallDialogComponent, {
+            hasBackdrop: true,
+            width: '700px',
+            disableClose: true,
+            data: {
+                onComplete: () => {
+                    this.checkForDependencies();
+                }
+            }
+        })
+    }
+
+    checkForDependencies(): void {
+        this.API.request({
+            module: 'mdk4',
+            action: 'check_dependencies'
+        }, (response) => {
+            if (response.error !== undefined) {
+                this.handleError(response.error);
+                return;
+            }
+            this.hasDependencies = response;
+        });
+    }
+
+    installDependencies(): void {
+        this.API.request({
+            module: 'mdk4',
+            action: 'manage_dependencies',
+            install: true
+        }, (response) => {
+            if (response.error !== undefined && response.error !== null) {
+                this.handleError(response.error);
+                return;
+            }
+
+            this.monitorDependencies(response.job_id);
+        });
+    }
+
+    showLicenseDialog(): void {
+        this.dialog.open(LicenseDialogComponent, {
+            width: '900px',
+            hasBackdrop: true
+        });
+    }
+
+    loadOutput(outputFile: string): void {
+        this.refreshingOutput = true;
+        this.API.request({
+            module: 'mdk4',
+            action: 'load_output',
+            output_file: outputFile
+        }, (response) => {
+            this.refreshingOutput = false;
+            if (response.error) {
+                this.handleError(response.error);
+                return;
+            }
+
+            this.output = response;
+        });
+    }
+
+    startMdk4(): void {
+        this.API.request({
+            module: 'mdk4',
+            action: 'start',
+            command: this.command,
+            input_iface: this.interfaceIn,
+            output_iface: this.interfaceOut
+        }, (response) => {
+            if (response.error !== undefined) {
+                this.handleError(response.error);
+                return;
+            }
+            this.monitorMdk4(response.job_id, response.output_file);
+        });
+    }
+
+    stopMdk4(): void {
+        this.API.request({
+            module: 'mdk4',
+            action: 'stop'
+        }, (response) => {
+            if (response.error !== undefined) {
+                this.handleError(response.error);
+                return;
+            }
+            this.isBusy = false;
+        });
+    }
+
+    private startup(): void {
         this.API.request({
             module: 'mdk4',
             action: 'startup'
-        }, (response) => {
+        }, (response: StartupDTO) => {
            if (response.error !== undefined) {
                this.handleError(response.error);
                return;
            }
+
+           this.hasDependencies = response.has_dependencies;
            this.interfaces = response.interfaces;
+
+           if (response.last_job.job_id !== null) {
+               this.rebind(response.last_job);
+           }
         });
     }
 
     ngOnInit(): void {
         this.startup();
+    }
+
+    ngOnDestroy() {
+        clearInterval(this.backgroundJobInterval);
     }
 
 }

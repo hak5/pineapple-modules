@@ -12,6 +12,8 @@ import { ConfirmationDialogComponent } from './components/helpers/confirmation-d
 import { Mdk4ResultDialogComponent } from './components/helpers/mdk4-result-dialog/mdk4-result-dialog.component';
 import {FormsModule} from "@angular/forms";
 import { ErrorDialogComponent } from './components/helpers/error-dialog/error-dialog.component';
+import { LicenseDialogComponent } from './components/helpers/license-dialog/license-dialog.component';
+import { UninstallDialogComponent } from './components/helpers/uninstall-dialog/uninstall-dialog.component';
 
 const routes: Routes = [
     {
@@ -26,7 +28,7 @@ const routes: Routes = [
 
 
 @NgModule({
-    declarations: [Mdk4Component, Mdk4MainComponent, Mdk4HistoryComponent, ConfirmationDialogComponent, Mdk4ResultDialogComponent, ErrorDialogComponent],
+    declarations: [Mdk4Component, Mdk4MainComponent, Mdk4HistoryComponent, ConfirmationDialogComponent, Mdk4ResultDialogComponent, ErrorDialogComponent, LicenseDialogComponent, UninstallDialogComponent],
     imports: [
         CommonModule,
         RouterModule.forChild(routes),
@@ -38,7 +40,9 @@ const routes: Routes = [
     entryComponents: [
         Mdk4ResultDialogComponent,
         ConfirmationDialogComponent,
-        ErrorDialogComponent
+        ErrorDialogComponent,
+        LicenseDialogComponent,
+        UninstallDialogComponent
     ]
 })
 export class mdk4Module { }

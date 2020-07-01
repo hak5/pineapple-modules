@@ -1,4 +1,39 @@
-<div class="controls-container" fxLayoutGap="20px" fxLayout="row" fxLayout.xs="column" fxLayout.sm="column">
+<div class="dependency-card-centered" *ngIf="!hasDependencies">
+    <mat-card class="dependency-card">
+        <mat-card-content>
+            <mat-card-title>Welcome To Mdk4</mat-card-title>
+            <mat-card-subtitle>Lets get started.</mat-card-subtitle>
+
+            <mat-divider></mat-divider>
+            <br />
+
+            <p>You need to install some dependencies before you can use this module.</p>
+            <p>This will make an request to the internet.</p>
+
+            <br/>
+            <br/>
+            <div class="dependency-card-centered">
+                <button mat-raised-button color="accent"
+                        class="dependency-card-button"
+                        (click)="installDependencies()"
+                        [disabled]="isInstalling">
+                    <span *ngIf="isInstalling">
+                        <mat-spinner [diameter]="20" class="spinner-padding" color="accent"></mat-spinner>
+                    </span>
+                    <span *ngIf="!isInstalling">
+                        Install Dependencies
+                    </span>
+                </button>
+            </div>
+            <br/>
+            <div class="dependency-card-centered">
+                <button mat-button color="accent" (click)="showLicenseDialog();">View Mdk4 License</button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<div *ngIf="hasDependencies" class="controls-container" fxLayoutGap="20px" fxLayout="row" fxLayout.xs="column" fxLayout.sm="column">
     <mat-card class="control-item">
         <mat-card-content>
             <div class="right-left-split-container">
@@ -6,8 +41,8 @@
                 <span><mat-spinner [diameter]="24" color="accent" style="margin-left: 8px" *ngIf="isBusy"></mat-spinner></span>
                 <span fxFlex></span>
                 <mat-menu #mdk4Menu>
-                    <button mat-menu-item>Mdk4 License</button>
-                    <button mat-menu-item>Uninstall Dependencies</button>
+                    <button mat-menu-item (click)="showLicenseDialog();">Mdk4 License</button>
+                    <button mat-menu-item (click)="showUninstallDialog();">Uninstall Dependencies</button>
                 </mat-menu>
                 <button mat-icon-button [matMenuTriggerFor]="mdk4Menu">
                     <mat-icon>more_vert</mat-icon>
@@ -44,8 +79,21 @@
                     </mat-form-field>
                 </div>
             </form>
-            <button mat-raised-button color="accent" style="width: 100%;" *ngIf="!isBusy">Start</button>
-            <button mat-raised-button color="warn" style="width: 100%;" *ngIf="isBusy">Stop</button>
+            <button mat-raised-button
+                    color="accent"
+                    style="width: 100%;"
+                    *ngIf="!isBusy"
+                    (click)="startMdk4();">
+                Start
+            </button>
+
+            <button mat-raised-button
+                    color="warn"
+                    style="width: 100%;"
+                    *ngIf="isBusy"
+                    (click)="stopMdk4();">
+                Stop
+            </button>
         </mat-card-content>
     </mat-card>
 
@@ -81,18 +129,18 @@
 
 <br/>
 
-<mat-card>
+<mat-card *ngIf="hasDependencies">
     <mat-card-content>
         <div class="output-container">
             <div class="right-left-split-container">
                 <mat-card-title>Output</mat-card-title>
                 <span fxFlex></span>
-                <button mat-icon-button><mat-icon>refresh</mat-icon></button>
-                <button mat-icon-button><mat-icon>cloud_download</mat-icon></button>
+                <button mat-icon-button [disabled]="refreshingOutput || outputFile == null" (click)="loadOutput(outputFile);"><mat-icon>refresh</mat-icon></button>
+                <button mat-icon-button [disabled]="isBusy || outputFile == null"><mat-icon>cloud_download</mat-icon></button>
             </div>
             <textarea class="output-textarea" placeholder="No output to display..." [(ngModel)]="output" readonly></textarea>
             <div class="right-left-split-container">
-                <span><i>Refreshes every 5 seconds...</i></span>
+                <span *ngIf="isBusy"><i>Refreshes every 5 seconds...</i></span>
                 <span><mat-spinner [diameter]="24" color="accent" *ngIf="refreshingOutput"></mat-spinner></span>
                 <span fxFlex></span>
             </div>
