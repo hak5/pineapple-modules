@@ -1,7 +1,7 @@
 <div class="dependency-card-centered" *ngIf="!hasDependencies">
     <mat-card class="dependency-card">
         <mat-card-content>
-            <mat-card-title>Welcome To Mdk4</mat-card-title>
+            <mat-card-title>Welcome To MDK4</mat-card-title>
             <mat-card-subtitle>Lets get started.</mat-card-subtitle>
 
             <mat-divider></mat-divider>
@@ -27,7 +27,7 @@
             </div>
             <br/>
             <div class="dependency-card-centered">
-                <button mat-button color="accent" (click)="showLicenseDialog();">View Mdk4 License</button>
+                <button mat-button color="accent" (click)="showLicenseDialog();">View MDK4 License</button>
             </div>
         </mat-card-content>
     </mat-card>
@@ -37,11 +37,11 @@
     <mat-card class="control-item">
         <mat-card-content>
             <div class="right-left-split-container">
-                <mat-card-title>Mdk4</mat-card-title>
+                <mat-card-title>MDK4</mat-card-title>
                 <span><mat-spinner [diameter]="24" color="accent" style="margin-left: 8px" *ngIf="isBusy"></mat-spinner></span>
                 <span fxFlex></span>
                 <mat-menu #mdk4Menu>
-                    <button mat-menu-item (click)="showLicenseDialog();">Mdk4 License</button>
+                    <button mat-menu-item (click)="showLicenseDialog();">MDK4 License</button>
                     <button mat-menu-item (click)="showUninstallDialog();">Uninstall Dependencies</button>
                 </mat-menu>
                 <button mat-icon-button [matMenuTriggerFor]="mdk4Menu">
