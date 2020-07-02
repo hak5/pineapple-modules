@@ -1,0 +1,19 @@
+<div class="right-left-split-container">
+    <h1 mat-dialog-title>{{ title }}</h1>
+    <span fxFlex></span>
+    <button mat-icon-button (click)="closeDialog();">
+        <mat-icon>close</mat-icon>
+    </button>
+</div>
+
+<mat-divider></mat-divider>
+<br/>
+
+<div class="confirmation-dialog-body-container">
+    <p>{{ message }}</p>
+    <div class="confirmation-dialog-buttons">
+        <span fxFlex></span>
+        <button mat-raised-button class="confirmation-dialog-button-first" (click)="handleResponse(false);">No</button>
+        <button mat-raised-button color="warn" (click)="handleResponse(true);">Yes</button>
+    </div>
+</div>

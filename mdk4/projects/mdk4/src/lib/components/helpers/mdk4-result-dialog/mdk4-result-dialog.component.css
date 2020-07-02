@@ -1,0 +1,18 @@
+
+.output-textarea {
+    width: 100%;
+    min-height: 480px;
+    resize: none;
+    margin: 0 0 5px;
+    padding: 0;
+    background-color: #efefef;
+    border-radius: 2px;
+    border-color: #cecece;
+    max-lines: 50;
+}
+
+.result-body-container {
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+}
