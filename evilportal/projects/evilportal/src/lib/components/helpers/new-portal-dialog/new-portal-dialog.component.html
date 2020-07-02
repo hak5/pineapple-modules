@@ -1,0 +1,76 @@
+<div class="right-left-split-container">
+    <mat-card-title>New Portal</mat-card-title>
+    <span fxFlex></span>
+    <button mat-icon-button (click)="closeDialog();">
+        <mat-icon>close</mat-icon>
+    </button>
+</div>
+
+<br/>
+<mat-divider></mat-divider>
+<br/>
+
+<div>
+    <div class="portal-box">
+        <div *ngIf="step === 0;">
+            <div class="portal-dialog-centered">
+                <h2>Select Portal Type</h2>
+            </div>
+
+            <div style="display: flex; justify-content: space-evenly">
+                <div>
+                    <form class="portal-element-centered">
+                        <mat-radio-group [(ngModel)]="portalType" name="portalType">
+                            <mat-radio-button [value]="'basic'">Basic Portal</mat-radio-button>
+                        </mat-radio-group>
+                        <p style="color: steelblue; text-align: center">
+                            Basic Portals are show all<br/>
+                            clients the same captive portal.
+                        </p>
+                    </form>
+                </div>
+
+                <mat-divider vertical></mat-divider>
+
+                <div>
+                    <form class="portal-element-centered">
+                        <mat-radio-group [(ngModel)]="portalType" name="portalType">
+                            <mat-radio-button [value]="'targeted'">Targeted Portal</mat-radio-button>
+                        </mat-radio-group>
+                        <p style="color: steelblue; text-align: center">
+                            Targeted Portals allow you to<br/>
+                            direct clients to different<br/>
+                            portals conditionally based<br/>
+                            on SSID, MAC, Hostname,<br/>
+                            or Useragent allowing for<br/>
+                            a much wider range of attacks.<br/>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div *ngIf="step === 1;">
+            <div class="portal-dialog-centered">
+                <h2>Name your Portal</h2>
+            </div>
+            <form class="portal-element-centered">
+                <mat-form-field style="width: 50%;">
+                    <mat-label>Portal Name</mat-label>
+                    <input matInput style="width: 50%;" [(ngModel)]="portalName" name="portalName"/>
+                </mat-form-field>
+            </form>
+        </div>
+
+        <div fxFlex></div>
+        <br/>
+
+        <div class="new-portal-buttons">
+            <span fxFlex></span>
+            <button mat-raised-button color="accent" class="new-portal-button-first" (click)="step = 1;" *ngIf="step !== 1;">Next</button>
+            <button mat-raised-button color="warn" class="new-portal-button-first" (click)="step = 0;" *ngIf="step !== 0;">Back</button>
+            <button mat-raised-button color="accent" (click)="createPortal();" *ngIf="step !== 0;">Done</button>
+        </div>
+
+    </div>
+
+</div>

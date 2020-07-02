@@ -1,6 +1,7 @@
 {
     "name": "cabinet",
     "title": "Cabinet",
-    "description": "A simple browser based file manager for the WiFi Pineapple.",
+    "description": "A simple browser based file manager",
+    "author": "newbi3",
     "version": "1.0"
 }
