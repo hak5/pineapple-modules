@@ -110,7 +110,7 @@ def _notify_dependencies_finished(job: OpkgJob):
     if not job.was_successful:
         module.send_notification(job.error, notifier.ERROR)
     elif job.install:
-        module.send_notification('TCPDump finished installing.', notifier.INFO)
+        module.send_notification('Mdk4 finished installing.', notifier.INFO)
 
 
 @module.handles_action('poll_job')
