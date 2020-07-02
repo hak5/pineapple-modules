@@ -3,6 +3,7 @@
     "title": "Example Module",
     "description": "An example module!",
     "version": "1.0",
-    "author": "Hak5"
+    "author": "Hak5",
+    "debug": false
 }
 
