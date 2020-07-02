@@ -30,7 +30,7 @@ rm -rf bundletmp
 
 # Step 4: Package (Optional)
 if [[ $1 == "package" ]]; then
-    VERS=$(cat dist/examplemodule/module.json | grep "version" | awk '{split($0, a, ": "); gsub("\"", "", a[2]); gsub(",", "", a[2]); print a[2]}')
+    VERS=$(cat dist/$MODULENAME/module.json | grep "version" | awk '{split($0, a, ": "); gsub("\"", "", a[2]); gsub(",", "", a[2]); print a[2]}')
     rm -rf $MODULENAME-$VERS.tar.gz
     echo "[*] Packaging $MODULENAME (Version $VERS)"
     cd dist/
