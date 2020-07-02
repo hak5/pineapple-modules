@@ -1,0 +1,216 @@
+<div class="dependency-card-centered" *ngIf="!hasDependencies">
+    <mat-card class="dependency-card">
+        <mat-card-content>
+            <mat-card-title>Welcome To Evil Portal</mat-card-title>
+            <mat-card-subtitle>Lets get started.</mat-card-subtitle>
+
+            <mat-divider></mat-divider>
+            <br />
+
+            <p>You need to install some dependencies before you can use this module.</p>
+            <p>This will make an request to the internet.</p>
+
+            <br/>
+            <br/>
+            <div class="dependency-card-centered">
+                <button mat-raised-button color="accent"
+                        class="dependency-card-button"
+                        (click)="installDependencies()"
+                        [disabled]="isInstalling">
+                    <span *ngIf="isInstalling">
+                        <mat-spinner [diameter]="20" class="spinner-padding" color="accent"></mat-spinner>
+                    </span>
+                    <span *ngIf="!isInstalling">
+                        Install Dependencies
+                    </span>
+                </button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<div class="controls-container" fxLayoutGap="20px" fxLayout="row" fxLayout.xs="column" fxLayout.sm="column" *ngIf="hasDependencies">
+    <mat-card class="control-item">
+        <mat-card-content>
+            <div class="right-left-split-container">
+                <mat-card-title>Evil Portal</mat-card-title>
+                <span *ngIf="controlState.isBusy"><mat-spinner [diameter]="24" color="accent" style="margin-left: 8px"></mat-spinner></span>
+                <span fxFlex></span>
+                <mat-menu #evilportalMenu>
+                    <button mat-menu-item (click)="loadControlState();">Refresh</button>
+                    <button mat-menu-item (click)="showUninstallDependencies();">Uninstall Dependencies</button>
+                </mat-menu>
+
+                <button mat-icon-button [matMenuTriggerFor]="evilportalMenu">
+                    <mat-icon>more_vert</mat-icon>
+                </button>
+            </div>
+            <br/><mat-divider></mat-divider><br/>
+            <button mat-raised-button color="accent" style="width: 100%;" *ngIf="!controlState.running" (click)="toggleEvilPortal();" [disabled]="controlState.isBusy">Start</button>
+            <button mat-raised-button color="warn" style="width: 100%;" *ngIf="controlState.running" (click)="toggleEvilPortal()" [disabled]="controlState.isBusy">Stop</button>
+            <br/><br/>
+            <button mat-raised-button color="accent" style="width: 100%;" [disabled]="controlState.isBusy">Enable on boot</button>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card class="control-item">
+        <mat-card-content>
+            <div class="right-left-split-container">
+                <mat-card-title>Permanent Clients</mat-card-title>
+                <span fxFlex></span>
+                <button mat-icon-button *ngIf="!permanentClientState.isBusy" (click)="loadAllowedClients();"><mat-icon>refresh</mat-icon></button>
+                <span *ngIf="permanentClientState.isBusy"><mat-spinner [diameter]="24" color="accent" style="margin-left: 8px"></mat-spinner></span>
+            </div>
+            <br/><mat-divider></mat-divider><br/>
+            <textarea #permanentClients
+                      class="client-textarea"
+                      [(ngModel)]="permanentClientState.clients"
+                      (mouseup)="getLineNumber('permanentClients');"
+                      readonly></textarea>
+
+            <div class="right-left-split-container">
+                <form>
+                    <mat-form-field>
+                        <mat-label>
+                            Client IP
+                        </mat-label>
+                        <input matInput [(ngModel)]="permanentClientState.selected" name="selectedPermanent" />
+                    </mat-form-field>
+                </form>
+                <span fxFlex></span>
+                <button mat-button color="accent">Add</button>
+                <button mat-button color="warn">Remove</button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card class="control-item">
+        <mat-card-content>
+            <div class="right-left-split-container">
+                <mat-card-title>Allowed Clients</mat-card-title>
+                <span fxFlex></span>
+                <button mat-icon-button *ngIf="!allowedClientState.isBusy" (click)="loadAllowedClients();"><mat-icon>refresh</mat-icon></button>
+                <span *ngIf="allowedClientState.isBusy"><mat-spinner [diameter]="24" color="accent" style="margin-left: 8px"></mat-spinner></span>
+            </div>
+            <br/><mat-divider></mat-divider><br/>
+            <textarea #allowedClients
+                      class="client-textarea"
+                      [(ngModel)]="allowedClientState.clients"
+                      (mouseup)="getLineNumber('allowedClients');"
+                      readonly></textarea>
+            <div class="right-left-split-container">
+                <form>
+                    <mat-form-field>
+                        <mat-label>
+                            Client IP
+                        </mat-label>
+                        <input matInput [(ngModel)]="allowedClientState.selected" [disabled]="!controlState.running" name="selectedAllowed" />
+                    </mat-form-field>
+                </form>
+                <span fxFlex></span>
+                <button mat-button color="accent"
+                        [disabled]="!controlState.running"
+                        (click)="updateClientList(allowedClientState.selected, 'allowedClients', true);">
+                    Add
+                </button>
+                <button mat-button color="warn"
+                        [disabled]="!controlState.running"
+                        (click)="updateClientList(allowedClientState.selected, 'allowedClients', false);">
+                    Remove
+                </button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<br/>
+
+<mat-card *ngIf="hasDependencies && libraryState.showLibrary">
+    <mat-card-content>
+        <div class="right-left-split-container">
+            <mat-card-title>Portal Library</mat-card-title>
+            <span *ngIf="libraryState.isBusy"><mat-spinner [diameter]="24" color="accent" style="margin-left: 8px"></mat-spinner></span>
+            <span fxFlex></span>
+            <button mat-raised-button color="accent" (click)="showNewPortalDialog();">New Portal</button>
+        </div>
+        <br/><mat-divider></mat-divider><br/>
+
+        <mat-table style="display: none">
+            <mat-header-row *matHeaderRowDef="[]"></mat-header-row>
+        </mat-table>
+        <table class="mat-table" style="min-width: 100%; overflow-x: auto; justify-content: left;">
+            <thead>
+            <tr class="mat-header-row">
+                <th class="mat-header-cell">Portal Name</th>
+                <th class="mat-header-cell">Portal Type</th>
+                <th class="mat-header-cell">Activate</th>
+                <th class="mat-header-cell">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <ng-container *ngFor="let portal of libraryState.portals">
+                <tr class="mat-row">
+                    <td class="mat-cell">
+                        <button mat-button color="accent" style="text-transform: capitalize" (click)="loadPortal(portal);">{{ portal.title }}</button>
+                    </td>
+                    <td class="mat-cell" style="text-transform: capitalize">{{ portal.portal_type }}</td>
+                    <td class="mat-cell">
+                        <button mat-button color="accent" *ngIf="!portal.active" (click)="togglePortal(portal.title);">Activate</button>
+                        <button mat-button color="warn" *ngIf="portal.active" (click)="togglePortal(portal.title);">Deactivate</button>
+                    </td>
+                    <td class="mat-cell">
+                        <button mat-raised-button color="warn" class="control-button" *ngIf="!portal.active" (click)="showDeletePortalDialog(portal.location);">Delete</button>
+                        <button mat-raised-button color="accent" class="control-button" *ngIf="portal.active" (click)="showPreviewDialog();">Preview</button>
+                        <button mat-raised-button color="accent" class="control-button" *ngIf="portal.active" class="control-button" (click)="editFile(portal, '.logs', true);">View Log</button>
+                    </td>
+                </tr>
+            </ng-container>
+            </tbody>
+        </table>
+
+    </mat-card-content>
+</mat-card>
+
+<mat-card *ngIf="hasDependencies && !libraryState.showLibrary">
+    <mat-card-content>
+        <div class="right-left-split-container">
+            <mat-card-title>Work Bench: <i>{{ workbenchState.portal.title }}</i></mat-card-title>
+            <span *ngIf="workbenchState.isBusy"><mat-spinner [diameter]="24" color="accent" style="margin-left: 8px"></mat-spinner></span>
+            <span fxFlex></span>
+            <div>
+                <button mat-raised-button color="accent" class="control-button" (click)="libraryState.showLibrary = true;">Back</button>
+                <button mat-raised-button color="accent" class="control-button" (click)="editFile(workbenchState.portal, '.logs', true);">View Log</button>
+                <button mat-raised-button color="accent" class="control-button" (click)="editFile(workbenchState.portal);">New File</button>
+                <button mat-raised-button color="accent" class="control-button" *ngIf="workbenchState.portal.portal_type === 'targeted';" (click)="showPortalRules(workbenchState.portal);">Target Rule Editor</button>
+                <button mat-raised-button color="accent" class="control-button" (click)="loadPortal(workbenchState.portal);">Refresh</button>
+            </div>
+        </div>
+        <br/><mat-divider></mat-divider><br/>
+
+        <mat-table style="display: none">
+            <mat-header-row *matHeaderRowDef="[]"></mat-header-row>
+        </mat-table>
+
+        <table class="mat-table" style="min-width: 100%; overflow-x: auto; justify-content: left;">
+            <thead>
+            <tr class="mat-header-row">
+                <th class="mat-header-cell">Name</th>
+                <th class="mat-header-cell">Size</th>
+                <th class="mat-header-cell">Edit</th>
+                <th class="mat-header-cell">Delete</th>
+            </tr>
+            </thead>
+            <tbody>
+            <ng-container *ngFor="let file of workbenchState.dirContents">
+                <tr class="mat-row">
+                    <td class="mat-cell">{{ file.name }}</td>
+                    <td class="mat-cell">{{ file.size }}</td>
+                    <td class="mat-cell"><button mat-raised-button color="accent" *ngIf="!file.directory" (click)="editFile(workbenchState.portal, file.name);">Edit</button></td>
+                    <td class="mat-cell"><button mat-raised-button color="warn" *ngIf="file.deletable" (click)="showDeleteItemDialog(file.path);">Delete</button></td>
+                </tr>
+            </ng-container>
+            </tbody>
+        </table>
+
+    </mat-card-content>
+</mat-card>

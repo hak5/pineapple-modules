@@ -1,0 +1,32 @@
+<div class="file-editor-title-container">
+    <h1 mat-dialog-title *ngIf="error === null || error === undefined">{{ title }}</h1>
+    <h1 style="color: red;" *ngIf="error != null">{{ error }}</h1>
+    <span *ngIf="isBusy"><mat-spinner [diameter]="24" color="accent" style="margin-left: 8px"></mat-spinner></span>
+    <span fxFlex></span>
+    <button mat-icon-button (click)="closeDialog();">
+        <mat-icon>close</mat-icon>
+    </button>
+</div>
+
+<mat-divider></mat-divider>
+
+<div>
+    <form>
+        <mat-form-field style="width: 100%;">
+            <mat-label>File Name</mat-label>
+            <input style="width: 100%" matInput [(ngModel)]="fileName" name="fileName" [disabled]="!isNew"/>
+        </mat-form-field>
+    </form>
+
+    <textarea placeholder="File Content" class="file-editor-text-area" matTextareaAutosize [(ngModel)]="fileContent" name="fileContent" (keydown)="handleTabKey($event);" [readOnly]="readonly"></textarea>
+
+    <div class="file-editor-buttons">
+        <span fxFlex></span>
+        <button mat-raised-button class="file-editor-button-first" (click)="closeDialog();" [disabled]="isBusy">
+            Cancel
+        </button>
+        <button mat-raised-button color="accent" (click)="preformSave();" [disabled]="isBusy">
+            Save
+        </button>
+    </div>
+</div>
