@@ -1,6 +1,46 @@
-<mat-card>
-    <mat-card-title>Welcome to Sniffer</mat-card-title>
-    <mat-card-content>
-        This is the example module.
-    </mat-card-content>
-</mat-card>
+<div class="card-container">
+    <div class="container" fxLayoutGap="20px" fxLayout="row" fxLayout.xs="column" fxLayout.sm="column">
+
+        <!-- Left Section -->
+        <div class="control-section" fxLayoutGap="20px" fxLayout="column" fxLayout.xs="column" fxLayout.sm="column">
+            <mat-card class="control-card">
+                <mat-card-content>
+                    <mat-card-title>Sniffer</mat-card-title>
+                    <br/>
+                    <div class="right-left-split-container">
+                        <b>Sniffer is not enabled</b>
+                        <span fxFlex></span>
+                        <button mat-raised-button color="accent">Enable</button>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+            <mat-card>
+                <mat-card-content>
+                    <mat-card-title>URLs</mat-card-title>
+                </mat-card-content>
+            </mat-card>
+            <mat-card>
+                <mat-card-content>
+                    <mat-card-title>Cookies</mat-card-title>
+                </mat-card-content>
+            </mat-card>
+            <mat-card>
+                <mat-card-content>
+                    <mat-card-title>Data</mat-card-title>
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+        <!-- Right Section -->
+        <div class="control-section">
+            <mat-card>
+                <mat-card-content>
+                    <mat-card-title>Images</mat-card-title>
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+    </div>
+
+</div>
+
