@@ -8,10 +8,44 @@
                     <mat-card-title>Sniffer</mat-card-title>
                     <br/>
                     <div class="right-left-split-container">
-                        <b>Sniffer is not enabled</b>
+                        <b *ngIf="!snifferEnabled">Sniffer is not enable</b>
+                        <b *ngIf="snifferEnabled">Sniffer is enabled</b>
                         <span fxFlex></span>
-                        <button mat-raised-button color="accent">Enable</button>
+                        <button mat-raised-button
+                                color="accent"
+                                (click)="toggleSniffer(true);"
+                                *ngIf="!snifferEnabled">
+                            Enable
+                        </button>
+                        <button mat-raised-button
+                                color="warn"
+                                (click)="toggleSniffer(false);"
+                                *ngIf="snifferEnabled">
+                            Disable
+                        </button>
                     </div>
+
+                    <br/>
+                    <br/>
+
+                    <div class="right-left-split-container">
+                        <b *ngIf="!listening">Not listening</b>
+                        <b *ngIf="listening">Currently Listening</b>
+                        <span fxFlex></span>
+                        <button mat-raised-button
+                                color="accent"
+                                (click)="startWebsocket();"
+                                *ngIf="!listening">
+                            Start
+                        </button>
+                        <button mat-raised-button
+                                color="warn"
+                                (click)="stopWebsocket();"
+                                *ngIf="listening">
+                            Stop
+                        </button>
+                    </div>
+
                 </mat-card-content>
             </mat-card>
             <mat-card>
