@@ -5,7 +5,11 @@
         <div class="control-section" fxLayoutGap="20px" fxLayout="column" fxLayout.xs="column" fxLayout.sm="column">
             <mat-card class="control-card">
                 <mat-card-content>
-                    <mat-card-title>Sniffer</mat-card-title>
+                    <div class="right-left-split-container">
+                        <mat-card-title>Sniffer</mat-card-title>
+                        <span fxFlex></span>
+                        <span *ngIf="isBusy"><mat-spinner [diameter]="24" color="accent" style="margin-left: 8px"></mat-spinner></span>
+                    </div>
                     <br/>
                     <div class="right-left-split-container">
                         <b *ngIf="!snifferEnabled">Sniffer is not enable</b>
@@ -14,12 +18,14 @@
                         <button mat-raised-button
                                 color="accent"
                                 (click)="toggleSniffer(true);"
+                                [disabled]="isBusy"
                                 *ngIf="!snifferEnabled">
                             Enable
                         </button>
                         <button mat-raised-button
                                 color="warn"
                                 (click)="toggleSniffer(false);"
+                                [disabled]="isBusy"
                                 *ngIf="snifferEnabled">
                             Disable
                         </button>
@@ -28,19 +34,21 @@
                     <br/>
                     <br/>
 
-                    <div class="right-left-split-container">
+                    <div class="right-left-split-container" *ngIf="snifferEnabled">
                         <b *ngIf="!listening">Not listening</b>
                         <b *ngIf="listening">Currently Listening</b>
                         <span fxFlex></span>
                         <button mat-raised-button
                                 color="accent"
                                 (click)="startWebsocket();"
+                                [disabled]="isBusy"
                                 *ngIf="!listening">
                             Start
                         </button>
                         <button mat-raised-button
                                 color="warn"
                                 (click)="stopWebsocket();"
+                                [disabled]="isBusy"
                                 *ngIf="listening">
                             Stop
                         </button>
@@ -51,16 +59,71 @@
             <mat-card>
                 <mat-card-content>
                     <mat-card-title>URLs</mat-card-title>
+                    <div class="data-container">
+                        <mat-table style="display: none">
+                            <mat-header-row *matHeaderRowDef="[]"></mat-header-row>
+                        </mat-table>
+
+                        <table class="mat-table" style="min-width: 100%; overflow-x: auto; justify-content: left;" *ngIf="urls.length > 0;">
+                            <thead class="mat-header-row">
+                            <th class="mat-header-cell">Client</th>
+                            <th class="mat-header-cell">Url</th>
+                            </thead>
+                            <tbody>
+                            <ng-container *ngFor="let u of urls">
+                                <tr class="mat-row">
+                                    <td class="mat-cell">{{ u.client }}</td>
+                                    <td class="mat-cell">{{ u.data }}</td>
+                                </tr>
+                            </ng-container>
+                            </tbody>
+                        </table>
+                    </div>
                 </mat-card-content>
             </mat-card>
             <mat-card>
                 <mat-card-content>
                     <mat-card-title>Cookies</mat-card-title>
+                    <div class="data-container">
+                        <table class="mat-table" style="min-width: 100%; overflow-x: auto; justify-content: left;" *ngIf="cookies.length > 0;">
+                            <thead class="mat-header-row">
+                            <th class="mat-header-cell">Client</th>
+                            <th class="mat-header-cell">Cookie</th>
+                            </thead>
+                            <tbody>
+                            <ng-container *ngFor="let c of cookies">
+                                <tr class="mat-row">
+                                    <td class="mat-cell">{{ c.client }}</td>
+                                    <td class="mat-cell">{{ c.data }}</td>
+                                </tr>
+                            </ng-container>
+                            </tbody>
+                        </table>
+                    </div>
                 </mat-card-content>
             </mat-card>
             <mat-card>
                 <mat-card-content>
-                    <mat-card-title>Data</mat-card-title>
+                    <mat-card-title>Post Data</mat-card-title>
+                    <div class="data-container">
+                        <mat-table style="display: none">
+                            <mat-header-row *matHeaderRowDef="[]"></mat-header-row>
+                        </mat-table>
+                        <table class="mat-table" style="min-width: 100%; overflow-x: auto; justify-content: left;" *ngIf="postData.length > 0;">
+                            <thead class="mat-header-row">
+                            <th class="mat-header-cell">Client</th>
+                            <th class="mat-header-cell">Data</th>
+                            </thead>
+                            <tbody>
+                            <ng-container *ngFor="let p of postData">
+                                <tr class="mat-row">
+                                    <td class="mat-cell">{{ p.client }}</td>
+                                    <td class="mat-cell">{{ p.data }}</td>
+                                </tr>
+                            </ng-container>
+                            </tbody>
+                        </table>
+                    </div>
                 </mat-card-content>
             </mat-card>
         </div>
@@ -70,6 +133,9 @@
             <mat-card>
                 <mat-card-content>
                     <mat-card-title>Images</mat-card-title>
+                    <ng-container *ngFor="let image of images">
+                        <img src="{{image.data}}"/>
+                    </ng-container>
                 </mat-card-content>
             </mat-card>
         </div>

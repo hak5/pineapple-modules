@@ -1,5 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import { ApiService } from '../services/api.service';
+import {DisplayModel} from "../interfaces/displaymodel.interface";
+import {MatDialog} from "@angular/material/dialog";
+import {ErrorDialogComponent} from "../helpers/error-dialog/error-dialog.component";
 
 @Component({
     selector: 'lib-Sniffer',
@@ -13,54 +16,72 @@ export class SnifferComponent implements OnInit {
     public listening: boolean = false;
     public websocket: WebSocket = null;
 
+    public urls: Array<DisplayModel> = [];
+    public images: Array<DisplayModel> = [];
+    public cookies: Array<DisplayModel> = [];
+    public postData: Array<DisplayModel> = [];
 
-    constructor(private API: ApiService) { }
+    constructor(private API: ApiService,
+                private dialog: MatDialog) { }
 
     private handleError(msg: string) {
-        console.log('ERROR: ' + msg);
+        this.dialog.closeAll();
+        this.dialog.open(ErrorDialogComponent, {
+            width: '400px',
+            hasBackdrop: true,
+            data: msg
+        });
     }
 
     private createWebsocket(component: SnifferComponent): void {
         component.isBusy = true;
         component.websocket = new WebSocket("ws://" + window.location.hostname + ":9999/");
 
-        component.websocket.onerror = (function() {
+        component.websocket.onerror = function() {
             component.websocket.onclose = (function() {});
-            console.log('WEBSOCKET ERROR!!!');
+            component.stopWebsocket();
             component.startWebsocket();
-        });
+        };
 
-        component.websocket.onopen = (function() {
-            component.websocket.onerror = (function(){
-                console.log('WEBSOCKET ERROR 2!!!');
-            });
+        component.websocket.onopen = function() {
             component.listening = true;
             component.isBusy = false;
-        });
+        };
 
-        component.websocket.onclose = (function() {
-            console.log('WEBSOCKET CLOSED!');
+        component.websocket.onclose = function() {
             component.isBusy = false;
             component.listening = false;
-        });
+        };
 
-        component.websocket.onmessage = (function(message) {
-            console.log('GOT MESSAGE!');
+        component.websocket.onmessage = function(message) {
             let data = JSON.parse(message.data);
-            console.log(data);
 
-            // if (data['image'] !== undefined) {
-            //     $("#img_container").prepend('<img src="' + encodeURI(data['image']) +'">');
-            // } else {
-            //     $("#url_table").prepend("<tr><td>" + data['from'] + "</td><td></td></tr>").children().first().children().last().text(data['url']);
-            // }
-            // if (data['cookie'] !== undefined) {
-            //     $("#cookie_table").prepend("<tr><td>" + data['from'] + "</td><td></td></tr>").children().first().children().last().text(data['cookie']);
-            // }
-            // if (data['post'] !== undefined) {
-            //     $("#post_table").prepend("<tr><td>" + data['from'] + "</td><td></td></tr>").children().first().children().last().text(data['post']);
-            // }
-        });
+            if (data['image'] !== undefined) {
+                component.images.unshift({
+                    client: data['from'],
+                    data: data['image']
+                });
+            } else {
+                component.urls.unshift({
+                    client: data['from'],
+                    data: encodeURI(data['url'])
+                });
+            }
+
+            if (data['cookie'] !== undefined) {
+                component.cookies.unshift({
+                    client: data['from'],
+                    data: data['cookie']
+                });
+            }
+
+            if (data['post'] !== undefined) {
+                component.postData.unshift({
+                    client: data['from'],
+                    data: data['post']
+                });
+            }
+        };
     }
 
     startWebsocket(): void {
@@ -94,17 +115,22 @@ export class SnifferComponent implements OnInit {
 
     toggleSniffer(enable: boolean): void {
         this.isBusy = true;
+
         this.API.request({
             module: 'Sniffer',
             action: 'toggle',
             enable: enable
         }, (response) => {
             this.isBusy = false;
+            this.loadStatus();
             if (response.error !== undefined) {
                 this.handleError(response);
                 return;
             }
-            this.loadStatus();
+
+            if (!enable) {
+                this.stopWebsocket();
+            }
         });
     }
 

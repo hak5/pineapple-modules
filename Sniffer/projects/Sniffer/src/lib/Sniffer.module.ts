@@ -6,19 +6,23 @@ import { RouterModule, Routes } from '@angular/router';
 
 import {MaterialModule} from './modules/material/material.module';
 import {FlexLayoutModule} from '@angular/flex-layout';
+import { ErrorDialogComponent } from './helpers/error-dialog/error-dialog.component';
 
 const routes: Routes = [
     { path: '', component: SnifferComponent }
 ];
 
 @NgModule({
-    declarations: [SnifferComponent],
+    declarations: [SnifferComponent, ErrorDialogComponent],
     imports: [
         CommonModule,
         RouterModule.forChild(routes),
         MaterialModule,
         FlexLayoutModule
     ],
-    exports: [SnifferComponent]
+    exports: [SnifferComponent],
+    entryComponents: [
+        ErrorDialogComponent
+    ]
 })
 export class SnifferModule { }

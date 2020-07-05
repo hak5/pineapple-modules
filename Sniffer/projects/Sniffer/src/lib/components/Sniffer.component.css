@@ -22,3 +22,8 @@
     flex-wrap: wrap;
     justify-content: space-between;
 }
+
+.data-container {
+    max-height: 250px;
+    overflow-y: auto;
+}

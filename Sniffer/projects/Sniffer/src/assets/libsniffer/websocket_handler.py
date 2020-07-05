@@ -43,11 +43,11 @@ class WebsocketHandler(socketserver.StreamRequestHandler):
         self.request.send(message)
 
     def build_response(self, key: str) -> str:
-        digest = b64encode(decode(sha1((key + self.magic).encode('utf-8')).hexdigest().encode('utf-8'), 'hex')).decode('ascii')
+        digest = b64encode(decode(sha1((key + self.magic).encode('utf-8')).hexdigest().encode('utf-8'), 'hex'))
         response = 'HTTP/1.1 101 Switching Protocols\r\n'
         response += 'Upgrade: websocket\r\n'
         response += 'Connection: Upgrade\r\n'
-        response += 'Sec-Websocket-Accept: %s\r\n\r\n' % digest
+        response += f'Sec-Websocket-Accept: {digest.decode("ascii")}\r\n\r\n'
         return response
 
     def handshake(self):
@@ -58,7 +58,5 @@ class WebsocketHandler(socketserver.StreamRequestHandler):
             return
 
         key = headers['Sec-Websocket-Key']
-        print(key)
         response = self.build_response(key)
-        print(response)
         return self.request.send(response.encode('ascii'))

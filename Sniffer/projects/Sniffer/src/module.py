@@ -20,16 +20,19 @@ def _check_sniffer_job() -> bool:
 
     for jid, runner in job_manager.jobs.items():
         if isinstance(runner.job, SnifferJob):
+            module.logger.debug(f'FOUND SNIFFER JOB: {jid}')
             if runner.job.is_complete:
+                module.logger.debug(f'SNIFFER JOB IS COMPLETED!')
                 job_manager.remove_job(jid)
                 return False
             else:
+                module.logger.debug(f'SNIFFER JOB IS STILL RUNNING!')
                 return True
 
     return False
 
 
-def _stop_sniffer_server() -> bool:
+def _stop_sniffer_job() -> bool:
     try:
         from libsniffer.sniffer_job import SnifferJob
     except ImportError as e:
@@ -43,11 +46,8 @@ def _stop_sniffer_server() -> bool:
 
 
 @module.handles_action('status')
-def status(request: Request) -> Tuple[bool, dict]:
-    return True, False not in [
-        cmd.check_for_process('sniffer'),
-        _check_sniffer_job()
-    ]
+def status(request: Request) -> Tuple[bool, bool]:
+    return True, _check_sniffer_job()
 
 
 @module.handles_action('toggle')
@@ -58,14 +58,12 @@ def toggle(request: Request) -> Tuple[bool, str]:
         return False, 'Unable to import WebsocketPublisher.'
 
     if request.enable:
-       if _check_sniffer_job():
-           job_manager.execute_job(SnifferJob())
+        if not _check_sniffer_job():
+            job_manager.execute_job(SnifferJob())
         return True, 'started'
     else:
-        if False in [os.system('killall -9 sniffer') == 0, _stop_sniffer_server()]:
-            return False, 'Unable to stop sniffer service'
-        else:
-            return True, 'Sniffer service stopped'
+        if not _stop_sniffer_job():
+            return True, 'Sniffer stopped'
 
 
 @module.handles_action('setup')

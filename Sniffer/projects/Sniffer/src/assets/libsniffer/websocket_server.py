@@ -15,4 +15,8 @@ class WebsocketServer(ThreadingTCPServer):
     def send_all(self, message: str):
         self.logger.debug(f'Sending message to {len(self.websockets)} clients: {message}')
         for websocket in self.websockets:
-            websocket.send_message(message.encode('utf-8'))
+            try:
+                websocket.send_message(message.encode('utf-8'))
+            except Exception as e:
+                self.logger.error(f'Unable to send message to websocket: {e}')
+                self.websockets.remove(websocket)

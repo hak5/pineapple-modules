@@ -15,7 +15,6 @@ class PacketListener(Thread):
         self.socket_path = socket_path
         self.websocket_server = server
         self.logger = logger
-
         self.socket_path = socket_path
         self.socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
@@ -51,7 +50,7 @@ class PacketListener(Thread):
         post_data = data[2].split(b'\r\n\r\n')
         if len(post_data) == 2:
             if post_data[1].strip():
-                data_dict['post'] = post_data[1]
+                data_dict['post'] = post_data[1].decode('utf-8')
 
         return data_dict
 
@@ -71,13 +70,16 @@ class PacketListener(Thread):
         return json.dumps(parsed_data)
 
     def stop(self):
-        self.socket.close()
         try:
-            os.unlink(self.socket_path)
+            if os.path.exists(self.socket_path):
+                os.unlink(self.socket_path)
         except Exception as e:
-            self.logger.error(f'Error shutting down packet listener: {e}')
+            self.logger.error(f'Error deleting socket file: {e}')
 
     def run(self):
+        self.socket.bind(self.socket_path)
+        self.socket.listen(1)
+
         while self.websocket_server.running:
             connection, client_address = self.socket.accept()
             self.logger.debug('RECEIVED CONNECTION!')
@@ -89,4 +91,5 @@ class PacketListener(Thread):
                 self.logger.error(f'EXCEPTION: {e}')
                 continue
 
-        self.shutdown()
+        self.socket.close()
+        print('PACKET LISTENER RETURNED')
