@@ -3,69 +3,62 @@ import struct
 import time
 from base64 import b64encode
 from email.message import Message
+from email.parser import BytesParser
 from hashlib import sha1
+from codecs import decode
 from io import StringIO
 from typing import Any
 
+from libsniffer.websocket_server import WebsocketServer
+
 
 class WebsocketHandler(socketserver.StreamRequestHandler):
-    magic = 'd9911cf4-d812-44f5-9f19-cb1f170e6b44'
+    magic = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
 
     def setup(self):
-        import libsniffer
-        print('SETUP CALLED!')
-        if isinstance(self.server, libsniffer.websocket_server.WebsocketServer):
-            print('APPENDING SELF!')
+        socketserver.StreamRequestHandler.setup(self)
+
+        if isinstance(self.server, WebsocketServer):
             self.server.websockets.append(self)
-        else:
-            print('SERVER ISNT THE THING')
 
     def handle(self):
         handshake_done = False
-        while True:
+        while self.server.running:
             if not handshake_done:
                 handshake_done = self.handshake()
             else:
                 time.sleep(5)
 
     def send_message(self, message: bytes):
-        print(f'RECEIVED MESSAGE OF TYPE: {type(message)}')
-        print('0')
-        self.request.send(chr(129).encode('utf-8'))
-        print('1')
+        self.request.send(bytes([129]))
         length = len(message)
-        print('2')
         if length <= 125:
-            print('3')
-            self.request.send(b'~')
-            print('4')
+            self.request.send(bytes([length]))
         elif 126 <= length <= 65535:
-            print('5')
-            self.request.send(b'~')
-            print('6')
-            self.request.send(struct.pack(">H", length))
-            print('7')
+            self.request.send(bytes([126]))
+            self.request.send(struct.pack('>H', length))
         else:
-            print('8')
-            self.request.send(b'\x7f')
-            print('9')
-            self.request.send(struct.pack(">Q", length))
-            print('10')
-
-        print('11')
+            self.request.send(bytes([127]))
+            self.request.send(struct.pack('>Q', length))
         self.request.send(message)
 
-    def handshake(self) -> bool:
-        data = self.request.recv(1024).strip()
-        headers = Message(data.split(b'\r\n', 1)[1])
-
-        if headers.get("Upgrade", None) != "websocket":
-            return False
-
-        key = headers['Sec-WebSocket-Key']
-        digest = b64encode(sha1(key + self.magic).hexdigest().decode('hex'))
+    def build_response(self, key: str) -> str:
+        digest = b64encode(decode(sha1((key + self.magic).encode('utf-8')).hexdigest().encode('utf-8'), 'hex')).decode('ascii')
         response = 'HTTP/1.1 101 Switching Protocols\r\n'
         response += 'Upgrade: websocket\r\n'
         response += 'Connection: Upgrade\r\n'
-        response += 'Sec-WebSocket-Accept: %s\r\n\r\n' % digest
-        return self.request.send(response)
+        response += 'Sec-Websocket-Accept: %s\r\n\r\n' % digest
+        return response
+
+    def handshake(self):
+        data = self.request.recv(1024).strip()
+        headers = BytesParser().parsebytes(data.split(b'\r\n', 1)[1])
+
+        if headers.get('Upgrade', None) != 'websocket':
+            return
+
+        key = headers['Sec-Websocket-Key']
+        print(key)
+        response = self.build_response(key)
+        print(response)
+        return self.request.send(response.encode('ascii'))

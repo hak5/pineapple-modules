@@ -1,38 +1,31 @@
 import json
 import os
-from logging import Logger
-from email.parser import BytesParser
 import socket
-import socketserver
+from email.parser import BytesParser
+from logging import Logger
 from threading import Thread
 
-from pineapple.jobs import Job
-
-from libsniffer.websocket_handler import WebsocketHandler
 from libsniffer.websocket_server import WebsocketServer
 
 
-class WebsocketPublisher(Job[bool]):
+class PacketListener(Thread):
 
-    def __init__(self, socket_path: str = '/tmp/tsniffer.sock'):
+    def __init__(self, socket_path: str, server: WebsocketServer, logger: Logger):
         super().__init__()
-        self.websockets = []
+        self.socket_path = socket_path
+        self.websocket_server = server
+        self.logger = logger
+
         self.socket_path = socket_path
         self.socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        self.running = False
-        # self.websockets: List[WebsocketHandler] = [WebsocketHandler()]
 
         try:
             os.unlink(self.socket_path)
         except OSError:
             pass
 
-    def _parse_data(self, data: bytes) -> dict:
-        """
-        Prase some data before publishing over websocket
-        :param data:
-        :return:
-        """
+    @staticmethod
+    def _parse_data(data: bytes) -> dict:
         data = data.split(b'|', 2)
 
         data_dict = {
@@ -77,39 +70,23 @@ class WebsocketPublisher(Job[bool]):
         parsed_data = self._parse_data(data)
         return json.dumps(parsed_data)
 
-    def _start_webserver(self, server: WebsocketServer, logger: Logger):
-        logger.debug('STARTING WEBSOCKET WEB SERVER')
-        server.serve_forever()
+    def stop(self):
+        self.socket.close()
+        try:
+            os.unlink(self.socket_path)
+        except Exception as e:
+            self.logger.error(f'Error shutting down packet listener: {e}')
 
-    def do_work(self, logger: Logger) -> bool:
-        self.running = True
-
-        logger.debug(f'BINDING TO SOCKET: {self.socket_path}')
-        self.socket.bind(self.socket_path)
-        logger.debug('LISTENING')
-        self.socket.listen(1)
-
-        WebsocketServer.allow_reuse_address = True
-        server = WebsocketServer(('', 9999), WebsocketHandler)
-        websocket_thread = Thread(target=self._start_webserver, args=(server, logger, ), daemon=True)
-        websocket_thread.start()
-
-        logger.debug('ACCEPTING CONNECTIONS')
-        while self.running:
+    def run(self):
+        while self.websocket_server.running:
             connection, client_address = self.socket.accept()
-            logger.debug('RECEIVED CONNECTION!')
+            self.logger.debug('RECEIVED CONNECTION!')
 
             try:
                 data = self._handle_connection(connection)
-                logger.debug(f'GOT DATA: {data}')
+                self.websocket_server.send_all(data)
             except Exception as e:
-                logger.error(f'EXCEPTION: {e}')
+                self.logger.error(f'EXCEPTION: {e}')
                 continue
 
-            logger.debug(f'PUBLISHING DATA TO {len(self.websockets)} WEBSOCKETS: {data}')
-            server.send_all(data)
-
-        server.shutdown()
-        server.server_close()
-        websocket_thread.join()
-        return True
+        self.shutdown()

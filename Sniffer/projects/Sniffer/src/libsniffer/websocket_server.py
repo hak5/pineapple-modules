@@ -1,17 +1,18 @@
-from socketserver import ThreadingTCPServer, BaseRequestHandler, TCPServer
-from typing import List, Tuple, Callable
+from logging import Logger
+from socketserver import ThreadingTCPServer, BaseRequestHandler
+from typing import Tuple, Callable, List
 
-from libsniffer.websocket_handler import WebsocketHandler
 
+class WebsocketServer(ThreadingTCPServer):
 
-class WebsocketServer(TCPServer):
-
-    def __init__(self, server_address: Tuple[str, int], RequestHandlerClass: Callable[..., BaseRequestHandler]):
-        self.websockets: List[WebsocketHandler] = []
+    def __init__(self, server_address: Tuple[str, int], logger: Logger, RequestHandlerClass: Callable[..., BaseRequestHandler]):
+        from libsniffer.websocket_handler import WebsocketHandler
         super().__init__(server_address, RequestHandlerClass)
+        self.logger = logger
+        self.websockets: List[WebsocketHandler] = []
+        self.running: bool = True
 
     def send_all(self, message: str):
-        message_bytes = message.encode('utf-8')
-        print(f'SENDING MESSAGE: {type(message_bytes)} | {message_bytes}')
+        self.logger.debug(f'Sending message to {len(self.websockets)} clients: {message}')
         for websocket in self.websockets:
-            websocket.send_message(message_bytes)
+            websocket.send_message(message.encode('utf-8'))
