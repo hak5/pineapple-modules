@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import { ApiService } from '../services/api.service';
 import {DisplayModel} from "../interfaces/displaymodel.interface";
 import {MatDialog} from "@angular/material/dialog";
@@ -9,7 +9,7 @@ import {ErrorDialogComponent} from "../helpers/error-dialog/error-dialog.compone
     templateUrl: './Sniffer.component.html',
     styleUrls: ['./Sniffer.component.css']
 })
-export class SnifferComponent implements OnInit {
+export class SnifferComponent implements OnInit, OnDestroy {
 
     public isBusy: boolean = false;
     public snifferEnabled: boolean = false;
@@ -34,6 +34,10 @@ export class SnifferComponent implements OnInit {
     }
 
     private createWebsocket(component: SnifferComponent): void {
+        if (this.websocket !== null) {
+            this.stopWebsocket();
+        }
+
         component.isBusy = true;
         component.websocket = new WebSocket("ws://" + window.location.hostname + ":9999/");
 
@@ -149,5 +153,9 @@ export class SnifferComponent implements OnInit {
 
     ngOnInit() {
         this.setup();
+    }
+
+    ngOnDestroy() {
+        this.stopWebsocket();
     }
 }

@@ -12,7 +12,7 @@
                     </div>
                     <br/>
                     <div class="right-left-split-container">
-                        <b *ngIf="!snifferEnabled">Sniffer is not enable</b>
+                        <b *ngIf="!snifferEnabled">Sniffer is not enabled</b>
                         <b *ngIf="snifferEnabled">Sniffer is enabled</b>
                         <span fxFlex></span>
                         <button mat-raised-button
@@ -67,7 +67,7 @@
                         <table class="mat-table" style="min-width: 100%; overflow-x: auto; justify-content: left;" *ngIf="urls.length > 0;">
                             <thead class="mat-header-row">
                             <th class="mat-header-cell">Client</th>
-                            <th class="mat-header-cell">Url</th>
+                            <th class="mat-header-cell">URL</th>
                             </thead>
                             <tbody>
                             <ng-container *ngFor="let u of urls">
