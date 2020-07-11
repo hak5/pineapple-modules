@@ -49,7 +49,7 @@ abstract class Portal
      * The log file is automatically appended to so there is no reason to add new line characters to your message.
      * @param $message: The message to write to the log file.
      */
-    protected final function writeLog($message) 
+    protected final function writeLog($message)
     {
         try {
             $reflector = new \ReflectionClass(get_class($this));
@@ -70,7 +70,6 @@ abstract class Portal
     {
         if (!$this->isClientAuthorized($clientIP)) {
             exec("iptables -t nat -I PREROUTING -s {$clientIP} -j ACCEPT");
-            // exec("{$this->BASE_EP_COMMAND} add {$clientIP}");
             file_put_contents($this->AUTHORIZED_CLIENTS_FILE, "{$clientIP}\n", FILE_APPEND);
         }
         return true;

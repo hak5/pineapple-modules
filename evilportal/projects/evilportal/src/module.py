@@ -18,8 +18,7 @@ manager = JobManager('evilportal', log_level=logging.DEBUG, module=module)
 # CONSTANTS
 _DEPENDENCIES = ['php7-mod-curl', 'php7-mod-json', 'php7-cgi', 'php7', 'lighttpd-mod-cgi', 'lighttpd']
 _MODULE_PATH = '/pineapple/ui/modules/evilportal'
-_DATA_PATH = f'{_MODULE_PATH}/assets'
-_INCLUDE_PATH = f'{_MODULE_PATH}/includes'
+_ASSETS_PATH = f'{_MODULE_PATH}/assets'
 _PORTAL_PATH = f'/root/portals'
 _CLIENTS_FILE = f'/tmp/EVILPORTAL_CLIENTS.txt'
 # CONSTANTS
@@ -43,7 +42,7 @@ cgi.assign = ( ".pl"  => "/usr/bin/perl",
         )
 
     os.system('/etc/init.d/lighttpd stop')
-    os.system(f'cp {_DATA_PATH}/evilportal.sh /etc/init.d/evilportal')
+    os.system(f'cp {_ASSETS_PATH}/evilportal.sh /etc/init.d/evilportal')
     os.system('chmod +x /etc/init.d/evilportal')
 
 
@@ -79,7 +78,7 @@ def _activate_portal(name: str) -> bool:
                 return False
 
     try:
-        os.symlink(f'{_INCLUDE_PATH}/api', '/www/captiveportal')
+        os.symlink(f'{_ASSETS_PATH}/api', '/www/captiveportal')
     except FileExistsError:
         module.logger.warning('Portal API already exists under /www/captiveportal. This is probably not an issue.')
 
@@ -153,11 +152,11 @@ def _start_evilportal() -> bool:
     if os.path.exists(_CLIENTS_FILE):
         os.unlink(_CLIENTS_FILE)
 
-    os.system(f'cp {_DATA_PATH}/permanentclients.txt {_CLIENTS_FILE}')
+    os.system(f'cp {_ASSETS_PATH}/permanentclients.txt {_CLIENTS_FILE}')
 
     # os.system(f'cp {_DATA_PATH}/allowed.txt {_CLIENTS_FILE}')
     # os.system('echo 1 > /proc/sys/net/ipv4/ip_forward')
-    # os.system(f'ln -s {_INCLUDE_PATH}/api /www/captiveportal')
+    # os.system(f'ln -s {_ASSETS_PATH}/api /www/captiveportal')
     #
     # # iptables
     # os.system('iptables -A INPUT -s 172.16.42.0/24 -j DROP')
@@ -275,8 +274,8 @@ def _get_directory_content(dir_path: str) -> List[dict]:
 
 
 def _create_portal_folders():
-    if not os.path.isdir(f'{_DATA_PATH}/portals'):
-        os.mkdir(f'{_DATA_PATH}/portals')
+    if not os.path.isdir(f'{_ASSETS_PATH}/portals'):
+        os.mkdir(f'{_ASSETS_PATH}/portals')
 
     if not os.path.isdir(f'{_PORTAL_PATH}'):
         os.mkdir(f'{_PORTAL_PATH}')
@@ -399,8 +398,8 @@ def new_portal(request: Request) -> Tuple[bool, str]:
     skeleton = type_to_skeleton.get(portal_type, 'skeleton')
 
     os.mkdir(f'{_PORTAL_PATH}/{name}')
-    os.system(f'cp {_INCLUDE_PATH}/{skeleton}/* {_PORTAL_PATH}/{name}')
-    os.system(f'cp {_INCLUDE_PATH}/{skeleton}/.* {_PORTAL_PATH}/{name}')
+    os.system(f'cp {_ASSETS_PATH}/{skeleton}/* {_PORTAL_PATH}/{name}')
+    os.system(f'cp {_ASSETS_PATH}/{skeleton}/.* {_PORTAL_PATH}/{name}')
     os.system(f'mv {_PORTAL_PATH}/{name}/portalinfo.json {_PORTAL_PATH}/{name}/{name}.ep')
     os.system(f'chmod +x {_PORTAL_PATH}/{name}/.enable')
     os.system(f'chmod +x {_PORTAL_PATH}/{name}/.disable')
