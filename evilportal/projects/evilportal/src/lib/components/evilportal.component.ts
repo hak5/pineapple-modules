@@ -26,9 +26,9 @@ export class EvilPortalComponent implements OnInit, OnDestroy {
     @ViewChild('allowedClients', {static: false}) macFilterPoolRef;
     @ViewChild('permanentClients', {static: false}) ssidFilterPoolRef;
 
-    public controlState: ControlState = { isBusy: false, running: false, autoStart: false };
-    public permanentClientState: ClientListState = { isBusy: false, clients: '', selected: ''};
-    public allowedClientState: ClientListState = { isBusy: false, clients: '', selected: ''};
+    public controlState: ControlState = { isBusy: false, running: false, webserver: false, autoStart: false };
+    public permanentClientState: ClientListState = { isBusy: false, clients: '', selected: '', error: null };
+    public allowedClientState: ClientListState = { isBusy: false, clients: '', selected: '', error: null };
     public libraryState: LibraryState = { showLibrary: true, isBusy: false, portals: [] };
     public workbenchState: WorkBenchState = { isBusy: false, portal: null, dirContents: [], inRoot: true, rootDirectory: null };
 
@@ -168,6 +168,11 @@ export class EvilPortalComponent implements OnInit, OnDestroy {
     }
 
     showPreviewDialog(): void {
+        if (!this.controlState.webserver) {
+            this.handleError('You can not preview the portal unless the webserver is running.\n Please start it and try again.');
+            return;
+        }
+
         this.dialog.open(PreviewDialogComponent, {
             hasBackdrop: true,
             data: {}
@@ -283,6 +288,22 @@ export class EvilPortalComponent implements OnInit, OnDestroy {
         });
     }
 
+    toggleWebserver(): void {
+        this.controlState.isBusy = true;
+        this.API.request({
+            module: 'evilportal',
+            action: 'toggle_webserver'
+        }, (response) => {
+            this.controlState.isBusy = false;
+            if (response.error !== undefined) {
+                this.handleError(response.error);
+                return;
+            }
+
+            this.loadControlState();
+        });
+    }
+
     toggleEvilPortal(): void {
         this.controlState.isBusy = true;
         this.API.request({
@@ -296,6 +317,7 @@ export class EvilPortalComponent implements OnInit, OnDestroy {
             }
 
             this.loadControlState();
+            this.loadAllowedClients();
         });
     }
 
@@ -333,9 +355,25 @@ export class EvilPortalComponent implements OnInit, OnDestroy {
         this.loadFile('/tmp/EVILPORTAL_CLIENTS.txt', (success, content, error) => {
             this.allowedClientState.isBusy = false;
             if (!success) {
+                this.allowedClientState.error = error;
+                this.allowedClientState.clients = '';
                 return;
             }
+            this.allowedClientState.error = null;
             this.allowedClientState.clients = content;
+        });
+    }
+
+    loadPermanentClients(): void {
+        this.permanentClientState.isBusy = true;
+        this.loadFile('/pineapple/ui/modules/evilportal/assets/permanentclients.txt', (success, content, error) => {
+            this.permanentClientState.isBusy = false;
+            if (!success) {
+                this.permanentClientState.error = error;
+                this.permanentClientState.clients = '';
+                return;
+            }
+            this.permanentClientState.clients = content;
         });
     }
 
@@ -354,6 +392,7 @@ export class EvilPortalComponent implements OnInit, OnDestroy {
             this.controlState = {
                 isBusy: false,
                 running: response.running,
+                webserver: response.webserver,
                 autoStart: response.start_on_boot
             }
         })
@@ -405,6 +444,7 @@ export class EvilPortalComponent implements OnInit, OnDestroy {
         this.loadControlState();
         this.loadPortals();
         this.loadAllowedClients();
+        this.loadPermanentClients();
     }
 
     ngOnDestroy() {
