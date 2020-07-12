@@ -8,8 +8,14 @@ start() {
     # Enable ip forward.
     echo 1 > /proc/sys/net/ipv4/ip_forward
 
+    # Remove old authorized clients list
+    rm /tmp/EVILPORTAL_CLIENTS.txt
+
+    /etc/init.d/php7-fpm start
+    /etc/init.d/nginx start
+
     # Create symlink
-    ln -s /pineapple/ui/modules/evilportal/includes/api /www/captiveportal
+    ln -s /pineapple/ui/modules/evilportal/assets/api /www/captiveportal
 
     # Run iptables commands
     iptables -t nat -A PREROUTING -i br-lan -p tcp --dport 443 -j DNAT --to-destination 172.16.42.1:80
@@ -27,6 +33,9 @@ start() {
 }
 
 stop() {
+    /etc/init.d/php7-fpm stop
+    /etc/init.d/nginx stop
+
     rm /www/captiveportal
     echo 'ALLOWING 80'
     iptables -t nat -D PREROUTING -i br-lan -p tcp --dport 80 -j DNAT --to-destination 172.16.42.1:80
