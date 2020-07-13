@@ -49,6 +49,9 @@
             <button mat-raised-button color="accent" style="width: 100%;" *ngIf="!controlState.running" (click)="toggleEvilPortal();" [disabled]="controlState.isBusy">Start</button>
             <button mat-raised-button color="warn" style="width: 100%;" *ngIf="controlState.running" (click)="toggleEvilPortal()" [disabled]="controlState.isBusy">Stop</button>
             <br/><br/>
+            <button mat-raised-button color="accent" style="width: 100%;" *ngIf="!controlState.webserver" (click)="toggleWebserver();" [disabled]="controlState.isBusy">Start Web Server</button>
+            <button mat-raised-button color="warn" style="width: 100%;" *ngIf="controlState.webserver" (click)="toggleWebserver();" [disabled]="controlState.isBusy">Stop Web Server</button>
+            <br/><br/>
             <button mat-raised-button color="accent" style="width: 100%;" [disabled]="controlState.isBusy">Enable on boot</button>
         </mat-card-content>
     </mat-card>
@@ -57,8 +60,9 @@
         <mat-card-content>
             <div class="right-left-split-container">
                 <mat-card-title>Permanent Clients</mat-card-title>
+                <mat-card-subtitle style="color: red">{{ permanentClientState.error }}</mat-card-subtitle>
                 <span fxFlex></span>
-                <button mat-icon-button *ngIf="!permanentClientState.isBusy" (click)="loadAllowedClients();"><mat-icon>refresh</mat-icon></button>
+                <button mat-icon-button *ngIf="!permanentClientState.isBusy" (click)="loadPermanentClients();"><mat-icon>refresh</mat-icon></button>
                 <span *ngIf="permanentClientState.isBusy"><mat-spinner [diameter]="24" color="accent" style="margin-left: 8px"></mat-spinner></span>
             </div>
             <br/><mat-divider></mat-divider><br/>
@@ -88,6 +92,7 @@
         <mat-card-content>
             <div class="right-left-split-container">
                 <mat-card-title>Allowed Clients</mat-card-title>
+                <mat-card-subtitle style="color: red;">{{ allowedClientState.error }}</mat-card-subtitle>
                 <span fxFlex></span>
                 <button mat-icon-button *ngIf="!allowedClientState.isBusy" (click)="loadAllowedClients();"><mat-icon>refresh</mat-icon></button>
                 <span *ngIf="allowedClientState.isBusy"><mat-spinner [diameter]="24" color="accent" style="margin-left: 8px"></mat-spinner></span>

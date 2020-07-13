@@ -33,4 +33,4 @@ def check_for_process(process_name) -> bool:
     :param process_name: The name of the process to look for
     :return: True if the process is running, False if it is not.
     """
-    return grep_output('ps -aux', process_name) != b''
+    return subprocess.run(['pgrep', '-l', process_name], capture_output=True).stdout != b''

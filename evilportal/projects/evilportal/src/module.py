@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
-from typing import Dict, Tuple, List
+import subprocess
+from typing import Dict, Tuple, List, Union
 import logging
 import pathlib
 import os
@@ -16,10 +17,9 @@ module = Module('evilportal', logging.DEBUG)
 manager = JobManager('evilportal', log_level=logging.DEBUG, module=module)
 
 # CONSTANTS
-_DEPENDENCIES = ['php7-mod-curl', 'php7-mod-json', 'php7-cgi', 'php7', 'lighttpd-mod-cgi', 'lighttpd']
+_DEPENDENCIES = ['php7-mod-curl', 'php7-mod-json', 'php7-fpm', 'php7', 'nginx']
 _MODULE_PATH = '/pineapple/ui/modules/evilportal'
-_DATA_PATH = f'{_MODULE_PATH}/assets'
-_INCLUDE_PATH = f'{_MODULE_PATH}/includes'
+_ASSETS_PATH = f'{_MODULE_PATH}/assets'
 _PORTAL_PATH = f'/root/portals'
 _CLIENTS_FILE = f'/tmp/EVILPORTAL_CLIENTS.txt'
 # CONSTANTS
@@ -28,22 +28,19 @@ _CLIENTS_FILE = f'/tmp/EVILPORTAL_CLIENTS.txt'
 def _post_install(job: OpkgJob):
     if not job.install:
         return
+    elif not job.was_successful:
+        module.logger.debug('Installation job did not finish successfully so post install is returning.')
+        return
 
-    with open('/etc/lighttpd/conf.d/30-cgi.conf', 'w') as f:
-        f.write(
-            '''
-server.modules += ( "mod_cgi" )
-cgi.assign = ( ".pl"  => "/usr/bin/perl",
-           ".cgi" => "/usr/bin/perl",
-           ".rb"  => "/usr/bin/ruby",
-           ".erb" => "/usr/bin/eruby",
-           ".py"  => "/usr/bin/python",
-           ".php" => "/usr/bin/php-cgi" )
-            '''
-        )
+    os.system(f'cp {_ASSETS_PATH}/configs/php.ini /etc/php.ini')
+    os.system(f'cp {_ASSETS_PATH}/configs/php7-fpm /etc/init.d/php7-fpm')
+    os.system(f'cp {_ASSETS_PATH}/configs/nginx.conf /etc/nginx/nginx.conf')
+    os.system(f'cp {_ASSETS_PATH}/configs/php7-fpm.conf /etc/php7-fpm.conf')
+    os.system(f'cp {_ASSETS_PATH}/configs/www.conf /etc/php7-fpm.d/www.conf')
 
-    os.system('/etc/init.d/lighttpd stop')
-    os.system(f'cp {_DATA_PATH}/evilportal.sh /etc/init.d/evilportal')
+    os.system('/etc/init.d/php7-fpm stop')
+    os.system('/etc/init.d/nginx stop')
+    os.system(f'cp {_ASSETS_PATH}/evilportal.sh /etc/init.d/evilportal')
     os.system('chmod +x /etc/init.d/evilportal')
 
 
@@ -61,7 +58,8 @@ def _deactivate_portal(name: str) -> bool:
 
     # remove all associate portal file symbolic links
     for item in pathlib.Path(f'{_PORTAL_PATH}/{name}').iterdir():
-        os.unlink(f'/www/{item.name}')
+        if os.path.exists(f'/www/{item.name}'):
+            os.unlink(f'/www/{item.name}')
 
     # restore any files evil portal backed up
     for item in pathlib.Path(f'/www').iterdir():
@@ -79,7 +77,7 @@ def _activate_portal(name: str) -> bool:
                 return False
 
     try:
-        os.symlink(f'{_INCLUDE_PATH}/api', '/www/captiveportal')
+        os.symlink(f'{_ASSETS_PATH}/api', '/www/captiveportal')
     except FileExistsError:
         module.logger.warning('Portal API already exists under /www/captiveportal. This is probably not an issue.')
 
@@ -96,44 +94,49 @@ def _check_portal_activate(name: str) -> bool:
 
 
 def _disable_webserver_autostart() -> bool:
-    return os.system('/etc/init.d/lighttpd disable') == 0
+    return os.system('/etc/init.d/nginx disable') == 0 and os.system('/etc/init.d/php7-fpm disable') == 0
 
 
 def _autostart_webserver() -> bool:
-    return os.system('/etc/init.d/lighttpd enable') == 0
+    return os.system('/etc/init.d/nginx enable') == 0 and os.system('/etc/init.d/php7-fpm enable') == 0
 
 
 def _check_webserver_autostart() -> bool:
-    return cmd.grep_output('ls /etc/rc.d/', 'lighttpd') != b''
+    return cmd.grep_output('ls /etc/rc.d/', 'nginx') != b'' and cmd.grep_output('ls /etc/rc.d/', 'php7-fpm')
 
 
 def _stop_webserver() -> bool:
     if not _check_webserver_running():
         return True
 
-    return os.system('/etc/init.d/lighttpd stop') == 0
+    return os.system('/etc/init.d/nginx stop') == 0 and os.system('/etc/init.d/php7-fpm stop') == 0
 
 
 def _start_webserver() -> bool:
     if _check_webserver_running():
         return True
 
-    return os.system('/etc/init.d/lighttpd start') == 1
+    nginx = subprocess.run(['/etc/init.d/nginx', 'start'], capture_output=True)
+    module.logger.debug(f'NGINX START STDOUT: {nginx.stdout}')
+    module.logger.debug(f'NGINX START SERROUT: {nginx.stderr}')
+
+    return os.system('/etc/init.d/php7-fpm start') == 1
 
 
 def _check_webserver_running() -> bool:
-    return cmd.check_for_process('lighttpd')
+    return cmd.check_for_process('nginx') and cmd.check_for_process('php-fpm')
 
 
 def _stop_evilportal() -> bool:
     if not _check_evilportal_running():
         return True
 
-    with open(_CLIENTS_FILE) as f:
-        for line in f.readlines():
-            _revoke_client(line)
+    if os.path.exists(_CLIENTS_FILE):
+        with open(_CLIENTS_FILE, 'r') as f:
+            for line in f.readlines():
+                _revoke_client(line)
 
-    os.unlink(_CLIENTS_FILE)
+        os.unlink(_CLIENTS_FILE)
 
     # os.system('iptables -t nat -D PREROUTING -i br-lan -p tcp --dport 80 -j DNAT --to-destination 172.16.42.1:80')
     # os.system('iptables -D INPUT -p tcp --dport 53 -j ACCEPT')
@@ -153,30 +156,10 @@ def _start_evilportal() -> bool:
     if os.path.exists(_CLIENTS_FILE):
         os.unlink(_CLIENTS_FILE)
 
-    os.system(f'cp {_DATA_PATH}/permanentclients.txt {_CLIENTS_FILE}')
-
-    # os.system(f'cp {_DATA_PATH}/allowed.txt {_CLIENTS_FILE}')
-    # os.system('echo 1 > /proc/sys/net/ipv4/ip_forward')
-    # os.system(f'ln -s {_INCLUDE_PATH}/api /www/captiveportal')
-    #
-    # # iptables
-    # os.system('iptables -A INPUT -s 172.16.42.0/24 -j DROP')
-    # os.system('iptables -A OUTPUT -s 172.16.42.0/24 -j DROP')
-    # os.system('iptables -A INPUT -s 172.16.42.0/24 -p udp --dport 53 -j ACCEPT')
-    #
-    # # allow the pineapple
-    # os.system('iptables -A INPUT -s 172.16.42.1 -j ACCEPT')
-    # os.system('iptables -A OUTPUT -s 172.16.42.1 -j ACCEPT')
-    #
-    # # drop rules
-    # os.system('iptables -t nat -A PREROUTING -i br-lan -p tcp --dport 443 -j DNAT --to-destination 172.16.42.1:80')
-    # os.system('iptables -t nat -A PREROUTING -i br-lan -p tcp --dport 80 -j DNAT --to-destination 172.16.42.1:80')
-    # os.system('iptables -t nat -A POSTROUTING -j MASQUERADE')
-
     os.system('/etc/init.d/evilportal start')
 
-    if os.path.exists(_CLIENTS_FILE):
-        with open(_CLIENTS_FILE) as f:
+    if os.path.exists(f'{_ASSETS_PATH}/permanentclients.txt'):
+        with open(f'{_ASSETS_PATH}/permanentclients.txt') as f:
             for line in f.readlines():
                 _authorize_client(line)
 
@@ -201,6 +184,7 @@ def _check_autostart() -> bool:
 
 def _authorize_client(ip: str):
     os.system(f'iptables -t nat -I PREROUTING -s {ip} -j ACCEPT')
+
     with open(_CLIENTS_FILE, 'a') as f:
         f.write(f'{ip}\n')
 
@@ -275,8 +259,8 @@ def _get_directory_content(dir_path: str) -> List[dict]:
 
 
 def _create_portal_folders():
-    if not os.path.isdir(f'{_DATA_PATH}/portals'):
-        os.mkdir(f'{_DATA_PATH}/portals')
+    if not os.path.isdir(f'{_ASSETS_PATH}/portals'):
+        os.mkdir(f'{_ASSETS_PATH}/portals')
 
     if not os.path.isdir(f'{_PORTAL_PATH}'):
         os.mkdir(f'{_PORTAL_PATH}')
@@ -300,6 +284,7 @@ def update_client_list(request: Request) -> Tuple[bool, str]:
 def status(request: Request) -> Tuple[bool, dict]:
     return True, {
         'running': _check_evilportal_running() and _check_webserver_running(),
+        'webserver': _check_webserver_running(),
         "start_on_boot": _check_autostart()
     }
 
@@ -314,14 +299,26 @@ def toggle_autostart(request: Request) -> Tuple[bool, str]:
         return True, 'Autostart enabled'
 
 
+@module.handles_action('toggle_webserver')
+def toggle_webserver(request: Request) -> Tuple[bool, Union[bool, str]]:
+    if _check_webserver_running():
+        _stop_webserver()
+    else:
+        _start_webserver()
+
+    return True, _check_webserver_running()
+
+
 @module.handles_action('toggle_evilportal')
 def toggle_evilportal(request: Request) -> Tuple[bool, str]:
     if _check_evilportal_running():
-        if False in [_stop_webserver(), _stop_evilportal()]:
+        module.logger.debug('Stopping Evil Portal')
+        if not _stop_evilportal():
             return False, 'Error stopping Evil Portal.'
         return True, 'Evil Portal stopped.'
     else:
-        if False in [_start_webserver(), _start_evilportal()]:
+        module.logger.debug('Starting Evil Portal')
+        if not _start_evilportal():
             return False, 'Error starting Evil Portal.'
 
         return True, 'Evil Portal started.'
@@ -399,8 +396,8 @@ def new_portal(request: Request) -> Tuple[bool, str]:
     skeleton = type_to_skeleton.get(portal_type, 'skeleton')
 
     os.mkdir(f'{_PORTAL_PATH}/{name}')
-    os.system(f'cp {_INCLUDE_PATH}/{skeleton}/* {_PORTAL_PATH}/{name}')
-    os.system(f'cp {_INCLUDE_PATH}/{skeleton}/.* {_PORTAL_PATH}/{name}')
+    os.system(f'cp {_ASSETS_PATH}/{skeleton}/* {_PORTAL_PATH}/{name}')
+    os.system(f'cp {_ASSETS_PATH}/{skeleton}/.* {_PORTAL_PATH}/{name}')
     os.system(f'mv {_PORTAL_PATH}/{name}/portalinfo.json {_PORTAL_PATH}/{name}/{name}.ep')
     os.system(f'chmod +x {_PORTAL_PATH}/{name}/.enable')
     os.system(f'chmod +x {_PORTAL_PATH}/{name}/.disable')
@@ -413,7 +410,7 @@ def new_portal(request: Request) -> Tuple[bool, str]:
         json.dump(portal_info, f, indent=2)
 
     if portal_type == 'targeted':
-        os.system(f"sed -i 's/\"portal_name_here\"/\"{name}\"/g' {_PORTAL_PATH}{name}/index.php")
+        os.system(f"sed -i 's/\"portal_name_here\"/\"{name}\"/g' {_PORTAL_PATH}/{name}/index.php")
 
     return True, 'Portal created successfully.'
 
