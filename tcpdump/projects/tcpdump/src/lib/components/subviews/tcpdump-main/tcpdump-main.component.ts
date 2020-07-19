@@ -205,7 +205,6 @@ export class TcpdumpMainComponent implements OnInit, OnDestroy {
         } else {
             this.tcpDumpState.filter = filter + value;
         }
-
         this.update();
     }
 
