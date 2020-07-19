@@ -6,7 +6,7 @@ import pathlib
 import os
 from datetime import datetime
 
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Union
 
 from pineapple.helpers.opkg_helpers import OpkgJob
 from pineapple.modules import Module, Request
@@ -22,7 +22,7 @@ _HISTORY_DIRECTORY = pathlib.Path(_HISTORY_DIRECTORY_PATH)
 # CONSTANTS
 
 module = Module('mdk4', logging.DEBUG)
-job_manager = JobManager('mdk4', logging.DEBUG)
+job_manager = JobManager(name='mdk4', module=module, log_level=logging.DEBUG)
 
 
 class Mdk4Job(Job[bool]):
@@ -78,11 +78,6 @@ class Mdk4Job(Job[bool]):
         return True
 
 
-def _make_history_directory():
-    if not _HISTORY_DIRECTORY.exists():
-        _HISTORY_DIRECTORY.mkdir(parents=True)
-
-
 def _get_last_background_job() -> dict:
     last_job_id: Optional[str] = None
     last_job_type: Optional[str] = None
@@ -113,85 +108,87 @@ def _notify_dependencies_finished(job: OpkgJob):
         module.send_notification('MDK4 finished installing.', notifier.INFO)
 
 
-@module.handles_action('poll_job')
-def poll_job(request: Request) -> Tuple[bool, dict]:
-    job = job_manager.get_job(request.job_id)
+@module.on_start()
+def _make_history_directory():
+    if not _HISTORY_DIRECTORY.exists():
+        _HISTORY_DIRECTORY.mkdir(parents=True)
 
-    if not job:
-        return False, 'No job found by that id'
 
-    return True, {'is_complete': job.is_complete, 'result': job.result, 'job_error': job.error}
+@module.on_shutdown()
+def stop_mdk4(signal: int = None) -> Union[str, Tuple[str, bool]]:
+    if len(list(filter(lambda job_runner: job_runner.running is True, job_manager.jobs.values()))) > 0:
+        if os.system('killall -9 mdk4') != 0:
+            return 'Error stopping Mdk4.', False
+
+    return 'Mdk4 stopped.'
 
 
 @module.handles_action('start')
-def start(request: Request) -> Tuple[bool, dict]:
+def start(request: Request):
     command = request.command.split(' ')
 
     filename = f"{datetime.now().strftime('%Y-%m-%dT%H-%M-%S')}"
     job_id = job_manager.execute_job(Mdk4Job(command, filename, request.input_iface, request.output_iface))
 
-    return True, {
+    return {
         'job_id': job_id,
         'output_file': filename
     }
 
 
 @module.handles_action('stop')
-def stop(request: Request) -> Tuple[bool, str]:
-    if os.system('killall -9 mdk4') == 0:
-        return True, 'Mdk4 stopped.'
-    else:
-        return False, 'Error stopping Mdk4.'
+def stop(request: Request):
+    return stop_mdk4()
 
 
 @module.handles_action('load_history')
-def load_history(request: Request) -> Tuple[bool, List[str]]:
-    return True, [item.name for item in _HISTORY_DIRECTORY.iterdir() if item.is_file()]
+def load_history(request: Request):
+    return [item.name for item in _HISTORY_DIRECTORY.iterdir() if item.is_file()]
 
 
 @module.handles_action('load_output')
-def load_output(request: Request) -> Tuple[bool, str]:
+def load_output(request: Request):
     output_path = f'{_HISTORY_DIRECTORY_PATH}/{request.output_file}'
     if not os.path.exists(output_path):
-        return False, 'Could not find scan output.'
+        return 'Could not find scan output.', False
 
     with open(output_path, 'r') as f:
-        return True, f.read()
+        return f.read()
 
 
 @module.handles_action('delete_result')
-def delete_result(request: Request) -> Tuple[bool, bool]:
+def delete_result(request: Request):
     output_path = pathlib.Path(f'{_HISTORY_DIRECTORY_PATH}/{request.output_file}')
     if output_path.exists() and output_path.is_file():
         output_path.unlink()
 
-    return True, True
+    return True
 
 
 @module.handles_action('clear_history')
-def clear_history(request: Request) -> Tuple[bool, bool]:
+def clear_history(request: Request):
     for item in _HISTORY_DIRECTORY.iterdir():
         if item.is_file():
             item.unlink()
 
-    return True, True
+    return True
 
 
 @module.handles_action('check_dependencies')
-def check_dependencies(request: Request) -> Tuple[bool, bool]:
-    return True, opkg.check_if_installed('mdk4', module.logger)
+def check_dependencies(request: Request):
+    return opkg.check_if_installed('mdk4', module.logger)
 
 
 @module.handles_action('manage_dependencies')
-def manage_dependencies(request: Request) -> Tuple[bool, dict]:
-    return True, {
+def manage_dependencies(request: Request):
+    return {
         'job_id': job_manager.execute_job(OpkgJob('mdk4', request.install), callbacks=[_notify_dependencies_finished])
     }
 
 
 @module.handles_action('startup')
-def startup(request: Request) -> Tuple[bool, dict]:
-    return True, {
+def startup(request: Request):
+    return {
         'has_dependencies': opkg.check_if_installed('mdk4', module.logger),
         'interfaces': net.get_interfaces(),
         'last_job': _get_last_background_job()
@@ -199,5 +196,4 @@ def startup(request: Request) -> Tuple[bool, dict]:
 
 
 if __name__ == '__main__':
-    _make_history_directory()
     module.start()

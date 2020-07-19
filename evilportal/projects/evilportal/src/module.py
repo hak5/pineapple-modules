@@ -258,6 +258,7 @@ def _get_directory_content(dir_path: str) -> List[dict]:
     ]
 
 
+@module.on_start()
 def _create_portal_folders():
     if not os.path.isdir(f'{_ASSETS_PATH}/portals'):
         os.mkdir(f'{_ASSETS_PATH}/portals')
@@ -281,8 +282,8 @@ def update_client_list(request: Request) -> Tuple[bool, str]:
 
 
 @module.handles_action('status')
-def status(request: Request) -> Tuple[bool, dict]:
-    return True, {
+def status(request: Request):
+    return {
         'running': _check_evilportal_running() and _check_webserver_running(),
         'webserver': _check_webserver_running(),
         "start_on_boot": _check_autostart()
@@ -290,61 +291,61 @@ def status(request: Request) -> Tuple[bool, dict]:
 
 
 @module.handles_action('toggle_autostart')
-def toggle_autostart(request: Request) -> Tuple[bool, str]:
+def toggle_autostart(request: Request):
     if _check_autostart():
         _disable_autostart()
-        return True, 'Autostart disabled.'
+        return 'Autostart disabled.'
     else:
         _enable_autostart()
-        return True, 'Autostart enabled'
+        return 'Autostart enabled'
 
 
 @module.handles_action('toggle_webserver')
-def toggle_webserver(request: Request) -> Tuple[bool, Union[bool, str]]:
+def toggle_webserver(request: Request):
     if _check_webserver_running():
         _stop_webserver()
     else:
         _start_webserver()
 
-    return True, _check_webserver_running()
+    return _check_webserver_running()
 
 
 @module.handles_action('toggle_evilportal')
-def toggle_evilportal(request: Request) -> Tuple[bool, str]:
+def toggle_evilportal(request: Request):
     if _check_evilportal_running():
         module.logger.debug('Stopping Evil Portal')
         if not _stop_evilportal():
-            return False, 'Error stopping Evil Portal.'
-        return True, 'Evil Portal stopped.'
+            return 'Error stopping Evil Portal.', False
+        return 'Evil Portal stopped.'
     else:
         module.logger.debug('Starting Evil Portal')
         if not _start_evilportal():
-            return False, 'Error starting Evil Portal.'
+            return 'Error starting Evil Portal.', False
 
-        return True, 'Evil Portal started.'
+        return 'Evil Portal started.'
 
 
 @module.handles_action('toggle_portal')
-def toggle_portal(request: Request) -> Tuple[bool, str]:
+def toggle_portal(request: Request):
     if not _check_portal_activate(request.portal):
         if _activate_portal(request.portal):
-            return True, 'Portal has been activated.'
+            return 'Portal has been activated.'
         else:
-            return False, 'Error activating portal.'
+            return 'Error activating portal.', False
     else:
         if _deactivate_portal(request.portal):
-            return True, 'Portal has been deactivated.'
+            return 'Portal has been deactivated.'
         else:
-            return False, 'Error deactivating portal.'
+            return 'Error deactivating portal.', False
 
 
 @module.handles_action('delete')
-def delete(request: Request) -> Tuple[bool, str]:
+def delete(request: Request):
     module.logger.debug(f'DELETING ITEM AT LOCATION: {request.file_path}')
     path = pathlib.Path(request.file_path)
 
     if not path.exists():
-        return False, 'File does not exist.'
+        return 'File does not exist.', False
 
     if path.is_dir():
         _delete_directory_tree(path)
@@ -352,11 +353,11 @@ def delete(request: Request) -> Tuple[bool, str]:
     else:
         path.unlink()
 
-    return True, 'File deleted.'
+    return 'File deleted.'
 
 
 @module.handles_action('save_portal_rules')
-def save_portal_rules(request: Request) -> Tuple[bool, str]:
+def save_portal_rules(request: Request):
     portal = request.portal
     new_rules = request.rules
 
@@ -364,18 +365,18 @@ def save_portal_rules(request: Request) -> Tuple[bool, str]:
     portal_type = portal_info.get('type', 'unknown')
 
     if portal_type != 'targeted':
-        return False, 'Can not get rules for non-targeted portal.'
+        return 'Can not get rules for non-targeted portal.', False
 
     portal_info['targeted_rules']['rules'] = new_rules
 
     with open(f'{_PORTAL_PATH}/{portal}/{portal}.ep', 'w') as f:
         json.dump(portal_info, f, indent=2)
 
-    return True, 'Portal rules updated.'
+    return 'Portal rules updated.'
 
 
 @module.handles_action('get_portal_rules')
-def get_portal_rules(request: Request) -> Tuple[bool, dict]:
+def get_portal_rules(request: Request):
     portal = request.portal
 
     portal_info = _get_portal_info(f'{_PORTAL_PATH}/{portal}', portal)
@@ -383,13 +384,13 @@ def get_portal_rules(request: Request) -> Tuple[bool, dict]:
     portal_rules = portal_info.get('targeted_rules', {}).get('rules', {})
 
     if portal_type != 'targeted':
-        return False, 'Can not get rules for non-targeted portal.'
+        return 'Can not get rules for non-targeted portal.', False
 
-    return True, portal_rules
+    return portal_rules
 
 
 @module.handles_action('new_portal')
-def new_portal(request: Request) -> Tuple[bool, str]:
+def new_portal(request: Request):
     type_to_skeleton = {'basic': 'skeleton', 'targeted': 'targeted_skeleton'}
     name = request.name
     portal_type = request.type
@@ -412,33 +413,33 @@ def new_portal(request: Request) -> Tuple[bool, str]:
     if portal_type == 'targeted':
         os.system(f"sed -i 's/\"portal_name_here\"/\"{name}\"/g' {_PORTAL_PATH}/{name}/index.php")
 
-    return True, 'Portal created successfully.'
+    return 'Portal created successfully.'
 
 
 @module.handles_action('save_file')
-def save_file(request: Request) -> Tuple[bool, str]:
+def save_file(request: Request):
     with open(request.path, 'w') as f:
         f.write(request.content)
 
-    return True, 'File saved.'
+    return 'File saved.'
 
 
 @module.handles_action('load_file')
-def load_file(request: Request) -> Tuple[bool, str]:
+def load_file(request: Request):
     try:
-        return True, _get_file_content(request.path)
+        return _get_file_content(request.path)
     except Exception as e:
         module.logger.error(f'Exception occurred while reading file: {e}')
-        return False, str(e)
+        return str(e), False
 
 
 @module.handles_action('load_directory')
-def load_directory(request: Request) -> Tuple[bool, List[dict]]:
-    return True, _get_directory_content(request.path)
+def load_directory(request: Request):
+    return _get_directory_content(request.path)
 
 
 @module.handles_action('list_portals')
-def list_portals(request: Request) -> Tuple[bool, List[dict]]:
+def list_portals(request: Request):
     module.logger.debug('Creating portal folder')
     _create_portal_folders()
 
@@ -446,7 +447,7 @@ def list_portals(request: Request) -> Tuple[bool, List[dict]]:
     directories = [item for item in _get_directory_content(_PORTAL_PATH) if item.get('directory', False)]
 
     module.logger.debug('Building list')
-    return True, [
+    return [
         {
             'title': item['name'],
             'portal_type': _get_portal_info(item['path'], item['name']).get('type', 'basic'),
@@ -459,18 +460,18 @@ def list_portals(request: Request) -> Tuple[bool, List[dict]]:
 
 
 @module.handles_action('manage_dependencies')
-def manage_dependencies(request: Request) -> Tuple[bool, Dict[str, str]]:
+def manage_dependencies(request: Request):
     if not request.install and _check_evilportal_running():
         _stop_evilportal()
 
-    return True, {
+    return {
         'job_id': manager.execute_job(OpkgJob(_DEPENDENCIES, request.install), [_post_install])
     }
 
 
 @module.handles_action('check_dependencies')
-def check_dependencies(request: Request) -> Tuple[bool, bool]:
-    return True, False not in [opkg.check_if_installed(package) for package in _DEPENDENCIES]
+def check_dependencies(request: Request):
+    return False not in [opkg.check_if_installed(package) for package in _DEPENDENCIES]
 
 
 if __name__ == '__main__':

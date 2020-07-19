@@ -1,5 +1,6 @@
-from typing import Tuple, Dict, Callable, List
-from dataclasses import dataclass
+#!/usr/bin/env python3
+
+from typing import List
 import logging
 import pathlib
 import os
@@ -8,6 +9,7 @@ from pineapple.modules import Module, Request
 
 
 module = Module('cabinet', logging.DEBUG)
+
 
 def _get_directory_contents(directory: pathlib.Path) -> List[dict]:
     return [
@@ -38,75 +40,75 @@ def _delete_directory_tree(directory: pathlib.Path) -> bool:
 
 
 @module.handles_action('list_directory')
-def list_directory(request: Request) -> Tuple[bool, dict]:
+def list_directory(request: Request):
     get_parent: bool = request.get_parent
     directory: pathlib.Path = pathlib.Path(request.directory) if not get_parent else pathlib.Path(request.directory).parent
 
     if not directory:
-        return False, 'Directory not found.'
+        return 'Directory not found.', False
 
     if not os.path.isdir(directory):
-        return False, 'Directory not found.'
+        return 'Directory not found.', False
 
-    return True, {'working_directory': str(directory), 'contents': _get_directory_contents(directory)}
+    return {'working_directory': str(directory), 'contents': _get_directory_contents(directory)}
 
 
 @module.handles_action('delete_item')
-def delete_item(request: Request) -> Tuple[bool, str]:
+def delete_item(request: Request):
     path = pathlib.Path(request.file_to_delete)
 
     module.logger.debug(f'DELETING: {request.file_to_delete}')
 
     if not path.exists():
-        return False, 'File or directory does not exist.'
+        return 'File or directory does not exist.', False
 
     if not path.is_absolute():
-        return False, 'Absolute path expected.'
+        return 'Absolute path expected.', False
 
     if path.is_dir():
         success = _delete_directory_tree(path)
         if success:
             path.rmdir()
         else:
-            return False, 'An error occurred deleting the directory.'
+            return 'An error occurred deleting the directory.', False
     else:
         path.unlink()
 
-    return True, f'{path} has been deleted.'
+    return f'{path} has been deleted.'
 
 
 @module.handles_action('write_file')
-def write_file(request: Request) -> Tuple[bool, str]:
+def write_file(request: Request):
     path = pathlib.Path(request.file)
     content = request.content
 
     with open(str(path), 'w') as f:
         f.write(content)
 
-    return True, 'File saved.'
+    return 'File saved.'
 
 
 @module.handles_action('read_file')
-def read_file(request: Request) -> Tuple[bool, str]:
+def read_file(request: Request):
     path = pathlib.Path(request.file)
 
     if not path.exists() or not path.is_file():
-        return False, 'Unable to open file.'
+        return 'Unable to open file.'
 
     with open(str(path), 'r') as f:
-        return True, f.read()
+        return f.read()
 
 
 @module.handles_action('create_directory')
-def create_directory(request: Request) -> Tuple[bool, str]:
+def create_directory(request: Request):
     path = pathlib.Path(f'{request.path}/{request.name}')
 
     module.logger.debug(f'CREATE FOLDER {request.name} IN PATH {request.path}. SHOULD BE {str(path)}')
     try:
         path.mkdir()
-        return True, "Directory created."
+        return "Directory created."
     except FileExistsError:
-        return False, "A file by that name already exists."
+        return "A file by that name already exists.", False
 
 
 if __name__ == '__main__':

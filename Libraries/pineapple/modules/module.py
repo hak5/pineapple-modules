@@ -3,7 +3,7 @@ import socket
 import json
 import logging
 import signal
-from typing import Tuple, Any, Callable, Optional, Dict
+from typing import Tuple, Any, Callable, Optional, Dict, Union, List
 
 from pineapple.logger import get_logger
 from pineapple.modules.request import Request
@@ -23,10 +23,19 @@ class Module:
 
         self.logger.debug(f'Initializing module {name}.')
 
-        self._action_handlers: Dict[str, Callable[[Request], Tuple[bool, Any]]] = {}
+        # A list of functions to called when module is started.
+        self._startup_handlers: List[Callable[[], None]] = []
+
+        # A list of functions to be called when module is stopped.
+        self._shutdown_handlers: List[Callable[[int], None]] = []
+
+        # A dictionary mapping an action to a function.
+        self._action_handlers: Dict[str, Callable[[Request], Union[Any, Tuple[bool, Any]]]] = {}
+
         self._running: bool = False  # set to False to stop the module loop
 
-        self._module_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)  # api requests will be received over this socket
+        # api requests will be received over this socket
+        self._module_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self._module_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self._module_socket_path = f'/tmp/{name}.sock'  # apth to the socket
         self._buffer_size = 10485760
@@ -87,7 +96,8 @@ class Module:
         :param request: The request instance to handle
         :return: None
         """
-        handler: Callable[[Request], Tuple[bool, Any]] = self._action_handlers.get(request.action)
+        handler: Callable[[Request], Union[Any, Tuple[Any, bool]]] = self._action_handlers.get(request.action)
+
         if not handler:
             self._publish(json_to_bytes({'error': f'No action handler registered for action {request.action}'}))
             self.logger.error(f'No action handler registered for action {request.action}')
@@ -100,18 +110,28 @@ class Module:
             self._publish(json_to_bytes({'error': f'Handler raised exception: {e}'}))
             return
 
-        if type(result) is not tuple:
-            self.logger.error(f'Expected tuple but received {type(result)} instead.')
-            self._publish(json_to_bytes({'error': f'Expected tuple but received {type(result)} instead.'}))
-            return
+        if isinstance(result, tuple):
+            if len(result) > 2:
+                self.logger.error(f'Action handler `{request.action}` returned to many values.')
+                self._publish(json_to_bytes({'error': f'Action handler `{request.action}` returned to many values.'}))
+                return
 
-        success, data = result
-        response_dict = {}
+            if not isinstance(result[1], bool):
+                self.logger.error(f'Second value expected to be a bool but got {type(result[1])} instead.')
+                self._publish(json_to_bytes({
+                    'error': f'Second value expected to be a bool but got {type(result[1])} instead.'
+                }))
+                return
+
+            data, success = result
+        else:
+            success = True
+            data = result
 
         if success:
-            response_dict['payload'] = data
+            response_dict = {'payload': data}
         else:
-            response_dict['error'] = data
+            response_dict = {'error': data}
 
         message_bytes = json_to_bytes(response_dict)
 
@@ -136,6 +156,14 @@ class Module:
         :param frame: Optional frame
         :return: None
         """
+
+        self.logger.debug(f'Calling {len(self._shutdown_handlers)} shutdown handlers.')
+        try:
+            for handler in self._shutdown_handlers:
+                handler(sig)
+        except Exception as e:
+            self.logger.warning(f'Shutdown handler raised an exception: {str(e)}')
+
         self.logger.info(f'Shutting down module. Signal: {sig}')
         self._running = False
         self._module_socket.close()
@@ -157,6 +185,13 @@ class Module:
         self._module_socket.listen(1)
         self.logger.debug('Listening on socket!')
 
+        self.logger.debug(f'Calling {len(self._startup_handlers)} startup handlers.')
+        for handler in self._startup_handlers:
+            try:
+                handler()
+            except Exception as e:
+                self.logger.warning(f'Startup handler raised an exception: {str(e)}')
+
         self._running = True
         while self._running:
             try:
@@ -175,7 +210,7 @@ class Module:
                 self.logger.critical(f'A fatal `{type(e)}` exception was thrown: {e}')
                 self.shutdown()
 
-    def register_action_handler(self, action: str, handler: Callable[[Request], Tuple[bool, Any]]):
+    def register_action_handler(self, action: str, handler: Callable[[Request], Union[Any, Tuple[Any, bool]]]):
         """
         Manually register an function `handler` to handle an action `action`.
         This function will be called anytime a request with the matching action is received.
@@ -184,7 +219,7 @@ class Module:
         Usage Example:
             module = Module('example')
 
-            def save_file(request: Request) -> Tuple[bool, Any]:
+            def save_file(request: Request) -> Union[Any, Tuple[Any, bool]]:
                 ...
 
             module.register_action_handler(save_file)
@@ -197,22 +232,116 @@ class Module:
     def handles_action(self, action: str):
         """
         A decorator that registers a function as an handler for a given action `action` in a request.
-        The decorated function is expected take an instance of `Request` as its first argument
-        and to return a Tuple with two values - bool, Any - in that order.
+        The decorated function is expected take an instance of `Request` as its first argument and can return either
+        Any or a tuple with two values - Any, bool - in that order.
 
-        The returned boolean value indicates whether or not the function completed successfully.
-        The next value is whatever data you want returned in the response.
-        This can be anything as long as it's json serializable.
+        If the function does not return a tuple, The response is assumed to be successful and the returned value
+        will be json serialized and placed into the 'payload' of the response body.
 
-        Usage Example:
-            @handles_action("save_file")
-            def save_file(request: Request) -> Tuple[bool, Any]:
+        Example Function:
+            @handles_action('save_file')
+            def save_file(request: Request) -> str:
                 ...
+                return 'Filed saved successfully!'
+
+        Example Response:
+            { "payload": "File saved successfully!" }
+
+        If a tuple is returned, the first value in the tuple will the data sent back to the user. The second value
+        must be a boolean that indicates whether the function was successful (True) or not (False). If this
+        value is True, the data in the first index will be sent back in the response payload.
+
+        Example Function:
+            @handles_action('save_file')
+            def save_file(request: Request) -> Tuple[str, bool]:
+                ...
+                return 'Filed saved successfully!', True
+
+        Example Response:
+            { "payload": "File saved successfully!" }
+
+        However, if this value is False, The data in the first index will be sent back as an error.
+
+        Example Function:
+            @handles_action('save_file')
+            def save_file(request: Request) -> Tuple[str, bool]:
+                ...
+                return 'There was an issue saving the file.', False
+
+        Example Response:
+            { "error": There was an issue saving the file." }
 
         :param action: The request action to handle
         """
-        def wrapper(func: Callable[[Request], Tuple[bool, Any]]):
+        def wrapper(func: Callable[[Request], Union[Any, Tuple[Any, bool]]]):
             self.register_action_handler(action, func)
+            return func
+        return wrapper
+
+    def register_shutdown_handler(self, handler: Callable[[Optional[int]], None]):
+        """
+        Manually register a function `handler` to be called on the module shutdown lifecycle event.
+        This handler function must take an integer as a parameter which may be the kill signal sent to the application.
+        Depending on how the module is shutdown, the signal value may be None.
+
+        Example:
+            module = Module('example')
+
+            def stop_all_tasks(signal: int):
+                ...
+
+            module.register_shutdown_handler(stop_all_tasks)
+
+        :param handler: A function to be called on shutdown lifecycle event.
+        """
+        self._shutdown_handlers.append(handler)
+
+    def on_shutdown(self):
+        """
+        A decorator that registers a function as a shutdown handler to be called on the shutdown lifecycle event.
+        In the example below, the function `stop_all_tasks` will be called when the module process is terminated.
+
+        Example:
+            @module.on_shutdown()
+            def stop_all_tasks(signal: int):
+                ...
+        """
+        def wrapper(func: Callable[[int], None]):
+            self.register_shutdown_handler(func)
+            return func
+        return wrapper
+
+    def register_startup_handler(self, handler: Callable[[], None]):
+        """
+        Manually register a function `handler` to be called on the module start lifecycle event.
+        This handler function most not take any arguments.
+
+        Example:
+            module = Module('example')
+
+            def copy_configs():
+                ...
+
+            module.register_startup_handler(copy_configs)
+
+        :param handler:
+        :return:
+        """
+        self._startup_handlers.append(handler)
+
+    def on_start(self):
+        """
+        A decorator that registers a function as a startup handler to be called on the start lifecycle event.
+        In the example below, the function `copy_configs` will be called when the modules `start` method is called.
+
+        Example:
+            @module.on_start()
+            def copy_configs():
+                ...
+        :return:
+        """
+        def wrapper(func: Callable[[], None]):
+            self.register_startup_handler(func)
             return func
         return wrapper
 

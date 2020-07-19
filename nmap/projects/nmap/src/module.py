@@ -15,9 +15,8 @@ from pineapple.helpers.opkg_helpers import OpkgJob
 import pineapple.helpers.notification_helpers as notifier
 import pineapple.helpers.opkg_helpers as opkg
 
-
 module = Module('nmap', logging.DEBUG)
-job_manager = JobManager('nmap', logging.DEBUG)
+job_manager = JobManager(name='nmap', module=module, log_level=logging.DEBUG)
 
 history_directory_path = '/root/.nmap'
 history_directory = pathlib.Path(history_directory_path)
@@ -42,13 +41,6 @@ class ScanJob(Job[bool]):
         return True
 
 
-def _make_history_directory():
-    path = pathlib.Path(history_directory)
-
-    if not path.exists():
-        path.mkdir(parents=True)
-
-
 def _notify_scan_complete(job: ScanJob):
     if not job.was_successful:
         module.send_notification(job.error, notifier.ERROR)
@@ -63,18 +55,24 @@ def _notify_dependencies_finished(job: OpkgJob):
         module.send_notification('Nmap finished installing.', notifier.INFO)
 
 
-@module.handles_action('check_background_job')
-def check_background_job(request: Request) -> Tuple[bool, dict]:
-    job = job_manager.get_job(request.job_id)
+@module.on_start()
+def make_history_directory():
+    path = pathlib.Path(history_directory)
 
-    if not job:
-        return False, 'No job found by that id'
+    if not path.exists():
+        module.logger.debug('Creating scan history directory.')
+        path.mkdir(parents=True)
 
-    return True, {'is_complete': job.is_complete, 'result': job.result, 'job_error': job.error}
+
+@module.on_shutdown()
+def stop_nmap(signal: int = None):
+    if len(list(filter(lambda job_runner: job_runner.running is True, job_manager.jobs.values()))) > 0:
+        module.logger.debug('Stopping nmap.')
+        os.system('killall -9 nmap')
 
 
 @module.handles_action('rebind_last_job')
-def rebind_last_job(request: Request) -> Tuple[bool, dict]:
+def rebind_last_job(request: Request):
     module.logger.debug('GETTING LAST BACKGROUND JOB')
     last_job_id: Optional[str] = None
     last_job_type: Optional[str] = None
@@ -91,73 +89,70 @@ def rebind_last_job(request: Request) -> Tuple[bool, dict]:
         else:
             last_job_type = 'unknown'
 
-    module.logger.debug('BACKGROUND: ' + json.dumps(({'job_id': last_job_id, 'job_type': last_job_type, 'job_info': job_info})))
-    return True, {'job_id': last_job_id, 'job_type': last_job_type, 'job_info': job_info}
+    module.logger.debug(
+        'BACKGROUND: ' + json.dumps(({'job_id': last_job_id, 'job_type': last_job_type, 'job_info': job_info})))
+    return {'job_id': last_job_id, 'job_type': last_job_type, 'job_info': job_info}
 
 
 @module.handles_action('check_dependencies')
-def check_dependencies(request: Request) -> Tuple[bool, bool]:
-    return True, opkg.check_if_installed('nmap', module.logger)
+def check_dependencies(request: Request):
+    return opkg.check_if_installed('nmap', module.logger)
 
 
 @module.handles_action('manage_dependencies')
-def manage_dependencies(request: Request) -> Tuple[bool, dict]:
-    _make_history_directory()
-    return True, {
+def manage_dependencies(request: Request):
+    return {
         'job_id': job_manager.execute_job(OpkgJob('nmap', request.install), callbacks=[_notify_dependencies_finished])
     }
 
 
 @module.handles_action('start_scan')
-def start_scan(request: Request) -> Tuple[bool, dict]:
-    _make_history_directory()
+def start_scan(request: Request):
     command = request.command.split(' ')
 
     filename = f"{datetime.now().strftime('%Y-%m-%dT%H-%M-%S')}"
     job_id = job_manager.execute_job(ScanJob(command, filename), callbacks=[_notify_scan_complete])
 
-    return True, {'job_id': job_id, 'output_file': filename}
+    return {'job_id': job_id, 'output_file': filename}
 
 
 @module.handles_action('stop_scan')
-def stop_scan(request: Request) -> Tuple[bool, bool]:
-    os.system('killall -9 nmap')
-    return True, True
+def stop_scan(request: Request):
+    stop_nmap()
+    return True
 
 
 @module.handles_action('list_scan_history')
-def list_scan_history(request: Request) -> Tuple[bool, List[str]]:
-    _make_history_directory()
-
-    return True, [item.name for item in history_directory.iterdir() if item.is_file()]
+def list_scan_history(request: Request):
+    return [item.name for item in history_directory.iterdir() if item.is_file()]
 
 
 @module.handles_action('get_scan_output')
-def get_scan_output(request: Request) -> Tuple[bool, str]:
+def get_scan_output(request: Request):
     output_path = f'{history_directory_path}/{request.output_file}'
     if not os.path.exists(output_path):
-        return False, 'Could not find scan output.'
+        return 'Could not find scan output.', False
 
     with open(output_path, 'r') as f:
-        return True, f.read()
+        return f.read()
 
 
 @module.handles_action('delete_result')
-def delete_result(request: Request) -> Tuple[bool, bool]:
+def delete_result(request: Request):
     output_path = pathlib.Path(f'{history_directory_path}/{request.output_file}')
     if output_path.exists() and output_path.is_file():
         output_path.unlink()
 
-    return True, True
+    return True
 
 
 @module.handles_action('clear_scans')
-def clear_scans(request: Request) -> Tuple[bool, bool]:
+def clear_scans(request: Request):
     for item in history_directory.iterdir():
         if item.is_file():
             item.unlink()
 
-    return True, True
+    return True
 
 
 if __name__ == '__main__':

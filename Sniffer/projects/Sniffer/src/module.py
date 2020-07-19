@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import logging
-from typing import Tuple
+from typing import Tuple, Union
 import os
 
 from pineapple.modules import Module, Request
@@ -32,7 +32,8 @@ def _check_sniffer_job() -> bool:
     return False
 
 
-def _stop_sniffer_job() -> bool:
+@module.on_shutdown()
+def _stop_sniffer_job(signal: int = None) -> Union[bool, Tuple[bool, str]]:
     try:
         from libsniffer.sniffer_job import SnifferJob
     except ImportError as e:
@@ -46,33 +47,33 @@ def _stop_sniffer_job() -> bool:
 
 
 @module.handles_action('status')
-def status(request: Request) -> Tuple[bool, bool]:
-    return True, _check_sniffer_job()
+def status(request: Request):
+    return _check_sniffer_job()
 
 
 @module.handles_action('toggle')
-def toggle(request: Request) -> Tuple[bool, str]:
+def toggle(request: Request):
     try:
         from libsniffer.sniffer_job import SnifferJob
     except ImportError as e:
-        return False, 'Unable to import WebsocketPublisher.'
+        return 'Unable to import WebsocketPublisher.', False
 
     if request.enable:
         if not _check_sniffer_job():
             job_manager.execute_job(SnifferJob())
-        return True, 'started'
+        return 'started'
     else:
         if not _stop_sniffer_job():
-            return True, 'Sniffer stopped'
+            return 'Sniffer stopped'
 
 
 @module.handles_action('setup')
-def setup(request: Request) -> Tuple[bool, str]:
+def setup(request: Request):
     if os.path.exists('/usr/lib/pineapple/libsniffer'):
-        return True, 'libsniffer exists'
+        return 'libsniffer exists'
     else:
         os.symlink('/pineapple/ui/modules/Sniffer/assets/libsniffer', '/usr/lib/pineapple/libsniffer')
-        return True, 'Symlink created.'
+        return 'Symlink created.'
 
 
 if __name__ == '__main__':

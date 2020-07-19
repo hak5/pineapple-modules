@@ -61,7 +61,7 @@ export class TcpdumpMainComponent implements OnInit, OnDestroy {
         this.backgroundJobInterval = setInterval(() => {
             this.API.request({
                 module: 'tcpdump',
-                action: 'check_background_job',
+                action: 'poll_job',
                 job_id: jobId
             }, (response: JobResultDTO<T>) => {
                 if (response.is_complete) {
