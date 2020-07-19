@@ -14,38 +14,31 @@ start() {
     /etc/init.d/php7-fpm start
     /etc/init.d/nginx start
 
-    # Create symlink
+    # Start DNS MASQ to spoof * for unauthorized clients
+    dnsmasq --no-hosts --no-resolv --address=/#/172.16.42.1 -p 5353
+
+    # Symlink evilportal portal api
+    rm /www/captiveportal
     ln -s /pineapple/ui/modules/evilportal/assets/api /www/captiveportal
 
     # Run iptables commands
     iptables -t nat -A PREROUTING -i br-lan -p tcp --dport 443 -j DNAT --to-destination 172.16.42.1:80
     iptables -t nat -A PREROUTING -i br-lan -p tcp --dport 80 -j DNAT --to-destination 172.16.42.1:80
-    iptables -t nat -A POSTROUTING -j MASQUERADE
-
-    iptables -A INPUT -s 172.16.42.0/24 -j DROP
-    iptables -A OUTPUT -s 172.16.42.0/24 -j DROP
-    iptables -A INPUT -s 172.16.42.0/24 -p udp --dport 53 -j ACCEPT
-    iptables -A INPUT -s 172.16.42.1 -j ACCEPT
-    iptables -A OUTPUT -s 172.16.42.1 -j ACCEPT
-
-    iptables -A INPUT -i br-lan -s 172.16.42.0/24 -j ACCEPT
-    iptables -A OUTPUT -i br-lan -s 172.16.42.0/24 -j ACCEPT
+    iptables -t nat -A PREROUTING -i br-lan -p tcp --dport 53 -j DNAT --to-destination 172.16.42.1:5353
+    iptables -t nat -A PREROUTING -i br-lan -p udp --dport 53 -j DNAT --to-destination 172.16.42.1:5353
 }
 
 stop() {
     /etc/init.d/php7-fpm stop
     /etc/init.d/nginx stop
 
+    kill $(netstat -plant | grep 5353 | awk '{print $NF}' | sed 's/\/dnsmasq//g' | head -n 1)
+
     rm /www/captiveportal
-    echo 'ALLOWING 80'
-    iptables -t nat -D PREROUTING -i br-lan -p tcp --dport 80 -j DNAT --to-destination 172.16.42.1:80
-    echo 'ALLOWING 443'
     iptables -t nat -D PREROUTING -i br-lan -p tcp --dport 443 -j DNAT --to-destination 172.16.42.1:80
-    echo 'ALLOWING 53'
-    iptables -D INPUT -p tcp --dport 53 -j ACCEPT
-    echo 'LAST ONE'
-    iptables -D INPUT -j DROP
-    echo 'DONE'
+    iptables -t nat -D PREROUTING -i br-lan -p tcp --dport 80 -j DNAT --to-destination 172.16.42.1:80
+    iptables -t nat -D PREROUTING -i br-lan -p tcp --dport 53 -j DNAT --to-destination 172.16.42.1:5353
+    iptables -t nat -D PREROUTING -i br-lan -p udp --dport 53 -j DNAT --to-destination 172.16.42.1:5353
 }
 
 disable() {

@@ -158,6 +158,7 @@ export class EvilPortalComponent implements OnInit, OnDestroy {
             } else if (list == 'permanentClients') {
                 this.permanentClientState.isBusy = false;
                 this.permanentClientState.selected = '';
+                this.loadPermanentClients();
             }
 
             if (response.error !== undefined) {
@@ -318,6 +319,22 @@ export class EvilPortalComponent implements OnInit, OnDestroy {
 
             this.loadControlState();
             this.loadAllowedClients();
+        });
+    }
+
+    toggleAutostart(): void {
+        this.controlState.isBusy = true;
+        this.API.request({
+            module: 'evilportal',
+            action: 'toggle_autostart'
+        }, (response) => {
+            this.controlState.isBusy = false;
+            if (response.error !== undefined) {
+                this.handleError(response.error);
+                return;
+            }
+
+            this.loadControlState();
         });
     }
 

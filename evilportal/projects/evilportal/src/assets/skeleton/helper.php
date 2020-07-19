@@ -21,15 +21,25 @@ function getClientMac($clientIP)
  */
 function getClientSSID($clientIP)
 {
-    // Get the clients mac address. We need this to get the SSID
-    $mac = getClientMac($clientIP);
+    if (file_exists("/tmp/log.db"))
+    {
 
-    // get the path to the log file
-    $pineAPLogPath = trim(file_get_contents('/etc/pineapple/pineap_log_location'));
+        // Get the clients mac address. We need this to get the SSID
+        $mac = strtoupper(getClientMac($clientIP));
 
-    // get the ssid
-    return trim(exec("grep " . $mac . " " . $pineAPLogPath . "pineap.log | grep 'Association' | awk -F ',' '{print $4}'"));
+        $db = new SQLite3("/tmp/log.db");
+        $results = $db->query("select ssid from log WHERE mac = '{$mac}' AND log_type = 0 ORDER BY updated_at DESC LIMIT 1;");
+        $ssid = '';
+        while($row = $results->fetchArray())
+        {
+            $ssid = $row['ssid'];
+            break;
+        }
+        $db->close();
+        return $ssid;
+    }
 
+    return '';
 }
 
 /**

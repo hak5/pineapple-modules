@@ -105,7 +105,7 @@ class JobManager:
 
         module.register_action_handler('poll_job', self._poll_job)
 
-    def _poll_job(self, request: Request) -> Tuple[bool, Union[dict, str]]:
+    def _poll_job(self, request: Request) -> Union[dict, Tuple[str, bool]]:
         """
         A module action handler to be used for checking the status of a background job.
         The request object must contain string `job_id` which is used to lookup the running job.
@@ -118,11 +118,11 @@ class JobManager:
         remove_if_complete = request.__dict__.get('remove_if_complete', True)
 
         if not job_id:
-            return False, 'job_id was not found in request.'
+            return 'job_id was not found in request.', False
 
         job = self.get_job(job_id, remove_if_complete)
 
         if not job:
-            return False, 'No job found by that id.'
+            return 'No job found by that id.', False
 
-        return True, {'is_complete': job.is_complete, 'result': job.result, 'job_error': job.error}
+        return {'is_complete': job.is_complete, 'result': job.result, 'job_error': job.error}

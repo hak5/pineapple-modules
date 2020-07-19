@@ -107,7 +107,7 @@
             <form>
                 <mat-form-field style="width: 100%;">
                     <mat-label>Filter</mat-label>
-                    <input matInput class="control-input" name="filter" [(ngModel)]="tcpDumpState.filter"/>
+                    <input matInput class="control-input" name="filter" [(ngModel)]="tcpDumpState.filter" (ngModelChange)="update();"/>
                 </mat-form-field>
                 <div class="right-left-split-container">
                     <mat-form-field style="width: 100%; margin-right: 8px;">

@@ -6,7 +6,7 @@ import pathlib
 import subprocess
 from datetime import datetime
 from logging import Logger
-from typing import List, Tuple, Optional
+from typing import List, Optional, Union, Tuple
 
 from pineapple.modules import Module, Request
 from pineapple.helpers.opkg_helpers import OpkgJob
@@ -17,7 +17,7 @@ from pineapple.jobs import JobManager, Job
 
 
 module = Module('tcpdump', logging.DEBUG)
-job_manager = JobManager('tcpdump', logging.DEBUG)
+job_manager = JobManager(name='tcpdump', module=module, log_level=logging.DEBUG)
 
 PCAP_DIRECTORY_PATH = '/root/.tcpdump'
 PCAP_DIRECTORY = pathlib.Path(PCAP_DIRECTORY_PATH)
@@ -43,13 +43,6 @@ class PcapJob(Job[bool]):
         logger.debug('Scan completed.')
 
         return True
-
-
-def _make_history_directory():
-    path = pathlib.Path(PCAP_DIRECTORY_PATH)
-
-    if not path.exists():
-        path.mkdir(parents=True)
 
 
 def _get_last_background_job() -> dict:
@@ -82,91 +75,92 @@ def _notify_dependencies_finished(job: OpkgJob):
         module.send_notification('TCPDump finished installing.', notifier.INFO)
 
 
-@module.handles_action('check_background_job')
-def check_background_job(request: Request) -> Tuple[bool, dict]:
-    job = job_manager.get_job(request.job_id)
+@module.on_start()
+def make_history_directory():
+    path = pathlib.Path(PCAP_DIRECTORY_PATH)
 
-    if not job:
-        return False, 'No job found by that id'
+    if not path.exists():
+        path.mkdir(parents=True)
 
-    return True, {'is_complete': job.is_complete, 'result': job.result, 'job_error': job.error}
+
+@module.on_shutdown()
+def stop_tcpdump(signal: int = None):
+    if len(list(filter(lambda job_runner: job_runner.running is True, job_manager.jobs.values()))) > 0:
+        module.logger.debug('Stopping tcpdump.')
+        os.system('killall -9 tcpdump')
 
 
 @module.handles_action('check_dependencies')
-def check_dependencies(request: Request) -> Tuple[bool, bool]:
-    return True, opkg.check_if_installed('tcpdump', module.logger)
+def check_dependencies(request: Request):
+    return opkg.check_if_installed('tcpdump', module.logger)
 
 
 @module.handles_action('manage_dependencies')
-def manage_dependencies(request: Request) -> Tuple[bool, dict]:
-    _make_history_directory()
-    return True, {'job_id': job_manager.execute_job(OpkgJob('tcpdump', request.install), callbacks=[_notify_dependencies_finished])}
+def manage_dependencies(request: Request):
+    return {'job_id': job_manager.execute_job(OpkgJob('tcpdump', request.install), callbacks=[_notify_dependencies_finished])}
 
 
 @module.handles_action('start_capture')
-def start_capture(request: Request) -> Tuple[bool, dict]:
-    _make_history_directory()
+def start_capture(request: Request):
     command = request.command.split(' ')
 
     filename = f"{datetime.now().strftime('%Y-%m-%dT%H-%M-%S')}.pcap"
 
     job_id = job_manager.execute_job(PcapJob(command, filename))
-    return True, {'job_id': job_id, 'output_file': filename}
+    return {'job_id': job_id, 'output_file': filename}
 
 
 @module.handles_action('stop_capture')
 def stop_capture(request: Request):
-    os.system('killall -9 tcpdump')
-    return True, True
+    stop_tcpdump()
+    return True
 
 
 @module.handles_action('list_capture_history')
-def list_capture_history(request: Request) -> Tuple[bool, List[str]]:
-    _make_history_directory()
-
-    return True, [item.name for item in PCAP_DIRECTORY.iterdir() if item.is_file()]
+def list_capture_history(request: Request):
+    return [item.name for item in PCAP_DIRECTORY.iterdir() if item.is_file()]
 
 
 @module.handles_action('get_capture_output')
-def get_capture_output(request: Request) -> Tuple[bool, str]:
+def get_capture_output(request: Request):
     output_path = f'{PCAP_DIRECTORY_PATH}/{request.output_file}'
     if not os.path.exists(output_path):
-        return False, 'Could not find scan output.'
+        return 'Could not find scan output.', False
 
     with open(output_path, 'r') as f:
-        return True, f.read()
+        return f.read()
 
 
 @module.handles_action('get_log_content')
-def get_log_content(request: Request) -> Tuple[bool, str]:
+def get_log_content(request: Request):
     if not os.path.exists('/tmp/tcpdump.log'):
-        return False, 'Could not find log output: /tmp/tcpdump.log'
+        return 'Could not find log output: /tmp/tcpdump.log', False
 
     with open('/tmp/tcpdump.log', 'r') as f:
-        return True, f.read()
+        return f.read()
 
 
 @module.handles_action('delete_capture')
-def delete_capture(request: Request) -> Tuple[bool, bool]:
+def delete_capture(request: Request):
     output_path = pathlib.Path(f'{PCAP_DIRECTORY_PATH}/{request.output_file}')
     if output_path.exists() and output_path.is_file():
         output_path.unlink()
 
-    return True, True
+    return True
 
 
 @module.handles_action('delete_all')
-def delete_all(request: Request) -> Tuple[bool, bool]:
+def delete_all(request: Request):
     for item in PCAP_DIRECTORY.iterdir():
         if item.is_file():
             item.unlink()
 
-    return True, True
+    return True
 
 
 @module.handles_action('startup')
-def startup(request: Request) -> Tuple[bool, dict]:
-    return True, {
+def startup(request: Request):
+    return {
         'has_dependencies': opkg.check_if_installed('tcpdump', module.logger),
         'interfaces': net.get_interfaces(),
         'last_job': _get_last_background_job()

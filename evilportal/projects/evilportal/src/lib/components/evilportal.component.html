@@ -52,7 +52,8 @@
             <button mat-raised-button color="accent" style="width: 100%;" *ngIf="!controlState.webserver" (click)="toggleWebserver();" [disabled]="controlState.isBusy">Start Web Server</button>
             <button mat-raised-button color="warn" style="width: 100%;" *ngIf="controlState.webserver" (click)="toggleWebserver();" [disabled]="controlState.isBusy">Stop Web Server</button>
             <br/><br/>
-            <button mat-raised-button color="accent" style="width: 100%;" [disabled]="controlState.isBusy">Enable on boot</button>
+            <button mat-raised-button color="accent" style="width: 100%;" *ngIf="!controlState.autoStart" [disabled]="controlState.isBusy" (click)="toggleAutostart();">Enable on boot</button>
+            <button mat-raised-button color="warn" style="width: 100%;" *ngIf="controlState.autoStart" [disabled]="controlState.isBusy" (click)="toggleAutostart();">Disable on boot</button>
         </mat-card-content>
     </mat-card>
 
@@ -82,8 +83,17 @@
                     </mat-form-field>
                 </form>
                 <span fxFlex></span>
-                <button mat-button color="accent">Add</button>
-                <button mat-button color="warn">Remove</button>
+                <button
+                    mat-button
+                    color="accent"
+                    [disabled]="permanentClientState.isBusy"
+                    (click)="updateClientList(permanentClientState.selected, 'permanentClients', true);">Add</button>
+
+                <button
+                    mat-button
+                    color="warn"
+                    [disabled]="permanentClientState.isBusy"
+                    (click)="updateClientList(permanentClientState.selected, 'permanentClients', false);">Remove</button>
             </div>
         </mat-card-content>
     </mat-card>
@@ -114,12 +124,12 @@
                 </form>
                 <span fxFlex></span>
                 <button mat-button color="accent"
-                        [disabled]="!controlState.running"
+                        [disabled]="!controlState.running || allowedClientState.isBusy"
                         (click)="updateClientList(allowedClientState.selected, 'allowedClients', true);">
                     Add
                 </button>
                 <button mat-button color="warn"
-                        [disabled]="!controlState.running"
+                        [disabled]="!controlState.running || allowedClientState.isBusy"
                         (click)="updateClientList(allowedClientState.selected, 'allowedClients', false);">
                     Remove
                 </button>
@@ -143,7 +153,7 @@
         <mat-table style="display: none">
             <mat-header-row *matHeaderRowDef="[]"></mat-header-row>
         </mat-table>
-        <table class="mat-table" style="min-width: 100%; overflow-x: auto; justify-content: left;">
+        <table *ngIf="libraryState.portals.length > 0"class="mat-table" style="min-width: 100%; overflow-x: auto; justify-content: left;">
             <thead>
             <tr class="mat-header-row">
                 <th class="mat-header-cell">Portal Name</th>
@@ -172,6 +182,9 @@
             </ng-container>
             </tbody>
         </table>
+
+        <p *ngIf="libraryState.portals.length == 0 && libraryState.isBusy"><i>Loading Portal Library...</i></p>
+        <p *ngIf="libraryState.portals.length == 0 && !libraryState.isBusy"><i>No portals to display.</i></p>
 
     </mat-card-content>
 </mat-card>

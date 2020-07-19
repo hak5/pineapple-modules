@@ -7,7 +7,6 @@ abstract class Portal
     protected $error;
 
     protected $AUTHORIZED_CLIENTS_FILE = "/tmp/EVILPORTAL_CLIENTS.txt";
-    private $BASE_EP_COMMAND = 'module EvilPortal';
 
     public function __construct($request)
     {
