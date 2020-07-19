@@ -17,7 +17,7 @@ module = Module('evilportal', logging.DEBUG)
 manager = JobManager('evilportal', log_level=logging.DEBUG, module=module)
 
 # CONSTANTS
-_DEPENDENCIES = ['php7-mod-curl', 'php7-mod-json', 'php7-fpm', 'php7', 'nginx']
+_DEPENDENCIES = ['php7-mod-curl', 'php7-mod-json', 'php7-fpm', 'php7-mod-sqlite3', 'php7', 'nginx']
 _MODULE_PATH = '/pineapple/ui/modules/evilportal'
 _ASSETS_PATH = f'{_MODULE_PATH}/assets'
 _PORTAL_PATH = f'/root/portals'
@@ -182,18 +182,25 @@ def _check_autostart() -> bool:
     return cmd.grep_output('ls /etc/rc.d/', 'evilportal') != b''
 
 
+def _remove_client_from_file(client_ip: str, client_file: str):
+    os.system(f'sed -i "s/{client_ip}//g" {client_file}')
+    os.system(f'sed -i "/^$/d" {client_file}')
+
+
+def _write_client_to_file(client_ip: str, client_file: str):
+    with open(client_file, 'a') as f:
+        f.write(f'{client_ip}\n')
+
+
 def _authorize_client(ip: str):
     os.system(f'iptables -t nat -I PREROUTING -s {ip} -j ACCEPT')
-
-    with open(_CLIENTS_FILE, 'a') as f:
-        f.write(f'{ip}\n')
+    _write_client_to_file(ip, _CLIENTS_FILE)
 
 
 def _revoke_client(ip: str):
     os.system(f'iptables -t nat -D PREROUTING -s {ip}')
     os.system(f'iptables -t nat -D PREROUTING -s {ip} -j ACCEPT')
-    os.system(f'sed -i "s/{ip}//g" {_CLIENTS_FILE}')
-    os.system(f'sed -i "/^$/d" {_CLIENTS_FILE}')
+    _remove_client_from_file(ip, _CLIENTS_FILE)
 
 
 def _delete_directory_tree(directory: pathlib.Path) -> bool:
@@ -260,6 +267,10 @@ def _get_directory_content(dir_path: str) -> List[dict]:
 
 @module.on_start()
 def _create_portal_folders():
+    if os.path.isfile(f'{_ASSETS_PATH}/evilportal.sh'):
+        os.system(f'cp {_ASSETS_PATH}/evilportal.sh /etc/init.d/evilportal')
+        os.chmod('/etc/init.d/evilportal', 755)
+
     if not os.path.isdir(f'{_ASSETS_PATH}/portals'):
         os.mkdir(f'{_ASSETS_PATH}/portals')
 
@@ -276,9 +287,12 @@ def update_client_list(request: Request) -> Tuple[bool, str]:
             _revoke_client(request.client)
 
     elif request.list == 'permanentClients':
-        pass
+        if request.add:
+            _write_client_to_file(request.client, f'{_ASSETS_PATH}/permanentclients.txt')
+        else:
+            _remove_client_from_file(request.client, f'{_ASSETS_PATH}/permanentclients.txt')
 
-    return True, 'List updated.'
+    return 'List updated.'
 
 
 @module.handles_action('status')
