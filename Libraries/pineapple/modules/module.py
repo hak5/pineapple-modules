@@ -37,7 +37,7 @@ class Module:
         # api requests will be received over this socket
         self._module_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self._module_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self._module_socket_path = f'/tmp/{name}.sock'  # apth to the socket
+        self._module_socket_path = f'/tmp/modules/{name}.sock'  # apth to the socket
         self._buffer_size = 10485760
 
         # if the socket already exists attempt to delete it.
