@@ -50,6 +50,7 @@ class Module:
 
         # If a SIGINT is received preform a clean shutdown by calling `shutdown()`
         signal.signal(signal.SIGINT, self.shutdown)
+        signal.signal(signal.SIGTERM, self.shutdown)
 
     def _receive(self) -> Optional[dict]:
         """
@@ -163,6 +164,12 @@ class Module:
                 handler(sig)
         except Exception as e:
             self.logger.warning(f'Shutdown handler raised an exception: {str(e)}')
+
+        try:
+            os.unlink(f'/tmp/modules/{self.name}.sock')
+            os.unlink(f'/tmp/modules/{self.name}.pid')
+        except Exception as e:
+            self.logger.warning(f'Error deleting socket or pid file: {str(e)}')
 
         self.logger.info(f'Shutting down module. Signal: {sig}')
         self._running = False
