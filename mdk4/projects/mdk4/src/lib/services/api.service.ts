@@ -7,6 +7,7 @@ import {Router} from '@angular/router';
 })
 export class ApiService {
     public static totalRequests = 0;
+    public moduleRequestBusy = false;
 
     constructor(private http: HttpClient,
                 private router: Router) {}
@@ -22,25 +23,23 @@ export class ApiService {
     }
 
     request(payload: any, callback: (any) => void) {
+        this.moduleRequestBusy = true;
         let resp;
 
         this.http.post('/api/module/request', payload).subscribe((r: any) => {
             if (r === undefined || r === null) {
                 resp = this.emptyResponse;
             }
-
-            if (r.payload !== undefined) {
-                resp = r.payload;
-            } else {
-                resp = r;
-            }
+            resp = r.payload;
         }, (err) => {
             resp = err.error;
             if (err.status === 401) {
                 this.unauth();
             }
+            this.moduleRequestBusy = false;
             callback(resp);
         }, () => {
+            this.moduleRequestBusy = false;
             callback(resp);
         });
 
@@ -152,5 +151,25 @@ export class ApiService {
 
     async APIDeleteAsync(path: string, body: any): Promise<any> {
         return await this.http.delete(path, body).toPromise();
+    }
+
+    APIDownload(fullpath: string, filename: string): void {
+        ApiService.totalRequests++;
+
+        const body = {
+            filename: fullpath
+        };
+
+        this.http.post('/api/download', body, {responseType: 'blob'}).subscribe((r) => {
+            const url = window.URL.createObjectURL(r);
+            const a = document.createElement('a');
+            document.body.appendChild(a);
+            a.setAttribute('style', 'display: none');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        });
     }
 }
