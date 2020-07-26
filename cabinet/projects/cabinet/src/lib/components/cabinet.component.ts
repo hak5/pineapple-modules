@@ -14,11 +14,13 @@ import {CabinetErrorDialogComponent} from './helpers/error-dialog/cabinet-error-
     styleUrls: ['cabinet.component.css'],
 })
 export class cabinetComponent implements OnInit {
+
+    public isBusy: boolean = false;
+    public currentDirectory: string = '/';
+    public directoryContents: Array<object> = [];
+
     constructor(private API: ApiService,
                 private dialog: MatDialog) { }
-
-    currentDirectory = '/';
-    directoryContents: Array<object> = [];
 
     humanFileSize(byteLength: number): string {
         const kiloBytes = 1024;
@@ -37,12 +39,15 @@ export class cabinetComponent implements OnInit {
     }
 
     getDirectoryContents(path: string, getParent: boolean = false): void {
+        this.isBusy = true;
+
         this.API.request({
             module: 'cabinet',
             action: 'list_directory',
             directory: path,
             get_parent: getParent
         }, (response) => {
+            this.isBusy = false;
             if (response.error !== undefined) {
                 this.showErrorDialog(response.error);
                 return

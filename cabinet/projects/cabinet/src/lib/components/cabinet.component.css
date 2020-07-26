@@ -15,3 +15,11 @@
     margin-right: 4px;
     margin-bottom: 4px;
 }
+
+.cabinet-loading-centered {
+    display: flex;
+    justify-content: center;
+    align-self: center;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}

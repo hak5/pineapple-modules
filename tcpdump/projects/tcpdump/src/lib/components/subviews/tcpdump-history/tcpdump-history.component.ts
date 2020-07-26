@@ -78,6 +78,10 @@ export class TcpdumpHistoryComponent implements OnInit {
         });
     }
 
+    downloadItem(item: string): void {
+        this.API.APIDownload('/root/.tcpdump/' + item, item);
+    }
+
     showDeleteDialog(item: string): void {
         this.dialog.open(ConfirmationDialogComponent, {
             hasBackdrop: true,

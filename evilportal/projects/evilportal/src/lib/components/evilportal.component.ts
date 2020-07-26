@@ -452,7 +452,13 @@ export class EvilPortalComponent implements OnInit, OnDestroy {
                 this.handleError(response.error);
                 return;
             }
-            this.hasDependencies = response;
+
+            this.hasDependencies = response.installed;
+
+            if (response.installing) {
+                this.isInstalling = true;
+                this.monitorDependencies(response.job_id);
+            }
         });
     }
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import json
 import subprocess
-from typing import Dict, Tuple, List, Union
+from typing import Dict, Tuple, List, Union, Optional
 import logging
 import pathlib
 import os
@@ -266,7 +266,7 @@ def _get_directory_content(dir_path: str) -> List[dict]:
 
 
 @module.on_start()
-def _create_portal_folders():
+def create_portal_folders():
     if os.path.isfile(f'{_ASSETS_PATH}/evilportal.sh'):
         os.system(f'cp {_ASSETS_PATH}/evilportal.sh /etc/init.d/evilportal')
         os.chmod('/etc/init.d/evilportal', 755)
@@ -455,7 +455,7 @@ def load_directory(request: Request):
 @module.handles_action('list_portals')
 def list_portals(request: Request):
     module.logger.debug('Creating portal folder')
-    _create_portal_folders()
+    create_portal_folders()
 
     module.logger.debug('Listing directories')
     directories = [item for item in _get_directory_content(_PORTAL_PATH) if item.get('directory', False)]
@@ -485,7 +485,19 @@ def manage_dependencies(request: Request):
 
 @module.handles_action('check_dependencies')
 def check_dependencies(request: Request):
-    return False not in [opkg.check_if_installed(package) for package in _DEPENDENCIES]
+    opkg_job_id: Optional[str] = None
+
+    if len(manager.jobs) >= 1:
+        for job_id, runner in manager.jobs.items():
+            if isinstance(runner.job, OpkgJob) and not runner.job.is_complete:
+                opkg_job_id = job_id
+                break
+
+    return {
+        'installed': False not in [opkg.check_if_installed(package) for package in _DEPENDENCIES],
+        'installing': opkg_job_id is not None,
+        'job_id': opkg_job_id
+    }
 
 
 if __name__ == '__main__':

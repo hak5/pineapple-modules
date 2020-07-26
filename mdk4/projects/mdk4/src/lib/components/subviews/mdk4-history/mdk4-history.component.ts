@@ -76,6 +76,10 @@ export class Mdk4HistoryComponent implements OnInit {
         });
     }
 
+    downloadItem(item: string): void {
+        this.API.APIDownload('/root/.mdk4/' + item, 'mdk4-' + item + '.log');
+    }
+
     showMdk4Results(item: string): void {
         this.dialog.open(Mdk4ResultDialogComponent, {
             hasBackdrop: true,

@@ -46,6 +46,10 @@ export class NmapHistoryComponent implements OnInit {
         });
     }
 
+    downloadItem(item: string): void {
+        this.API.APIDownload('/root/.nmap/' + item, 'nmap-' + item + '.log')
+    }
+
     private deleteItem(item: string): void {
         this.isBusy = true;
         this.API.request({

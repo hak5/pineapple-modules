@@ -13,7 +13,7 @@ export class TcpdumpComponent implements OnInit {
     constructor() {
         this.navLinks = [
             {
-                label: 'Tcpdump',
+                label: 'TCPDump',
                 link: './',
                 index: 0
             },

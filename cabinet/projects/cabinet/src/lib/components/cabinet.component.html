@@ -6,20 +6,55 @@
                 <mat-card-subtitle>Current Directory <i>{{ currentDirectory }}</i></mat-card-subtitle>
             </div>
             <span fxFlex></span>
-            <div>
-                <button mat-raised-button color="accent" class="control-button" (click)="getDirectoryContents(currentDirectory, true);" [disabled]="currentDirectory == '/'">Back</button>
-                <button mat-raised-button color="accent" class="control-button" (click)="showCreateDirectory();">New Folder</button>
-                <button mat-raised-button color="accent" class="control-button" (click)="showEditDialog(null);">New File</button>
-                <button mat-raised-button color="accent" class="control-button" (click)="getDirectoryContents(currentDirectory);">Refresh</button>
+            <div class="cabinet-control-container">
+                <mat-spinner [diameter]="24" color="accent" class="control-button" *ngIf="isBusy"></mat-spinner>
+                <button mat-raised-button
+                        color="accent"
+                        class="control-button"
+                        (click)="getDirectoryContents(currentDirectory, true);"
+                        [disabled]="currentDirectory == '/' || isBusy">Back
+                </button>
+                <button mat-raised-button
+                        color="accent"
+                        class="control-button"
+                        (click)="showCreateDirectory();"
+                        [disabled]="isBusy">New Folder
+                </button>
+                <button mat-raised-button
+                        color="accent"
+                        class="control-button"
+                        (click)="showEditDialog(null);"
+                        [disabled]="isBusy">New File</button>
+                <button mat-raised-button
+                        color="accent"
+                        class="control-button"
+                        (click)="getDirectoryContents(currentDirectory);"
+                        [disabled]="isBusy">Refresh
+                </button>
             </div>
         </div>
 
         <mat-divider></mat-divider>
 
+        <div class="cabinet-loading-centered" *ngIf="isBusy && directoryContents.length == 0">
+            <i>Loading...</i>
+            <mat-spinner [diameter]="18" color="accent" style="margin-left: 8px"></mat-spinner>
+        </div>
+
+        <div class="cabinet-loading-centered" *ngIf="!isBusy && directoryContents.length == 0">
+            <span>
+                <p>Directory <i>{{ currentDirectory }}</i> appears to be empty</p>
+                <button mat-flat-button
+                        color="accent"
+                        style="width: 100%"
+                        (click)="getDirectoryContents(currentDirectory, true);">Back</button>
+            </span>
+        </div>
+
         <mat-table style="display: none">
             <mat-header-row *matHeaderRowDef="[]"></mat-header-row>
         </mat-table>
-        <table class="mat-table" style="min-width: 100%; overflow-x: auto; justify-content: left">
+        <table class="mat-table" style="min-width: 100%; overflow-x: auto; justify-content: left" *ngIf="directoryContents.length > 0">
             <thead>
             <tr class="mat-header-row">
                 <th class="mat-header-cell">File Name</th>
