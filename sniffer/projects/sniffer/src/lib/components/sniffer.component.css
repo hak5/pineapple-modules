@@ -16,11 +16,10 @@
 }
 
 .control-section {
-    /*flex: 1;*/
     flex: 1;
-    width: 100%;
     flex-wrap: wrap;
     justify-content: space-between;
+    max-width: 50%;
 }
 
 .data-container {

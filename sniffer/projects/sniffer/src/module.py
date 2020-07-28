@@ -1,23 +1,45 @@
 #!/usr/bin/env python3
 
 import logging
-from typing import Tuple, Union
 import os
+import subprocess
+from logging import Logger
+from time import sleep
 
+from pineapple.jobs.job import TResult
 from pineapple.modules import Module, Request
-from pineapple.jobs import JobManager
-import pineapple.helpers.command_helpers as cmd
+from pineapple.jobs import JobManager, Job
 
-module = Module('Sniffer', logging.DEBUG)
-job_manager = JobManager('Sniffer', logging.DEBUG, module=module)
+module = Module('sniffer', logging.DEBUG)
+job_manager = JobManager('sniffer', logging.DEBUG, module=module)
+
+
+class SnifferJob(Job[bool]):
+
+    def __init__(self):
+        super().__init__()
+        self.proc = None
+
+    def do_work(self, logger: Logger) -> TResult:
+        logger.debug('Starting sniffer handler...')
+        self.proc = subprocess.Popen(['python3', 'sniffer_handler.py'], cwd='/pineapple/modules/sniffer/assets/')
+
+        while True:
+            sleep(0.5)
+            value = self.proc.poll()
+            if value is not None:
+                logger.debug(f'Proc returned value {value}')
+                break
+
+        logger.debug('SnifferJob completed.')
+        return True
+
+    def stop(self):
+        os.system('killall -9 sniffer')
+        self.proc.kill()
 
 
 def _check_sniffer_job() -> bool:
-    try:
-        from libsniffer.sniffer_job import SnifferJob
-    except ImportError as e:
-        return False, 'Unable to import SnifferJob.'
-
     for jid, runner in job_manager.jobs.items():
         if isinstance(runner.job, SnifferJob):
             module.logger.debug(f'FOUND SNIFFER JOB: {jid}')
@@ -33,12 +55,7 @@ def _check_sniffer_job() -> bool:
 
 
 @module.on_shutdown()
-def _stop_sniffer_job(signal: int = None) -> Union[bool, Tuple[bool, str]]:
-    try:
-        from libsniffer.sniffer_job import SnifferJob
-    except ImportError as e:
-        return False, 'Unable to import SnifferJob.'
-
+def _stop_sniffer_job(signal: int = None) -> bool:
     for jid, runner in job_manager.jobs.items():
         if isinstance(runner.job, SnifferJob):
             runner.job.stop()
@@ -53,11 +70,6 @@ def status(request: Request):
 
 @module.handles_action('toggle')
 def toggle(request: Request):
-    try:
-        from libsniffer.sniffer_job import SnifferJob
-    except ImportError as e:
-        return 'Unable to import WebsocketPublisher.', False
-
     if request.enable:
         if not _check_sniffer_job():
             job_manager.execute_job(SnifferJob())
@@ -65,15 +77,6 @@ def toggle(request: Request):
     else:
         if not _stop_sniffer_job():
             return 'Sniffer stopped'
-
-
-@module.handles_action('setup')
-def setup(request: Request):
-    if os.path.exists('/usr/lib/pineapple/libsniffer'):
-        return 'libsniffer exists'
-    else:
-        os.symlink('/pineapple/ui/modules/Sniffer/assets/libsniffer', '/usr/lib/pineapple/libsniffer')
-        return 'Symlink created.'
 
 
 if __name__ == '__main__':

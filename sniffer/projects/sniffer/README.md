@@ -13,7 +13,7 @@ Run `ng build Example-Module` to build the project. The build artifacts will be 
 
 ## Publishing
 
-After building your library with `ng build Example-Module`, go to the dist folder `cd dist/Sniffer` and run `npm publish`.
+After building your library with `ng build Example-Module`, go to the dist folder `cd dist/sniffer` and run `npm publish`.
 
 ## Running unit tests
 

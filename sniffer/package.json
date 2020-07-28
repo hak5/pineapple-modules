@@ -1,5 +1,5 @@
 {
-    "name": "Sniffer",
+    "name": "sniffer",
     "version": "0.0.0",
     "scripts": {
         "ng": "ng",

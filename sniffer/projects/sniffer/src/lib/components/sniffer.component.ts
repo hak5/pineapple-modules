@@ -1,13 +1,13 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import { ApiService } from '../services/api.service';
-import {DisplayModel} from "../interfaces/displaymodel.interface";
 import {MatDialog} from "@angular/material/dialog";
+import {DisplayModel} from "../interfaces/displaymodel.interface";
 import {ErrorDialogComponent} from "../helpers/error-dialog/error-dialog.component";
 
 @Component({
-    selector: 'lib-Sniffer',
-    templateUrl: './Sniffer.component.html',
-    styleUrls: ['./Sniffer.component.css']
+    selector: 'lib-sniffer',
+    templateUrl: './sniffer.component.html',
+    styleUrls: ['./sniffer.component.css']
 })
 export class SnifferComponent implements OnInit, OnDestroy {
 
@@ -104,7 +104,7 @@ export class SnifferComponent implements OnInit, OnDestroy {
     loadStatus(): void {
         this.isBusy = true;
         this.API.request({
-            module: 'Sniffer',
+            module: 'sniffer',
             action: 'status'
         }, (response) => {
             this.isBusy = false;
@@ -121,7 +121,7 @@ export class SnifferComponent implements OnInit, OnDestroy {
         this.isBusy = true;
 
         this.API.request({
-            module: 'Sniffer',
+            module: 'sniffer',
             action: 'toggle',
             enable: enable
         }, (response) => {
@@ -138,21 +138,8 @@ export class SnifferComponent implements OnInit, OnDestroy {
         });
     }
 
-    setup(): void {
-        this.API.request({
-            module: 'Sniffer',
-            action: 'setup'
-        }, (response) => {
-            if (response.error !== undefined) {
-                this.handleError(response);
-                return;
-            }
-            this.loadStatus();
-        });
-    }
-
     ngOnInit() {
-        this.setup();
+        this.loadStatus();
     }
 
     ngOnDestroy() {
