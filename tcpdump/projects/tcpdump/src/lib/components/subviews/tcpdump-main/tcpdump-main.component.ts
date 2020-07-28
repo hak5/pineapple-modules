@@ -75,7 +75,6 @@ export class TcpdumpMainComponent implements OnInit, OnDestroy {
     }
 
     getLogContent(): void {
-
         this.isFetchingOutput = true;
         this.API.request({
             module: 'tcpdump',
@@ -89,6 +88,10 @@ export class TcpdumpMainComponent implements OnInit, OnDestroy {
 
             this.captureOutput = response;
         });
+    }
+
+    downloadPcap(): void {
+        this.API.APIDownload('/root/.tcpdump/' + this.captureFileName, this.captureFileName);
     }
 
     private monitorCaptureJob(jobId: string, captureFile: string): void {

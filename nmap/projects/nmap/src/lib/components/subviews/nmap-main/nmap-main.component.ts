@@ -241,6 +241,10 @@ export class NmapMainComponent implements OnInit, OnDestroy {
         });
     }
 
+    downloadOutput(): void {
+        this.API.APIDownload('/root/.nmap/' + this.scanOutputFileName, 'nmap-' + this.scanOutputFileName + '.log')
+    }
+
     private monitorScan(jobId: string, outputFile: string): void {
         this.isScanning = true;
         this.scanOutputFileName = outputFile;

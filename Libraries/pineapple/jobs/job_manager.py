@@ -14,13 +14,13 @@ class JobManager:
         """
         :param name: The name of the job manager.
         :param log_level: Optional level for logging. Default is ERROR
-        :param module: Optional instance of Module. If given some action handlers will be registered.
-                       Checkout `_register_action_handlers` for more details.
+        :param module: Optional instance of Module. If given some action and shutdown handlers will be registered.
+                       Checkout `_setup_with_module` for more details.
         """
         self.name = name
         self.logger = get_logger(name, log_level)
         self.jobs: Dict[str, JobRunner] = {}
-        self._register_action_handlers(module)
+        self._setup_with_module(module)
 
     def get_job(self, job_id: str, remove_if_complete: bool = True) -> Optional[Job]:
         """
@@ -65,6 +65,7 @@ class JobManager:
         """
         Remove a job from memory based on its id.
         This will remove the job regardless of its completion status.
+
         :param job_id: The id of the job to delete.
         :return:
         """
@@ -75,6 +76,7 @@ class JobManager:
         """
         Assign an id to a job and execute it in a background thread.
         The id will be returned and the job can be tracked by calling `get_job` and providing it the id.
+
         :param job: an instance of Job to start running.
         :param callbacks: An optional list of functions that take `job` as a parameter to be called when completed.
                           These will be called regardless if `job` raises an exception or not.
@@ -93,10 +95,30 @@ class JobManager:
 
         return job_id
 
-    def _register_action_handlers(self, module: Optional[Module]):
+    def stop_job(self, job: Optional[Job] = None, job_id: Optional[str] = None):
+        """
+        Call the `stop` method on a job.
+        Either an instance of the Job to stop or id of the job is expected.
+        The job will not automatically be removed from memory on completion.
+
+        :param job: An instance of Job
+        :param job_id: The id of te job to stop
+        """
+        if not job and not job_id:
+            raise Exception('A job or job_id is expected.')
+
+        if not job:
+            job = self.get_job(job_id, remove_if_complete=False)
+
+        if isinstance(job, Job):
+            job.stop()
+
+    def _setup_with_module(self, module: Optional[Module]):
         """
         If module is not None and is an instance of Module then register the following action handlers:
             action: `poll_job` | handler: `self.poll_job`
+
+        And register _on_module_shutdown as a shutdown handler.
 
         :param module: an instance of Module
         """
@@ -104,6 +126,17 @@ class JobManager:
             return
 
         module.register_action_handler('poll_job', self._poll_job)
+        module.register_shutdown_handler(self._on_module_shutdown)
+
+    def _on_module_shutdown(self, signal: int):
+        """
+        A shutdown handler to be registered is `self.module` is not None.
+        This will stop all currently running jobs.
+
+        :param signal: The signal given
+        """
+        for job_id, runner in self.jobs.items():
+            self.stop_job(job_id=job_id)
 
     def _poll_job(self, request: Request) -> Union[dict, Tuple[str, bool]]:
         """
@@ -112,6 +145,7 @@ class JobManager:
         Optionally, the request can contain boolean `remove_if_complete`. If this is True then the job will
         be deleted from memory if it is completed. If this value is False then the job will remain until manually deleted.
         This default value is True.
+
         :param request: An instance of Request
         """
         job_id = request.__dict__.get('job_id')

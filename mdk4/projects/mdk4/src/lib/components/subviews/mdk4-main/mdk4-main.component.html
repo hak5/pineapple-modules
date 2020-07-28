@@ -136,7 +136,7 @@
                 <mat-card-title>Output</mat-card-title>
                 <span fxFlex></span>
                 <button mat-icon-button [disabled]="refreshingOutput || outputFile == null" (click)="loadOutput(outputFile);"><mat-icon>refresh</mat-icon></button>
-                <button mat-icon-button [disabled]="isBusy || outputFile == null"><mat-icon>cloud_download</mat-icon></button>
+                <button mat-icon-button [disabled]="isBusy || outputFile == null" (click)="downloadOutput();"><mat-icon>cloud_download</mat-icon></button>
             </div>
             <textarea class="output-textarea" placeholder="No output to display..." [(ngModel)]="output" readonly></textarea>
             <div class="right-left-split-container">

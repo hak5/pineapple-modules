@@ -30,6 +30,7 @@ class PcapJob(Job[bool]):
         self.file_name = file_name
         self.command = command
         self.pcap_file = f'{PCAP_DIRECTORY_PATH}/{file_name}'
+        self.proc = None
 
     def do_work(self, logger: Logger) -> bool:
         logger.debug('tcpdump job started.')
@@ -43,6 +44,9 @@ class PcapJob(Job[bool]):
         logger.debug('Scan completed.')
 
         return True
+
+    def stop(self):
+        os.system('killall -9 tcpdump')
 
 
 def _get_last_background_job() -> dict:

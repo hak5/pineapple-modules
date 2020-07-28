@@ -34,12 +34,19 @@ class Mdk4Job(Job[bool]):
         self.mdk4_file = f'{_HISTORY_DIRECTORY_PATH}/{file_name}'
         self.input_interface = input_interface
         self.output_interface = output_interface
+        self.monitor_input_iface = None
+        self.monitor_output_iface = None
+
+
+    def _stop_monitor_mode(self):
+        if self.monitor_input_iface:
+            os.system(f'airmon-ng stop {self.monitor_input_iface}')
+        if self.monitor_output_iface:
+            os.system(f'airmon-ng stop {self.monitor_output_iface}')
 
     def do_work(self, logger: logging.Logger) -> bool:
         logger.debug('mdk4 job started.')
 
-        monitor_input_iface = None
-        monitor_output_iface = None
         output_file = open(self.mdk4_file, 'w')
 
         if self.input_interface and self.input_interface != '' and self.input_interface[-3:] != 'mon':
@@ -48,7 +55,7 @@ class Mdk4Job(Job[bool]):
                 for index, substr in enumerate(self.command):
                     if substr == self.input_interface:
                         self.command[index] = f'{self.input_interface}mon'
-                        monitor_input_iface = f'{self.input_interface}mon'
+                        self.monitor_input_iface = f'{self.input_interface}mon'
             else:
                 self.error = 'Error starting monitor mode for input interface.'
                 return False
@@ -59,7 +66,7 @@ class Mdk4Job(Job[bool]):
                 for index, substr in enumerate(self.command):
                     if substr == self.output_interface:
                         self.command[index] = f'{self.output_interface}mon'
-                        monitor_output_iface = f'{self.output_interface}mon'
+                        self.monitor_output_iface = f'{self.output_interface}mon'
             else:
                 self.error = 'Error starting monitor mode for output interface.'
                 return False
@@ -68,14 +75,13 @@ class Mdk4Job(Job[bool]):
         subprocess.call(self.command, stdout=output_file, stderr=output_file)
         logger.debug('Mdk4 Completed.')
 
-        if monitor_input_iface:
-            logger.debug(f'stopping monitor mode for interface {monitor_input_iface}')
-            os.system(f'airmon-ng stop {monitor_input_iface}')
-        if monitor_output_iface:
-            logger.debug(f'stopping monitor mode for interface {monitor_output_iface}')
-            os.system(f'airmon-ng stop {monitor_output_iface}')
+        self._stop_monitor_mode()
 
         return True
+
+    def stop(self):
+        os.system('killall -9 mdk4')
+        self._stop_monitor_mode()
 
 
 def _get_last_background_job() -> dict:

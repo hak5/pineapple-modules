@@ -258,6 +258,10 @@ export class Mdk4MainComponent implements OnInit, OnDestroy {
         });
     }
 
+    downloadOutput(): void {
+        this.API.APIDownload('/root/.mdk4/' + this.outputFile, 'mdk4-' + this.outputFile + '.log');
+    }
+
     startMdk4(): void {
         this.API.request({
             module: 'mdk4',
