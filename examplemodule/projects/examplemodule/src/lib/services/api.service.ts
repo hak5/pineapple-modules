@@ -7,7 +7,7 @@ import {Router} from '@angular/router';
 })
 export class ApiService {
     public static totalRequests = 0;
-    public moduleRequestBusy = false;
+    apiModuleBusy = document.getElementById('ApiModuleBusy');
 
     constructor(private http: HttpClient,
                 private router: Router) {}
@@ -22,8 +22,15 @@ export class ApiService {
         }
     }
 
+    setBusy(): void {
+        this.apiModuleBusy.style.display = 'block';
+    }
+    setNotBusy(): void {
+        this.apiModuleBusy.style.display = 'none';
+    }
+
     request(payload: any, callback: (any) => void) {
-        this.moduleRequestBusy = true;
+        this.setBusy();
         let resp;
 
         this.http.post('/api/module/request', payload).subscribe((r: any) => {
@@ -36,10 +43,10 @@ export class ApiService {
             if (err.status === 401) {
                 this.unauth();
             }
-            this.moduleRequestBusy = false;
+            this.setNotBusy();
             callback(resp);
         }, () => {
-            this.moduleRequestBusy = false;
+            this.setNotBusy();
             callback(resp);
         });
 
