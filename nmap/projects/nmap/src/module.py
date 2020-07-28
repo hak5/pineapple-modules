@@ -40,6 +40,9 @@ class ScanJob(Job[bool]):
         logger.debug('Scan completed.')
         return True
 
+    def stop(self):
+        os.system('killall -9 nmap')
+
 
 def _notify_scan_complete(job: ScanJob):
     if not job.was_successful:

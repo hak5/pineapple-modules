@@ -105,6 +105,7 @@ class Module:
             return
 
         try:
+            self.logger.debug(f'Calling handler for action {request.action} and passing {request.__dict__}')
             result = handler(request)
         except Exception as e:
             self.logger.error(f'Handler raised exception: {e}')
@@ -118,9 +119,9 @@ class Module:
                 return
 
             if not isinstance(result[1], bool):
-                self.logger.error(f'Second value expected to be a bool but got {type(result[1])} instead.')
+                self.logger.error(f'{request.action}: second value expected to be a bool but got {type(result[1])} instead.')
                 self._publish(json_to_bytes({
-                    'error': f'Second value expected to be a bool but got {type(result[1])} instead.'
+                    'error': f'{request.action}: second value expected to be a bool but got {type(result[1])} instead.'
                 }))
                 return
 

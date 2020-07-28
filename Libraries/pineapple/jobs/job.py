@@ -32,3 +32,11 @@ class Job(Generic[TResult]):
         :return: The result of the work.
         """
         raise NotImplementedError()
+
+    @abc.abstractmethod
+    def stop(self):
+        """
+        Override this method and implement a way to stop the running jub.
+        :return:
+        """
+        raise NotImplementedError()

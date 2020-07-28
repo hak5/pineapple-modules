@@ -211,7 +211,7 @@
                 <mat-card-title>Output</mat-card-title>
                 <span fxFlex></span>
                 <button mat-icon-button [disabled]="isFetchingOutput || !isCapturing" (click)="getLogContent();"><mat-icon>refresh</mat-icon></button>
-                <button mat-icon-button [disabled]="captureFileName == null || isCapturing"><mat-icon>cloud_download</mat-icon></button>
+                <button mat-icon-button [disabled]="captureFileName == null || isCapturing" (click)="downloadPcap();"><mat-icon>cloud_download</mat-icon></button>
             </div>
             <textarea class="output-textarea" [(ngModel)]="captureOutput" placeholder="No output to display..." readonly></textarea>
             <div class="right-left-split-container">

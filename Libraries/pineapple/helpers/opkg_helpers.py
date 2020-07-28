@@ -1,6 +1,7 @@
 from logging import Logger
 from typing import Optional, Tuple, List, Union
 import subprocess
+import os
 
 from pineapple.helpers.network_helpers import check_for_internet
 from pineapple.jobs.job import Job
@@ -156,3 +157,11 @@ class OpkgJob(Job[bool]):
             return self._install_or_remove(self.package, logger)
         else:
             raise TypeError(f'Package is expected to be a list of strings or a single string. Got {type(self.package)} instead.')
+
+    def stop(self):
+        """
+        Kill the opkg process if it is running.
+        :return:
+        """
+        if not self.is_complete:
+            os.system('killall -9 opkg')

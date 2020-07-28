@@ -16,7 +16,7 @@ class JobRunner(Thread):
         """
         super().__init__()
         self.logger = logger
-        self.job = job
+        self.job: Job = job
         self.running: bool = False
         self._callbacks: List[Callable[[Job], None]] = callbacks if callbacks else list()
 
@@ -43,3 +43,11 @@ class JobRunner(Thread):
             self.logger.error(f'Callback failed with a {type(e)} error: {e}')
 
         self.running = False
+
+    def stop(self):
+        """
+        Call the `stop` method on `self.job` if the job is running.
+        :return:
+        """
+        if self.running:
+            self.job.stop()
