@@ -3,38 +3,38 @@
     "version": 1,
     "newProjectRoot": "projects",
     "projects": {
-        "Sniffer": {
+        "sniffer": {
             "projectType": "library",
-            "root": "projects/Sniffer",
-            "sourceRoot": "projects/Sniffer/src",
+            "root": "projects/sniffer",
+            "sourceRoot": "projects/sniffer/src",
             "prefix": "lib",
             "architect": {
                 "build": {
                     "builder": "@angular-devkit/build-ng-packagr:build",
                     "options": {
-                        "tsConfig": "projects/Sniffer/tsconfig.lib.json",
-                        "project": "projects/Sniffer/ng-package.json"
+                        "tsConfig": "projects/sniffer/tsconfig.lib.json",
+                        "project": "projects/sniffer/ng-package.json"
                     },
                     "configurations": {
                         "production": {
-                            "tsConfig": "projects/Sniffer/tsconfig.lib.prod.json"
+                            "tsConfig": "projects/sniffer/tsconfig.lib.prod.json"
                         }
                     }
                 },
                 "test": {
                     "builder": "@angular-devkit/build-angular:karma",
                     "options": {
-                        "main": "projects/Sniffer/src/test.ts",
-                        "tsConfig": "projects/Sniffer/tsconfig.spec.json",
-                        "karmaConfig": "projects/Sniffer/karma.conf.js"
+                        "main": "projects/sniffer/src/test.ts",
+                        "tsConfig": "projects/sniffer/tsconfig.spec.json",
+                        "karmaConfig": "projects/sniffer/karma.conf.js"
                     }
                 },
                 "lint": {
                     "builder": "@angular-devkit/build-angular:tslint",
                     "options": {
                         "tsConfig": [
-                            "projects/Sniffer/tsconfig.lib.json",
-                            "projects/Sniffer/tsconfig.spec.json"
+                            "projects/sniffer/tsconfig.lib.json",
+                            "projects/sniffer/tsconfig.spec.json"
                         ],
                         "exclude": [
                             "**/node_modules/**"
@@ -43,5 +43,5 @@
                 }
             }
         }},
-    "defaultProject": "Sniffer"
+    "defaultProject": "sniffer"
 }

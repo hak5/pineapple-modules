@@ -19,11 +19,11 @@
             "dom"
         ],
         "paths": {
-            "Sniffer": [
-                "dist/Sniffer"
+            "sniffer": [
+                "dist/sniffer"
             ],
-            "Sniffer/*": [
-                "dist/Sniffer/*"
+            "sniffer/*": [
+                "dist/sniffer/*"
             ]
         }
     },
