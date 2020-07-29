@@ -19,7 +19,7 @@ class Sniffer:
         self.socket_path = socket_path
         self.interface = interface
         self.running: bool = False
-        self.logger = get_logger('sniffer', logging.DEBUG)
+        self.logger = get_logger('httpeek', logging.DEBUG)
         self.websocket_server: Optional[WebsocketServer] = None
         self.packet_listener: Optional[PacketListener] = None
 

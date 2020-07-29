@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { SnifferComponent } from './components/sniffer.component';
+import { HTTPeekComponent } from './components/httpeek.component';
 import { RouterModule, Routes } from '@angular/router';
 
 import {MaterialModule} from './modules/material/material.module';
@@ -9,18 +9,18 @@ import {FlexLayoutModule} from '@angular/flex-layout';
 import {ErrorDialogComponent} from "./helpers/error-dialog/error-dialog.component";
 
 const routes: Routes = [
-    { path: '', component: SnifferComponent }
+    { path: '', component: HTTPeekComponent }
 ];
 
 @NgModule({
-    declarations: [SnifferComponent, ErrorDialogComponent],
+    declarations: [HTTPeekComponent, ErrorDialogComponent],
     imports: [
         CommonModule,
         RouterModule.forChild(routes),
         MaterialModule,
         FlexLayoutModule
     ],
-    exports: [SnifferComponent],
+    exports: [HTTPeekComponent],
     entryComponents: [ErrorDialogComponent]
 })
-export class snifferModule { }
+export class httpeekModule { }
