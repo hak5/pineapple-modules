@@ -1,8 +1,7 @@
 {
     "name": "httpeek",
     "title": "HTTPeek",
-    "description": "View plaintext HTTP traffic in real time",
+    "description": "View plaintext HTTP traffic, such as cookies and images.",
     "version": "1.0",
-    "author": "newbi3",
-    "debug": false
+    "author": "newbi3"
 }
