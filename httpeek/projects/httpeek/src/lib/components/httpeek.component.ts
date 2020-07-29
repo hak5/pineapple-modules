@@ -1,16 +1,15 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../services/api.service';
 import {MatDialog} from "@angular/material/dialog";
-import {DisplayModel} from "../interfaces/displaymodel.interface";
 import {ErrorDialogComponent} from "../helpers/error-dialog/error-dialog.component";
+import {DisplayModel} from "../interfaces/displaymodel.interface";
 
 @Component({
-    selector: 'lib-sniffer',
-    templateUrl: './sniffer.component.html',
-    styleUrls: ['./sniffer.component.css']
+    selector: 'lib-httpeek',
+    templateUrl: './httpeek.component.html',
+    styleUrls: ['./httpeek.component.css']
 })
-export class SnifferComponent implements OnInit, OnDestroy {
-
+export class HTTPeekComponent implements OnInit {
     public isBusy: boolean = false;
     public snifferEnabled: boolean = false;
     public listening: boolean = false;
@@ -33,7 +32,7 @@ export class SnifferComponent implements OnInit, OnDestroy {
         });
     }
 
-    private createWebsocket(component: SnifferComponent): void {
+    private createWebsocket(component: HTTPeekComponent): void {
         if (this.websocket !== null) {
             this.stopWebsocket();
         }
@@ -104,7 +103,7 @@ export class SnifferComponent implements OnInit, OnDestroy {
     loadStatus(): void {
         this.isBusy = true;
         this.API.request({
-            module: 'sniffer',
+            module: 'httpeek',
             action: 'status'
         }, (response) => {
             this.isBusy = false;
@@ -121,7 +120,7 @@ export class SnifferComponent implements OnInit, OnDestroy {
         this.isBusy = true;
 
         this.API.request({
-            module: 'sniffer',
+            module: 'httpeek',
             action: 'toggle',
             enable: enable
         }, (response) => {

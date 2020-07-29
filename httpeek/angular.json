@@ -3,38 +3,38 @@
     "version": 1,
     "newProjectRoot": "projects",
     "projects": {
-        "sniffer": {
+        "httpeek": {
             "projectType": "library",
-            "root": "projects/sniffer",
-            "sourceRoot": "projects/sniffer/src",
+            "root": "projects/httpeek",
+            "sourceRoot": "projects/httpeek/src",
             "prefix": "lib",
             "architect": {
                 "build": {
                     "builder": "@angular-devkit/build-ng-packagr:build",
                     "options": {
-                        "tsConfig": "projects/sniffer/tsconfig.lib.json",
-                        "project": "projects/sniffer/ng-package.json"
+                        "tsConfig": "projects/httpeek/tsconfig.lib.json",
+                        "project": "projects/httpeek/ng-package.json"
                     },
                     "configurations": {
                         "production": {
-                            "tsConfig": "projects/sniffer/tsconfig.lib.prod.json"
+                            "tsConfig": "projects/httpeek/tsconfig.lib.prod.json"
                         }
                     }
                 },
                 "test": {
                     "builder": "@angular-devkit/build-angular:karma",
                     "options": {
-                        "main": "projects/sniffer/src/test.ts",
-                        "tsConfig": "projects/sniffer/tsconfig.spec.json",
-                        "karmaConfig": "projects/sniffer/karma.conf.js"
+                        "main": "projects/httpeek/src/test.ts",
+                        "tsConfig": "projects/httpeek/tsconfig.spec.json",
+                        "karmaConfig": "projects/httpeek/karma.conf.js"
                     }
                 },
                 "lint": {
                     "builder": "@angular-devkit/build-angular:tslint",
                     "options": {
                         "tsConfig": [
-                            "projects/sniffer/tsconfig.lib.json",
-                            "projects/sniffer/tsconfig.spec.json"
+                            "projects/httpeek/tsconfig.lib.json",
+                            "projects/httpeek/tsconfig.spec.json"
                         ],
                         "exclude": [
                             "**/node_modules/**"
@@ -43,5 +43,5 @@
                 }
             }
         }},
-    "defaultProject": "sniffer"
+    "defaultProject": "httpeek"
 }

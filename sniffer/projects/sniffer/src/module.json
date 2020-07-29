@@ -1,7 +1,0 @@
-{
-    "name": "sniffer",
-    "title": "Sniffer",
-    "description": "View plaintext HTTP traffic, such as cookies and images.",
-    "version": "1.0",
-    "author": "newbi3",
-}

@@ -1,0 +1,8 @@
+{
+    "name": "httpeek",
+    "title": "HTTPeek",
+    "description": "View plaintext HTTP traffic in real time",
+    "version": "1.0",
+    "author": "newbi3",
+    "debug": false
+}

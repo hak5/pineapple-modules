@@ -19,11 +19,11 @@
             "dom"
         ],
         "paths": {
-            "sniffer": [
-                "dist/sniffer"
+            "httpeek": [
+                "dist/httpeek"
             ],
-            "sniffer/*": [
-                "dist/sniffer/*"
+            "httpeek/*": [
+                "dist/httpeek/*"
             ]
         }
     },

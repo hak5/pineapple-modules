@@ -10,8 +10,8 @@ from pineapple.jobs.job import TResult
 from pineapple.modules import Module, Request
 from pineapple.jobs import JobManager, Job
 
-module = Module('sniffer', logging.DEBUG)
-job_manager = JobManager('sniffer', logging.DEBUG, module=module)
+module = Module('httpeek', logging.DEBUG)
+job_manager = JobManager('httpeek', logging.DEBUG, module=module)
 
 
 class SnifferJob(Job[bool]):
@@ -22,7 +22,7 @@ class SnifferJob(Job[bool]):
 
     def do_work(self, logger: Logger) -> TResult:
         logger.debug('Starting sniffer handler...')
-        self.proc = subprocess.Popen(['python3', 'sniffer_handler.py'], cwd='/pineapple/modules/sniffer/assets/')
+        self.proc = subprocess.Popen(['python3', 'sniffer_handler.py'], cwd='/pineapple/modules/httpeek/assets/')
 
         while True:
             sleep(0.5)
@@ -76,7 +76,7 @@ def toggle(request: Request):
         return 'started'
     else:
         if not _stop_sniffer_job():
-            return 'Sniffer stopped'
+            return 'HTTPeek stopped'
 
 
 if __name__ == '__main__':
