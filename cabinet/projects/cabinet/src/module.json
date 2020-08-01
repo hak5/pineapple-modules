@@ -3,6 +3,5 @@
     "title": "Cabinet",
     "description": "A simple browser based file manager.",
     "author": "newbi3",
-    "version": "1.0",
-    "debug": false
+    "version": "1.0"
 }
