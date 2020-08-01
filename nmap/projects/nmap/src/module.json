@@ -3,6 +3,5 @@
     "title": "Nmap",
     "description": "Web GUI for Nmap, the popular network mapping tool.",
     "version": "1.0",
-    "author": "newbi3",
-    "debug": false
+    "author": "newbi3"
 }
