@@ -3,6 +3,5 @@
     "title": "MDK4",
     "description": "Web GUI for the MDK4 wireless testing tool.",
     "version": "1.0",
-    "author": "newbi3",
-    "debug": false
+    "author": "newbi3"
 }
