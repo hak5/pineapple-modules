@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
+
+from typing import Dict, Tuple, List, Union, Optional
 import json
 import subprocess
-from typing import Dict, Tuple, List, Union, Optional
 import logging
 import pathlib
+import tarfile
 import os
 
 from pineapple.modules import Module, Request
@@ -406,7 +408,7 @@ def get_portal_rules(request: Request):
 @module.handles_action('new_portal')
 def new_portal(request: Request):
     type_to_skeleton = {'basic': 'skeleton', 'targeted': 'targeted_skeleton'}
-    name = request.name
+    name = request.name.title().replace(' ', '')
     portal_type = request.type
     skeleton = type_to_skeleton.get(portal_type, 'skeleton')
 
@@ -428,6 +430,20 @@ def new_portal(request: Request):
         os.system(f"sed -i 's/\"portal_name_here\"/\"{name}\"/g' {_PORTAL_PATH}/{name}/index.php")
 
     return 'Portal created successfully.'
+
+
+@module.handles_action('archive_portal')
+def archive_portal(request: Request):
+    name = request.portal
+    portal_path = pathlib.Path(f'{_PORTAL_PATH}/{name}')
+
+    if not portal_path.is_dir():
+        return 'A portal with the given name does not exist.', False
+
+    with tarfile.open(f'/tmp/{name}.tar.gz', 'w:gz') as tar:
+        tar.add(str(portal_path), portal_path.name)
+
+    return f'/tmp/{name}.tar.gz'
 
 
 @module.handles_action('save_file')

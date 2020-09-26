@@ -115,8 +115,9 @@ export class EvilPortalComponent implements OnInit, OnDestroy {
             action: 'load_file',
             path: path
         }, (response) => {
-            if (response.error !== undefined) {
-                onComplete(false, undefined, response.error);
+            if (response === undefined || response.error !== undefined) {
+                let error = (response !== undefined) ? response.error : '';
+                onComplete(false, undefined, error);
                 return
             }
             onComplete(true, response, undefined);
@@ -335,6 +336,22 @@ export class EvilPortalComponent implements OnInit, OnDestroy {
             }
 
             this.loadControlState();
+        });
+    }
+
+    downloadPortal(portal: PortalInfoDTO): void {
+        this.API.request({
+            module: 'evilportal',
+            action: 'archive_portal',
+            portal: portal.title
+        }, (response) => {
+            if (response.error !== undefined) {
+                this.handleError(response.error);
+                return;
+            }
+
+            this.API.APIDownload(response, portal.title + '.tar.gz');
+            this.delete(response, () => {});
         });
     }
 
