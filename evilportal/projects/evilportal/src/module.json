@@ -3,5 +3,6 @@
     "title": "Evil Portal",
     "description": "An evil captive portal for the WiFi Pineapple.",
     "author": "newbi3",
-    "version": "1.2"
+    "version": "1.2",
+    "firmware_required": "1.0.0"
 }
