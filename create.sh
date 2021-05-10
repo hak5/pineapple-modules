@@ -39,15 +39,15 @@ sanitize_info() {
     MODULE_NAME=${MODULE_NAME// /}
 }
 
-create_template() {
-    if [[ ! -d "examplemodule" ]]; then
+create_from_template() {
+    if [[ ! -d "Misc/module-template" ]]; then
         echo "[!!] The template module seems to be missing. Please re-clone this repository and try again."
         exit 1
     fi
 
     echo "[*] Creating New Module ($MODULE_NAME)."
 
-    cp -r examplemodule $MODULE_NAME
+    cp -r Misc/module-template $MODULE_NAME
 
     grep -rl examplemodule $MODULE_NAME/ | xargs sed -i "s/examplemodule/$MODULE_NAME/g"
     grep -rl example-module $MODULE_NAME/ | xargs sed -i "s/example-module/$MODULE_NAME/g"
@@ -101,7 +101,7 @@ finish() {
 main() {
     print_banner
     get_info
-    create_template
+    create_from_template
     ask_prepare_node
 
     finish
