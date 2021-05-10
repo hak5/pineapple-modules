@@ -20,7 +20,7 @@ print_banner() {
     echo "    \  /\  /  | | |    | | | |   | | | | |  __/ (_| | |_) | |_) | |  __/ "
     echo "     \/  \/   |_|_|    |_| |_|   |_|_| |_|\___|\__,_| .__/| .__/|_|\___| Mark 7"
     echo " Module Creation Helper                             | |   | |            "
-    echo " Version 1.0                                        |_|   |_|            "
+    echo " Version 1.1                                        |_|   |_|            "
     echo " "
     echo " "
 }
