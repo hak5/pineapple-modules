@@ -6,12 +6,15 @@
             <input matInput [(ngModel)]="userInput" />
         </mat-form-field>
 
-        <button mat-flat-button color="accent"
+        <button  mat-flat-button color="accent"
                                 (click)="check_mac();">
             Request to Module
         </button>
         <br/>
-        <span>The MAC manufacturer was: {{ apiResponse }}</span>
+        <span *ngIf="isLoading">
+            The MAC manufacturer was:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
+        </span>
+        <span *ngIf="!isLoading">The MAC manufacturer was: {{ apiResponse }}</span>
         <br/>
     </mat-card-content>
 </mat-card>
