@@ -1,0 +1,47 @@
+{
+    "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+    "version": 1,
+    "newProjectRoot": "projects",
+    "projects": {
+        "MACInfo": {
+            "projectType": "library",
+            "root": "projects/MACInfo",
+            "sourceRoot": "projects/MACInfo/src",
+            "prefix": "lib",
+            "architect": {
+                "build": {
+                    "builder": "@angular-devkit/build-ng-packagr:build",
+                    "options": {
+                        "tsConfig": "projects/MACInfo/tsconfig.lib.json",
+                        "project": "projects/MACInfo/ng-package.json"
+                    },
+                    "configurations": {
+                        "production": {
+                            "tsConfig": "projects/MACInfo/tsconfig.lib.prod.json"
+                        }
+                    }
+                },
+                "test": {
+                    "builder": "@angular-devkit/build-angular:karma",
+                    "options": {
+                        "main": "projects/MACInfo/src/test.ts",
+                        "tsConfig": "projects/MACInfo/tsconfig.spec.json",
+                        "karmaConfig": "projects/MACInfo/karma.conf.js"
+                    }
+                },
+                "lint": {
+                    "builder": "@angular-devkit/build-angular:tslint",
+                    "options": {
+                        "tsConfig": [
+                            "projects/MACInfo/tsconfig.lib.json",
+                            "projects/MACInfo/tsconfig.spec.json"
+                        ],
+                        "exclude": [
+                            "**/node_modules/**"
+                        ]
+                    }
+                }
+            }
+        }},
+    "defaultProject": "MACInfo"
+}

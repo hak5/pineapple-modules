@@ -1,0 +1,17 @@
+<mat-card>
+    <mat-card-title>Welcome to MACInfo</mat-card-title>
+    <mat-card-content>
+        <mat-form-field>
+            <mat-label> MAC to lookup</mat-label>
+            <input matInput [(ngModel)]="userInput" />
+        </mat-form-field>
+
+        <button mat-flat-button color="accent"
+                                (click)="check_mac();">
+            Request to Module
+        </button>
+        <br/>
+        <span>The MAC manufacturer was: {{ apiResponse }}</span>
+        <br/>
+    </mat-card-content>
+</mat-card>
