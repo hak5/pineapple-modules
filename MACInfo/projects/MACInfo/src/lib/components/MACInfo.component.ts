@@ -13,6 +13,18 @@ export class MACInfoComponent implements OnInit {
     apiResponse = '';
     public isLoading: boolean = false;
 
+    check_mac_online(): void {
+        this.isLoading = true;
+        this.API.request({
+            module: 'MACInfo',
+            action: 'check_mac_online',
+            user_input: this.userInput
+        }, (response) => {
+            this.isLoading = false;
+            this.apiResponse = response;
+        })
+    }
+
     check_mac(): void {
         this.isLoading = true;
         this.API.request({

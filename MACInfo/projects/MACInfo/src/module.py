@@ -10,12 +10,25 @@ import os
 module = Module('MACInfo', logging.DEBUG)
 
 OUI_FILE = '/etc/pineapple/ouis'
+ONLINE_URL = 'https://macvendors.co/api/'
 
 @module.on_start()
 def on_start():
     module.logger.debug("Started")
     print("lmfao")
     os.system("mkdir -p /tmp/modules")
+
+@module.handles_action('check_mac_online')
+def check_mac_online(request: Request):
+    mac = request.user_input.upper()
+    module.logger.debug(mac)
+    curl_out = os.system(f"curl {ONLINE_URL}/{mac}/JSON")
+    output_json = json.loads(curl_out)
+    module.logger.debug(type(output_json))
+    for (k, v) in output_json.items():
+        print("Key" + k)
+        print("Value:" + str(v))
+        return(k,v)
 
 @module.handles_action('check_mac')
 def check_mac(request: Request):

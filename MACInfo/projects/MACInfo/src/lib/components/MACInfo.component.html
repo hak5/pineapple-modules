@@ -10,6 +10,11 @@
                                 (click)="check_mac();">
             Request to Module
         </button>
+        <button  mat-flat-button color="accent"
+                                (click)="check_mac_online();">
+            Request to Module online
+        </button>
+
         <br/>
         <span *ngIf="isLoading">
             The MAC manufacturer was:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
