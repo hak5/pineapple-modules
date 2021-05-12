@@ -5,6 +5,7 @@ import logging
 from pineapple.modules import Module, Request
 import json
 import os
+import urllib.request
 
 
 module = Module('MACInfo', logging.DEBUG)
@@ -22,13 +23,14 @@ def on_start():
 def check_mac_online(request: Request):
     mac = request.user_input.upper()
     module.logger.debug(mac)
-    curl_out = os.system(f"curl {ONLINE_URL}/{mac}/JSON")
-    output_json = json.loads(curl_out)
-    module.logger.debug(type(output_json))
-    for (k, v) in output_json.items():
-        print("Key" + k)
-        print("Value:" + str(v))
-        return(k,v)
+    response = urllib.request.urlopen(f'{ONLINE_URL}/34:46:EC:09:F3:3B/JSON')
+    data = response.read()
+    output_json = json.loads(data)
+    jsonData = output_json["result"]
+    for (k, v) in jsonData.items():
+        module.logger.debug("Key:" + k)
+        module.logger.debug("Value" + str(v))
+        return(v)
 
 @module.handles_action('check_mac')
 def check_mac(request: Request):
