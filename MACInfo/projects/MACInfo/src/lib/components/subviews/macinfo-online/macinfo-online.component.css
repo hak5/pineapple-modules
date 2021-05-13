@@ -10,9 +10,6 @@
     flex-direction: row;
     justify-content: space-apart;
 }
-.lookup {
-    flex-direction: row;
-}
 .button {
     float: left;
 }

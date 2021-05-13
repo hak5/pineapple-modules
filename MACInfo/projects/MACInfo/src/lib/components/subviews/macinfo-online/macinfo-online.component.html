@@ -12,47 +12,27 @@
             </button>
         </div>
         <div fxFlex class="mac_results">
-            <div class="spinner">
-                <span *ngIf="isLoading">
-                    Company:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
-                </span>
-                <span *ngIf="isLoading">
-                    Adress:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
-                </span>
-                <span *ngIf="isLoading">
-                    Type:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
-                </span>
-                <span *ngIf="isLoading">
-                    Country:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
-                </span>
-                <span *ngIf="isLoading">
-                    Start hex:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
-                </span>
-                <span *ngIf="isLoading">
-                    End hex:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
-                </span>
-            </div>
-            <span *ngIf="!isLoading">
+            <span>
                 Company: {{ company }}
             </span>
             <br/>
-            <span *ngIf="!isLoading">
+            <span>
                 Address: {{ address }}
             </span>
             <br/>
-            <span *ngIf="!isLoading">
+            <span>
                 Type: {{ mactype }}
             </span>
             <br/>
-            <span *ngIf="!isLoading">
+            <span>
                 Country: {{ maccountry }}
             </span>
             <br/>
-            <span *ngIf="!isLoading">
+            <span>
                 Start hex: {{ start_hex }}
             </span>
             <br/>
-            <span *ngIf="!isLoading">
+            <span>
                 End hex: {{ end_hex }}
             </span>
         </div>
