@@ -12,19 +12,24 @@
         </button>
 
         <br/>
-        <span *ngIf="isLoading">
+        <span class="spinner" *ngIf="isLoading">
             The MAC company is:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
         </span>
-        <span *ngIf="isLoading">
+        <span class="spinner" *ngIf="isLoading">
             The MAC adress is:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
         </span>
-        <span *ngIf="isLoading">
+        <span class="spinner" *ngIf="isLoading">
             The MAC type is:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
         </span>
-        <span *ngIf="isLoading">
+        <span class="spinner" *ngIf="isLoading">
             The MAC country is:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
         </span>
-
+        <span class="spinner" *ngIf="isLoading">
+            The MAC start hex is:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
+        </span>
+        <span class="spinner" *ngIf="isLoading">
+            The MAC end hex is:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
+        </span>
 
         <span *ngIf="!isLoading">
             The MAC company is: {{ company }}
