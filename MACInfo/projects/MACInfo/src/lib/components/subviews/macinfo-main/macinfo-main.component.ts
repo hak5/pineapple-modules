@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { ApiService } from '../services/api.service';
+import { ApiService } from '../../../services/api.service';
 
 @Component({
-    selector: 'lib-MACInfo',
-    templateUrl: './MACInfo.component.html',
-    styleUrls: ['./MACInfo.component.css']
+    selector: 'lib-MACInfo-maininfo',
+    templateUrl: './macinfo-main.component.html',
+    styleUrls: ['./macinfo-main.component.css']
 })
 export class MACInfoMainComponent implements OnInit {
     constructor(private API: ApiService) { }
