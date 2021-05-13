@@ -21,8 +21,9 @@ def on_start():
 @module.handles_action('check_mac_online')
 def check_mac_online(request: Request):
     mac = request.user_input.upper()
-    module.logger.debug(mac)
-    response = urllib.request.urlopen(f'{ONLINE_URL}/{mac}/JSON')
+    strip_mac = mac.replace(' ','')
+    module.logger.debug(strip_mac)
+    response = urllib.request.urlopen(f'{ONLINE_URL}/{strip_mac}/JSON')
     data = response.read()
     output_json = json.loads(data)
     jsonData = output_json["result"]
