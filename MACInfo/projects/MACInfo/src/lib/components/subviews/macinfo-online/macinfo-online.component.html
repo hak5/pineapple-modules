@@ -1,59 +1,60 @@
 <mat-card>
     <mat-card-title>Welcome to MACInfo ( Online )</mat-card-title>
     <mat-card-content>
-        <mat-form-field>
-            <mat-label> MAC to lookup</mat-label>
-            <input matInput [(ngModel)]="userInput" />
-        </mat-form-field>
-
-        <button  mat-flat-button color="accent"
-                                (click)="check_mac_online();">
-            Lookup MAC Adress
-        </button>
-
-        <br/>
-        <span class="spinner" *ngIf="isLoading">
-            The MAC company is:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
-        </span>
-        <span class="spinner" *ngIf="isLoading">
-            The MAC adress is:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
-        </span>
-        <span class="spinner" *ngIf="isLoading">
-            The MAC type is:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
-        </span>
-        <span class="spinner" *ngIf="isLoading">
-            The MAC country is:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
-        </span>
-        <span class="spinner" *ngIf="isLoading">
-            The MAC start hex is:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
-        </span>
-        <span class="spinner" *ngIf="isLoading">
-            The MAC end hex is:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
-        </span>
-
-        <span *ngIf="!isLoading">
-            The MAC company is: {{ company }}
-        </span>
-        <br/>
-        <span *ngIf="!isLoading">
-            The MAC address is: {{ address }}
-        </span>
-        <br/>
-        <span *ngIf="!isLoading">
-            The MAC type is: {{ mactype }}
-        </span>
-        <br/>
-        <span *ngIf="!isLoading">
-            The MAC country is: {{ maccountry }}
-        </span>
-        <br/>
-        <span *ngIf="!isLoading">
-            The MAC start hex is: {{ start_hex }}
-        </span>
-        <br/>
-        <span *ngIf="!isLoading">
-            The MAC end hex is: {{ end_hex }}
-        </span>
-
+        <div fxFlex class="lookup">
+            <mat-form-field>
+                <mat-label> MAC to lookup</mat-label>
+                <input matInput [(ngModel)]="userInput" />
+            </mat-form-field>
+            <button  class="button" mat-flat-button color="accent"
+                                    (click)="check_mac_online();">
+                Lookup MAC Adress
+            </button>
+        </div>
+        <div fxFlex class="mac_results">
+            <div class="spinner">
+                <span *ngIf="isLoading">
+                    Company:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
+                </span>
+                <span *ngIf="isLoading">
+                    Adress:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
+                </span>
+                <span *ngIf="isLoading">
+                    Type:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
+                </span>
+                <span *ngIf="isLoading">
+                    Country:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
+                </span>
+                <span *ngIf="isLoading">
+                    Start hex:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
+                </span>
+                <span *ngIf="isLoading">
+                    End hex:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
+                </span>
+            </div>
+            <span *ngIf="!isLoading">
+                Company: {{ company }}
+            </span>
+            <br/>
+            <span *ngIf="!isLoading">
+                Address: {{ address }}
+            </span>
+            <br/>
+            <span *ngIf="!isLoading">
+                Type: {{ mactype }}
+            </span>
+            <br/>
+            <span *ngIf="!isLoading">
+                Country: {{ maccountry }}
+            </span>
+            <br/>
+            <span *ngIf="!isLoading">
+                Start hex: {{ start_hex }}
+            </span>
+            <br/>
+            <span *ngIf="!isLoading">
+                End hex: {{ end_hex }}
+            </span>
+        </div>
     </mat-card-content>
 </mat-card>

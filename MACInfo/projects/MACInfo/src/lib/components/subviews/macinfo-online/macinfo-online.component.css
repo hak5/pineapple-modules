@@ -3,4 +3,16 @@
     margin-top: 6px;
     margin-bottom: 6px;
     align-items: center;
+    justify-content: space-apart;
+}
+.mac_results {
+    float: right;
+    flex-direction: row;
+    justify-content: space-apart;
+}
+.lookup {
+    flex-direction: row;
+}
+.button {
+    float: left;
 }
