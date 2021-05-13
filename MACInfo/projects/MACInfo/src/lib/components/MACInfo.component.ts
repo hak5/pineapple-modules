@@ -11,9 +11,18 @@ export class MACInfoComponent implements OnInit {
 
     userInput = '';
     apiResponse = '';
+    apiOnlineResponse = '';
     public isLoading: boolean = false;
+    public isOnline: boolean = false;
+    company = '';
+    address = '';
+    mactype = '';
+    maccountry = '';
+    start_hex = '';
+    end_hex = '';
 
     check_mac_online(): void {
+        this.isOnline = true;
         this.isLoading = true;
         this.API.request({
             module: 'MACInfo',
@@ -21,11 +30,17 @@ export class MACInfoComponent implements OnInit {
             user_input: this.userInput
         }, (response) => {
             this.isLoading = false;
-            this.apiResponse = response;
+            this.company = response.company;
+            this.address = response.address;
+            this.mactype = response.mactype;
+            this.maccountry = response.maccountry;
+            this.start_hex = response.start_hex;
+            this.end_hex = response.end_hex;
         })
     }
 
     check_mac(): void {
+        this.isOnline = false;
         this.isLoading = true;
         this.API.request({
             module: 'MACInfo',
@@ -33,7 +48,7 @@ export class MACInfoComponent implements OnInit {
             user_input: this.userInput
         }, (response) => {
             this.isLoading = false;
-            this.apiResponse = response;
+            this.company = response.company;
         })
     }
 
