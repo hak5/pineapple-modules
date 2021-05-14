@@ -13,12 +13,12 @@ export class MACInfoComponent implements OnInit {
     constructor() {
         this.navLinks = [
             {
-                label: 'MACInfo',
+                label: 'Offline Lookup',
                 link: './',
                 index: 0
             },
             {
-                label: 'Online',
+                label: 'Online Lookup',
                 link: './online',
                 index: 1
             },

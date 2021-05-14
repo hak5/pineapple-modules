@@ -1,15 +1,20 @@
-.spinner {
+.macinfo-online-card {
+    min-width: 40%;
+}
+
+.macinfo-online-card-content {
     display: flex;
-    margin-top: 6px;
-    margin-bottom: 6px;
+    justify-content: center;
+
+    flex-direction: column;
+}
+
+.macinfo-online-lookup-field {
+    width: 100%;
+}
+
+.macinfo-online-results {
+    display: flex;
+    justify-content: space-evenly;
     align-items: center;
-    justify-content: space-apart;
-}
-.mac_results {
-    float: right;
-    flex-direction: row;
-    justify-content: space-apart;
-}
-.button {
-    float: left;
 }

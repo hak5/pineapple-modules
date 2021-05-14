@@ -1,6 +1,12 @@
-.spinner {
+.macinfo-offline-card {
+    min-width: 40%;
+}
+
+.macinfo-offline-lookup-field {
+    width: 100%;
+}
+
+.macinfo-offline-card-content {
     display: flex;
-    margin-top: 6px;
-    margin-bottom: 6px;
-    align-items: center;
+    flex-direction: column;
 }

@@ -1,40 +1,54 @@
-<mat-card>
-    <mat-card-title>MACInfo</mat-card-title>
-    <mat-card-content>
-        <div fxFlex class="lookup">
-            <mat-form-field>
-                <mat-label> MAC to lookup</mat-label>
+<div class="macinfo-center-card">
+    <mat-card class="macinfo-online-card">
+        <mat-card-title>MAC Address Online Lookup</mat-card-title>
+        <mat-card-content class="macinfo-online-card-content">
+            <mat-form-field class="macinfo-online-lookup-field">
+                <mat-label>MAC Address</mat-label>
                 <input matInput [(ngModel)]="userInput" />
             </mat-form-field>
-            <button  class="button" mat-flat-button color="accent"
-                                    (click)="check_mac_online();">
-                Lookup MAC Address
+
+            <div *ngIf="company" class="macinfo-online-results">
+                <br/>
+                <div>
+                    <span>
+                        Company: {{ company }}
+                    </span>
+                    <br/>
+                    <span>
+                        Address: {{ address }}
+                    </span>
+                    <br/>
+                    <span>
+                        Type: {{ mactype }}
+                    </span>
+                </div>
+                <div>
+                    <span>
+                        Country: {{ maccountry }}
+                    </span>
+                    <br/>
+                    <span>
+                        Start hex: {{ start_hex }}
+                    </span>
+                    <br/>
+                    <span>
+                        End hex: {{ end_hex }}
+                    </span>
+                </div>
+                <br/>
+            </div>
+
+            <button mat-flat-button class="macinfo-lookup-button"
+                                    color="accent"
+                                    (click)="check_mac_online();"
+                                    [disabled]="isLoading">
+                <span *ngIf="!isLoading">Lookup MAC Address Online</span>
+                <span *ngIf="isLoading">
+                    <mat-spinner diameter="20"></mat-spinner>
+                </span>
             </button>
-        </div>
-        <div fxFlex class="mac_results">
-            <span>
-                Company: {{ company }}
-            </span>
-            <br/>
-            <span>
-                Address: {{ address }}
-            </span>
-            <br/>
-            <span>
-                Type: {{ mactype }}
-            </span>
-            <br/>
-            <span>
-                Country: {{ maccountry }}
-            </span>
-            <br/>
-            <span>
-                Start hex: {{ start_hex }}
-            </span>
-            <br/>
-            <span>
-                End hex: {{ end_hex }}
-            </span>
-        </div>
-    </mat-card-content>
-</mat-card>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<br/>
