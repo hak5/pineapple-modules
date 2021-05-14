@@ -1,5 +1,5 @@
 <mat-card>
-    <mat-card-title>Welcome to MACInfo</mat-card-title>
+    <mat-card-title>MACInfo</mat-card-title>
     <mat-card-content>
         <mat-form-field>
             <mat-label> MAC to lookup</mat-label>
@@ -8,15 +8,15 @@
 
         <button  mat-flat-button color="accent"
                                 (click)="check_mac();">
-            Lookup MAC Adress
+            Lookup MAC Address
         </button>
         <br/>
         <span class="spinner" *ngIf="isLoading">
-            The MAC company is:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
+            Company:<mat-spinner [diameter]="20" color="accent" class="spinner-padding"></mat-spinner>
         </span>
 
         <span *ngIf="!isLoading">
-            The MAC company is: {{ company }}
+            Company: {{ company }}
         </span>
         <br/>
     </mat-card-content>
