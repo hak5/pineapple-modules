@@ -22,6 +22,8 @@ def on_start():
 def check_mac_online(request: Request):
     mac = request.user_input.upper()
     strip_mac = mac.replace(' ','')
+    if '-' in strip_mac:
+        strip_mac = mac.replace('-',':')
     module.logger.debug(strip_mac)
     response = urllib.request.urlopen(f'{ONLINE_URL}/{strip_mac}/JSON')
     data = response.read()
@@ -46,8 +48,11 @@ def check_mac(request: Request):
         OUIS = json.load(f)
         mac = request.user_input.upper()
         module.logger.debug("User inputted: " + mac)
-
-        strip_mac = mac.replace(':','')
+        strip_mac = mac.replace(' ','')
+        if ':' in strip_mac:
+            strip_mac = mac.replace(':','')
+        elif '-' in strip_mac:
+            strip_mac = mac.replace('-','')
         module.logger.debug(strip_mac[:6])
         new_mac = strip_mac[:6]
         company = OUIS.get(new_mac)
