@@ -53,16 +53,22 @@ def check_mac(request: Request):
     with open(OUI_FILE) as f:
         OUIS = json.load(f)
         mac = request.user_input.upper()
-        module.logger.debug("User inputted: " + mac)
-        strip_mac = mac.replace(' ','')
-        if ':' in strip_mac:
-            strip_mac = mac.replace(':','')
-        elif '-' in strip_mac:
-            strip_mac = mac.replace('-','')
-        module.logger.debug(strip_mac[:6])
-        new_mac = strip_mac[:6]
-        company = OUIS.get(new_mac)
-        return{'company':company}
+        mac_reg = re.search("^[a-fA-F0-9]{2}([:\-]?[a-fA-F0-9]{2}){2,5}$",mac)
+        if mac_reg:
+            module.logger.debug("User inputted: " + mac)
+            strip_mac = mac.replace(' ','')
+            if ':' in strip_mac:
+                strip_mac = mac.replace(':','')
+            elif '-' in strip_mac:
+                strip_mac = mac.replace('-','')
+            module.logger.debug(strip_mac[:6])
+            new_mac = strip_mac[:6]
+            company = OUIS.get(new_mac)
+            return{'company':company}
+        else:
+            module.logger.debug("Not a valid MAC address")
+            return{'company':'Not a valid MAC address'}
+
 
 if __name__ == '__main__':
     module.start()
