@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../../services/api.service';
 
 @Component({
-    selector: 'lib-MACInfo-maininfo',
-    templateUrl: './macinfo-main.component.html',
-    styleUrls: ['../../MACInfo.component.css', './macinfo-main.component.css']
+    selector: 'lib-MACInfo-offlineinfo',
+    templateUrl: './macinfo-offline.component.html',
+    styleUrls: ['../../MACInfo.component.css', './macinfo-offline.component.css']
 })
-export class MACInfoMainComponent implements OnInit {
+export class MACInfoOfflineComponent implements OnInit {
     constructor(private API: ApiService) { }
 
     userInput : string = '';
@@ -25,7 +25,7 @@ export class MACInfoMainComponent implements OnInit {
             this.isLoading = false;
             this.company = response.company;
             this.nomac = response.nomac;
-            if (this.nomac == "Not a valid MAC address"){
+            if (this.nomac === "Not a valid MAC address"){
                 this.validMAC = false;
             }
         })

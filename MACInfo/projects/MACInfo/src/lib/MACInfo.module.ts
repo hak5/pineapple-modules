@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { MACInfoComponent } from './components/MACInfo.component';
-import { MACInfoMainComponent } from './components/subviews/macinfo-main/macinfo-main.component';
+import { MACInfoOfflineComponent } from './components/subviews/macinfo-offline/macinfo-offline.component';
 import { MACInfoOnlineComponent } from './components/subviews/macinfo-online/macinfo-online.component';
 import { RouterModule, Routes } from '@angular/router';
 
@@ -16,7 +16,7 @@ const routes: Routes = [
         path: '',
         component: MACInfoComponent,
         children: [
-            { path: '', component: MACInfoMainComponent, pathMatch: 'full' },
+            { path: '', component: MACInfoOfflineComponent, pathMatch: 'full' },
             { path: 'online', component: MACInfoOnlineComponent }
         ]
     }
@@ -25,7 +25,7 @@ const routes: Routes = [
 @NgModule({
     declarations: [
         MACInfoComponent,
-        MACInfoMainComponent,
+        MACInfoOfflineComponent,
         MACInfoOnlineComponent
     ],
     imports: [
