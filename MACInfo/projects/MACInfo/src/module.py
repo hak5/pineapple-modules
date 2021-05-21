@@ -15,7 +15,6 @@ ONLINE_URL = 'https://macvendors.co/api/'
 
 @module.on_start()
 def on_start():
-    module.logger.debug("Started")
     os.system("mkdir -p /tmp/modules")
 
 @module.handles_action('check_mac_online')

@@ -4,8 +4,6 @@
 
 .macinfo-online-card-content {
     display: flex;
-    justify-content: center;
-
     flex-direction: column;
 }
 
@@ -16,5 +14,8 @@
 .macinfo-online-results {
     display: flex;
     justify-content: space-evenly;
-    align-items: center;
+}
+.macinfo-online-results-left {
+    word-break: break-word;
+    max-width: 300px; 
 }
