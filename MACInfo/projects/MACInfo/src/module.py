@@ -14,10 +14,6 @@ module = Module('MACInfo', logging.DEBUG)
 OUI_FILE = '/etc/pineapple/ouis'
 ONLINE_URL = 'https://macvendors.co/api/'
 
-@module.on_start()
-def on_start():
-    os.system("mkdir -p /tmp/modules")
-
 @module.handles_action('check_mac_online')
 def check_mac_online(request: Request):
     mac = request.user_input.upper()
