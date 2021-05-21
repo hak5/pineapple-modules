@@ -50,11 +50,11 @@ def check_mac_online(request: Request):
 @module.handles_action('check_mac')
 def check_mac(request: Request):
     module.logger.debug("Opening file")
-    with open(OUI_FILE) as f:
-        OUIS = json.load(f)
-        mac = request.user_input.upper()
-        mac_reg = re.search("^[a-fA-F0-9]{2}([:\-]?[a-fA-F0-9]{2}){2,5}$",mac)
-        if mac_reg:
+    mac = request.user_input.upper()
+    mac_reg = re.search("^[a-fA-F0-9]{2}([:\-]?[a-fA-F0-9]{2}){2,5}$",mac)
+    if mac_reg:
+        with open(OUI_FILE) as f:
+            OUIS = json.load(f)
             module.logger.debug("User inputted: " + mac)
             strip_mac = mac.replace(' ','')
             if ':' in strip_mac:
@@ -65,9 +65,9 @@ def check_mac(request: Request):
             new_mac = strip_mac[:6]
             company = OUIS.get(new_mac)
             return{'company':company}
-        else:
-            module.logger.debug("Not a valid MAC address")
-            return{'nomac':'Not a valid MAC address'}
+    else:
+        module.logger.debug("Not a valid MAC address")
+        return{'nomac':'Not a valid MAC address'}
 
 
 if __name__ == '__main__':

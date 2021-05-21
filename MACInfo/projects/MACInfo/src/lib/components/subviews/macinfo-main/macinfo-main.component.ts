@@ -9,11 +9,11 @@ import { ApiService } from '../../../services/api.service';
 export class MACInfoMainComponent implements OnInit {
     constructor(private API: ApiService) { }
 
-    userInput = '';
-    company = '';
-    nomac = '';
-    isLoading = false;
-    validMAC = true;
+    userInput : string = '';
+    company : string = '';
+    nomac : string = '';
+    isLoading : boolean = false;
+    validMAC : boolean = true;
 
     check_mac(): void {
         this.isLoading = true;

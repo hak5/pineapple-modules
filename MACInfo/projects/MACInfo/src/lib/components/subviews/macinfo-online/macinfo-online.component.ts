@@ -9,17 +9,17 @@ import { ApiService } from '../../../services/api.service';
 export class MACInfoOnlineComponent implements OnInit {
     constructor(private API: ApiService) { }
 
-    userInput = '';
-    isLoading = false;
+    userInput : string = '';
+    isLoading : boolean = false;
 
-    nomac = '';
-    company = '';
-    address = '';
-    mactype = '';
-    maccountry = '';
-    start_hex = '';
-    end_hex = '';
-    validMAC = true;
+    nomac : string = '';
+    company : string = '';
+    address : string = '';
+    mactype : string = '';
+    maccountry : string = '';
+    start_hex : string = '';
+    end_hex : string = '';
+    validMAC: boolean = true;
 
     check_mac_online(): void {
         this.isLoading = true;
