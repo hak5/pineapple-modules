@@ -11,7 +11,9 @@ export class MACInfoMainComponent implements OnInit {
 
     userInput = '';
     company = '';
+    nomac = '';
     isLoading = false;
+    validMAC = true;
 
     check_mac(): void {
         this.isLoading = true;
@@ -22,6 +24,10 @@ export class MACInfoMainComponent implements OnInit {
         }, (response) => {
             this.isLoading = false;
             this.company = response.company;
+            this.nomac = response.nomac;
+            if (this.nomac == "Not a valid MAC address"){
+                this.validMAC = false;
+            }
         })
     }
 

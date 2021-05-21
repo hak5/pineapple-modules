@@ -7,6 +7,9 @@
                 <input matInput [(ngModel)]="userInput" />
             </mat-form-field>
 
+            <div *ngIf="!validMAC">
+                <span><strong>Please enter a valid MAC address</strong></span>
+            </div>
             <div *ngIf="company" class="macinfo-online-results">
                 <br/>
                 <div class="macinfo-online-results-left">

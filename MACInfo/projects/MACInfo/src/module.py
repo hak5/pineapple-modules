@@ -45,7 +45,7 @@ def check_mac_online(request: Request):
         return{'company':company,'address':address,'maccountry':maccountry,'mac_prefix':mac_prefix,'start_hex':start_hex,'end_hex':end_hex,'mactype':mactype}
     else:
         module.logger.debug("Not a valid MAC address")
-        return{'company':'Not a valid MAC address'}
+        return{'nomac':'Not a valid MAC address'}
 
 @module.handles_action('check_mac')
 def check_mac(request: Request):
@@ -67,7 +67,7 @@ def check_mac(request: Request):
             return{'company':company}
         else:
             module.logger.debug("Not a valid MAC address")
-            return{'company':'Not a valid MAC address'}
+            return{'nomac':'Not a valid MAC address'}
 
 
 if __name__ == '__main__':

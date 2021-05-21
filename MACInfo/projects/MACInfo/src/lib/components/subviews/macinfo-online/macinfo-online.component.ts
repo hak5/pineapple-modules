@@ -12,12 +12,14 @@ export class MACInfoOnlineComponent implements OnInit {
     userInput = '';
     isLoading = false;
 
+    nomac = '';
     company = '';
     address = '';
     mactype = '';
     maccountry = '';
     start_hex = '';
     end_hex = '';
+    validMAC = true;
 
     check_mac_online(): void {
         this.isLoading = true;
@@ -33,6 +35,10 @@ export class MACInfoOnlineComponent implements OnInit {
             this.maccountry = response.maccountry;
             this.start_hex = response.start_hex;
             this.end_hex = response.end_hex;
+            this.nomac = response.nomac;
+            if (this.nomac == "Not a valid MAC address"){
+                this.validMAC = false;
+            }
         })
     }
 

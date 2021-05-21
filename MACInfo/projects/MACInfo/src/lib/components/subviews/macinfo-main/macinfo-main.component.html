@@ -12,6 +12,9 @@
                 <br/>
                 <br/>
             </div>
+            <div *ngIf="!validMAC">
+                <span><strong>Please enter a valid MAC address</strong></span>
+            </div>
 
             <button mat-flat-button class="macinfo-lookup-button"
                                     color="accent"
