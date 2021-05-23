@@ -25,4 +25,4 @@ jobs:
       #   working-directory: ./mdk4
       #   run: npm i
       - name: Build All Modules
-        run: for D in */; do if [[ "$D" != "Libraries/" && "$D" != "node_modules/" ]]; then cd $D; npm i; npm run build; cd ../; fi; done
+        run: for D in */; do if [[ "$D" != "Libraries/" && "$D" != "Misc/" && "$D" != "node_modules/" ]]; then cd $D; npm i; npm run build; cd ../; fi; done
