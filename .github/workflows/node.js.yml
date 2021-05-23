@@ -21,9 +21,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
-      - name: Get Dependencies
-        working-directory: ./mdk4
-        run: npm i
-      - name: Build Modules
-        working-directory: ./mdk4
-        run: npm run build
+      # - name: Get Dependencies
+      #   working-directory: ./mdk4
+      #   run: npm i
+      - name: Build All Modules
+        run: for D in */; do if [[ "$D" != "Libraries/" && "$D" != "node_modules/" ]]; then cd $D; npm i; npm run build; cd ../ fi done
