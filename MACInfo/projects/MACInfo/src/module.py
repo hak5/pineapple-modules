@@ -14,6 +14,12 @@ module = Module('MACInfo', logging.DEBUG)
 OUI_FILE = '/etc/pineapple/ouis'
 ONLINE_URL = 'https://macvendors.co/api/'
 
+@module.on_start()
+def on_start():
+    with open(OUI_FILE) as f:
+        global OUIS
+        OUIS = json.load(f)
+
 @module.handles_action('check_mac_online')
 def check_mac_online(request: Request):
     mac = request.user_input.upper()
@@ -57,13 +63,11 @@ def check_mac(request: Request):
     reg_mac = re.search("^[a-fA-F0-9]{2}([:\-]?[a-fA-F0-9]{2}){2,5}$",nospace_mac)
 
     if reg_mac:
-        with open(OUI_FILE) as f:
-            OUIS = json.load(f)
-            module.logger.debug("User inputted: " + mac)
-            module.logger.debug(strip_mac[:6])
-            new_mac = strip_mac[:6]
-            company = OUIS.get(new_mac)
-            return{'company':company}
+        module.logger.debug("User inputted: " + mac)
+        module.logger.debug(strip_mac[:6])
+        new_mac = strip_mac[:6]
+        company = OUIS.get(new_mac)
+        return{'company':company}
     else:
         module.logger.debug("Not a valid MAC address")
         return{'nomac':'Not a valid MAC address'}
