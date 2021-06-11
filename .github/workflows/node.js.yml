@@ -1,0 +1,28 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Build Modules
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      # - name: Get Dependencies
+      #   working-directory: ./mdk4
+      #   run: npm i
+      - name: Build All Modules
+        run: for D in */; do if [[ "$D" != "Libraries/" && "$D" != "Misc/" && "$D" != "node_modules/" ]]; then cd $D; npm i; npm run build; cd ../; fi; done
