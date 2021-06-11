@@ -26,11 +26,10 @@ def check_mac_online(request: Request):
     strip_mac = mac.replace(' ','')
     if '-' in strip_mac:
         strip_mac = mac.replace('-',':')
-    strip_mac = re.search("^[a-fA-F0-9]{2}([:\-]?[a-fA-F0-9]{2}){2,5}$",strip_mac)
+    strip_mac = re.search("^[a-fA-F0-9]{2}([:\-]?[a-fA-F0-9]{2}){2,5}$",strip_mac).group(0)
 
     if strip_mac:
         module.logger.debug("MATCH FOUND")
-        module.logger.debug(mac_reg)
         module.logger.debug(strip_mac)
         response = urllib.request.urlopen(f'{ONLINE_URL}/{strip_mac}/JSON')
         data = response.read()
@@ -60,7 +59,7 @@ def check_mac(request: Request):
     elif '-' in nospace_mac:
         strip_mac = mac.replace('-','')
 
-    reg_mac = re.search("^[a-fA-F0-9]{2}([:\-]?[a-fA-F0-9]{2}){2,5}$",nospace_mac)
+    reg_mac = re.search("^[a-fA-F0-9]{2}([:\-]?[a-fA-F0-9]{2}){2,5}$",nospace_mac).group(0)
 
     if reg_mac:
         module.logger.debug("User inputted: " + mac)
