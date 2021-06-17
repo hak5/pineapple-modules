@@ -20,7 +20,7 @@
                     <b>Interface</b> : {{ network_interface }}
                 </li>
                 <li>
-                    <b>Connected</b> : {{ (network_connected) ? 'OK' : 'NOK' }}
+                    <b>Connected</b> : {{ (network_connected) ? 'OK' : 'You are not connected to the Internet' }}
                 </li>
             </ul>
         </div>
@@ -32,10 +32,10 @@
 
             <ul>
                 <li>
-                    <b>python3-pip</b> : {{ (dependency_python3_pip) ? 'OK' : 'NOK' }}
+                    <b>python3-pip</b> : {{ (dependency_python3_pip) ? 'OK' : 'Dependency is not installed' }}
                 </li>
                 <li>
-                    <b>speedtest-cli</b> : {{ (dependency_speedtest_cli) ? 'OK' : 'NOK' }}
+                    <b>speedtest-cli</b> : {{ (dependency_speedtest_cli) ? 'OK' : 'Dependency is not installed' }}
                 </li>
             </ul>
 
