@@ -2,7 +2,7 @@
     "name": "mdk4",
     "title": "MDK4",
     "description": "Web GUI for the MDK4 wireless testing tool.",
-    "version": "1.1",
+    "version": "1.2",
     "author": "newbi3",
     "firmware_required": "1.0.0"
 }
