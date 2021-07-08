@@ -20,13 +20,12 @@ export class locateComponent implements OnInit {
     country_name = "";
     country_capital = "";
     timezone = "";
-    languages = "";
-    calling_code = "";
-    postal = "";
+    country_neighbours = "";
+    country_phone = "";
+    country_flag = "";
     org = "";
-    cordinates = "";
+    coordinates = "";
     validIP: boolean = true;
-    noip = "";
 
     locate_ip(): void {
         this.isLoading = true;
@@ -43,15 +42,14 @@ export class locateComponent implements OnInit {
                 this.city = response.city;
                 this.region = response.region;
                 this.country = response.country;
-                this.postal = response.postal;
+                this.country_neighbours = response.country_neighbours;
                 this.country_capital = response.country_capital;
                 this.timezone = response.timezone;
-                this.calling_code = response.calling_code;
-                this.languages = response.languages;
+                this.country_phone = response.country_phone;
+                this.country_flag = response.country_flag;
                 this.org = response.org;
-                this.cordinates = response.cordinates;
-                this.noip = response.noip;
-                if (this.noip =="Not a valid IP address!"){
+                this.coordinates = response.coordinates;
+                if (response.error){
                     this.validIP = false;
                 }
             }
