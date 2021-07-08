@@ -1,0 +1,54 @@
+<div class="locate-center-card">
+    <mat-card class="locate-card">
+        <mat-card-title>Geolocate IP address.</mat-card-title>
+        <mat-card-content class="locate-card-content">
+            <mat-form-field class="locate-lookup-field">
+                <mat-label> IP address. </mat-label>
+                <input matInput [(ngModel)]="userInput" />
+            </mat-form-field>
+            <div *ngIf="!validIP">
+                <span><strong>Please enter a valid IP address!</strong></span>
+            </div>
+            <div *ngIf="lookup_ip" class="locate-results">
+                <br />
+                <div class="locate-results-left">
+                    <span> <strong>IP:</strong> {{ lookup_ip }} </span>
+                    <br />
+                    <span> <strong>City:</strong> {{ city }} </span>
+                    <br />
+                    <span> <strong>Region:</strong> {{ region }} </span>
+                    <br />
+                    <span> <strong>Country:</strong> {{ country }} </span>
+                    <br />
+                    <span> <strong>Postal Code:</strong> {{ postal }} </span>
+                </div>
+                <div class="locate-results-right">
+                    <span> <strong>Timezone:</strong> {{ timezone }} </span>
+                    <br />
+                    <span> <strong>Languages:</strong> {{ languages }} </span>
+                    <br />
+                    <span> <strong>Cordinates:</strong> {{ cordinates }} </span>
+                    <br />
+                    <span>
+                        <strong>Calling Code:</strong> {{ calling_code }}
+                    </span>
+                    <br />
+                    <span> <strong>ORG:</strong> {{ org }} </span>
+                    <br />
+                </div>
+            </div>
+
+            <button
+                mat-flat-button
+                class="macinfo-lookup-button"
+                color="accent"
+                (click)="locate_ip()"
+            >
+                <span *ngIf="!isLoading">Locate IP</span>
+                <span class="spinner" *ngIf="isLoading">
+                    <mat-spinner diameter="20"></mat-spinner>
+                </span>
+            </button>
+        </mat-card-content>
+    </mat-card>
+</div>
