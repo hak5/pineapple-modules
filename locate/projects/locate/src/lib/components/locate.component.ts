@@ -9,24 +9,24 @@ import { ApiService } from "../services/api.service";
 export class locateComponent implements OnInit {
     constructor(private API: ApiService) {}
 
-    userInput: string = "";
-    iplocation: string = "";
+    userInput = "";
+    iplocation = "";
     isLoading: boolean = false;
 
-    lookup_ip: string = "";
-    city: string = "";
-    region: string = "";
-    country: string = "";
-    country_name: string = "";
-    country_capital: string = "";
-    timezone: string = "";
-    languages: string = "";
-    calling_code: string = "";
-    postal: string = "";
-    org: string = "";
-    cordinates: string = "";
+    lookup_ip = "";
+    city = "";
+    region = "";
+    country = "";
+    country_name = "";
+    country_capital = "";
+    timezone = "";
+    languages = "";
+    calling_code = "";
+    postal = "";
+    org = "";
+    cordinates = "";
     validIP: boolean = true;
-    noip: string = "";
+    noip = "";
 
     locate_ip(): void {
         this.isLoading = true;
@@ -51,7 +51,7 @@ export class locateComponent implements OnInit {
                 this.org = response.org;
                 this.cordinates = response.cordinates;
                 this.noip = response.noip;
-                if (this.noip == "Not a valid IP address!"){
+                if (this.noip =="Not a valid IP address!"){
                     this.validIP = false;
                 }
             }

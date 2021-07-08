@@ -51,7 +51,7 @@ def locate_ip(request: Request):
                 'calling_code':calling_code,'cordinates':cordinates,'org':org,'postal':postal_code}
     else:
         module.logger.debug("Not a valid IP address!")
-        return{"noip":"Not a valid IP address!"}
+        return "Not a valid IP address!", False
 
 if __name__ == "__main__":
     module.start()

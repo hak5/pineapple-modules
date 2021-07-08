@@ -2,7 +2,7 @@
     "name": "locate",
     "title": "Locate",
     "description": "Geolocate IP addresses over HTTPS via ipapi.",
-    "version": "1.1",
+    "version": "1.0",
     "author": "KoalaV2",
     "firmware_required": "1.0.0"
 }
