@@ -36,8 +36,11 @@ export class ApiService {
         this.http.post('/api/module/request', payload).subscribe((r: any) => {
             if (r === undefined || r === null) {
                 resp = this.emptyResponse;
+            } else if (r.error) {
+                resp = r;
+            } else {
+                resp = r.payload;
             }
-            resp = r.payload;
         }, (err) => {
             resp = err.error;
             if (err.status === 401) {
