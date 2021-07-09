@@ -7,7 +7,11 @@
                 <input matInput [(ngModel)]="userInput" />
             </mat-form-field>
             <div *ngIf="!validIP">
-                <span><strong>Please enter a valid IP address!</strong></span>
+                <span
+                    ><strong
+                        >Please enter a valid IP address or domain name!</strong
+                    ></span
+                >
             </div>
             <div *ngIf="lookup_ip" class="locate-results">
                 <br />
@@ -28,10 +32,17 @@
                 <div class="locate-results-right">
                     <span> <strong>Timezone:</strong> {{ timezone }} </span>
                     <br />
-                    <span>
-                        <strong>Country Flag:</strong> {{ country_flag }}
+                    <span style="display: flex; align-items: center">
+                        <strong>Country Flag:</strong>
+                        <div>
+                            <img
+                                width="25"
+                                height="18"
+                                style="margin-left: 0.25em"
+                                src="{{ country_flag }}"
+                            />
+                        </div>
                     </span>
-                    <br />
                     <span>
                         <strong>Coordinates:</strong> {{ coordinates }}
                     </span>
