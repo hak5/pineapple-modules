@@ -1,0 +1,21 @@
+.macinfo-online-card {
+    min-width: 40%;
+}
+
+.macinfo-online-card-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.macinfo-online-lookup-field {
+    width: 100%;
+}
+
+.macinfo-online-results {
+    display: flex;
+    justify-content: space-evenly;
+}
+.macinfo-online-results-left {
+    word-break: break-word;
+    max-width: 300px; 
+}

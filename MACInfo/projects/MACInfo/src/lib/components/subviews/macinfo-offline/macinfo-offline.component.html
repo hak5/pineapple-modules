@@ -1,0 +1,32 @@
+<div class="macinfo-center-card">
+    <mat-card class="macinfo-offline-card">
+        <mat-card-title>MAC Address Lookup</mat-card-title>
+        <mat-card-content class="macinfo-offline-card-content">
+            <mat-form-field class="macinfo-offline-lookup-field">
+                <mat-label>MAC Address</mat-label>
+                <input matInput [(ngModel)]="userInput" />
+            </mat-form-field>
+
+            <div *ngIf="company">
+                <span><strong>Company:</strong> {{ company }}</span>
+                <br/>
+                <br/>
+            </div>
+            <div *ngIf="!validMAC">
+                <span><strong>Please enter a valid MAC address</strong></span>
+            </div>
+
+            <button mat-flat-button class="macinfo-lookup-button"
+                                    color="accent"
+                                    (click)="check_mac();"
+                                    [disabled]="isLoading">
+                <span *ngIf="!isLoading">Lookup MAC Address</span>
+                <span *ngIf="isLoading">
+                    <mat-spinner diameter="20"></mat-spinner>
+                </span>
+            </button>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<br/>
