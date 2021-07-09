@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import pathlib
 import logging
 import subprocess
@@ -22,10 +23,8 @@ _CERTIFICATE_FILE = '/root/sslsplit/openssl/self-signed_certificate.crt'
 _CERTIFICATE_FILE_PATHLIB = pathlib.Path(_CERTIFICATE_FILE)
 
 _GENERATE_CERTIFICATE_SCRIPT = '/pineapple/modules/sslsplit/assets/scripts/generate-certificate.sh'
-
-_PRIVATE_KEY = '/root/sslsplit/openssl/private-key.pem'
-_PRIVATE_KEY_PATHLIB = pathlib.Path(_PRIVATE_KEY)
-# private_key_generated = _PRIVATE_KEY_PATHLIB.exists()
+_START_SSLSPLIT_SCRIPT = '/pineapple/modules/sslsplit/assets/scripts/start-sslsplit.sh'
+_STOP_SSLSPLIT_SCRIPT = '/pineapple/modules/sslsplit/assets/scripts/stop-sslsplit.sh'
 
 # OBJECTS
 
@@ -39,7 +38,7 @@ job_manager = JobManager(
 
 # CLASSES
 
-class GenerateCertificateJob(Job[bool]):
+class BashJob(Job[bool]):
 
     def __init__(self, argument: str):
         super().__init__()
@@ -111,13 +110,13 @@ def check_certificate(request: Request):
 @module.handles_action('generate_certificate')
 def generate_certificate(request: Request):
     module.logger.debug('[+] sslsplit-module : Generate required certificate')
-    job_id = job_manager.execute_job(GenerateCertificateJob(_GENERATE_CERTIFICATE_SCRIPT))
+    job_id = job_manager.execute_job(BashJob(_GENERATE_CERTIFICATE_SCRIPT))
     return {
         'job_id': job_id
     }
 
 @module.handles_action('poll_certificate')
-def poll_dependencies(request: Request):
+def poll_certificate(request: Request):
     job_id = request.job_id
     is_complete = False
     if len(job_manager.jobs) >= 1:
@@ -127,6 +126,38 @@ def poll_dependencies(request: Request):
                 break
     return {
         'is_complete': is_complete
+    }
+
+@module.handles_action('start_sslsplit')
+def start_sslsplit(request: Request):
+    job_id = job_manager.execute_job(BashJob(_START_SSLSPLIT_SCRIPT))
+    return {
+        'job_id': job_id
+    }
+
+@module.handles_action('poll_sslsplit')
+def poll_sslsplit(request: Request):
+    job_id = request.job_id
+    is_complete = False
+    if len(job_manager.jobs) >= 1:
+        for job, runner in job_manager.jobs.items():
+            if job == job_id and runner.job.is_complete:
+                is_complete = True
+                break
+    return {
+        'is_complete': is_complete
+    }
+
+@module.handles_action('stop_sslsplit')
+def stop_sslsplit(request: Request):
+    os.system(f'/bin/bash {_STOP_SSLSPLIT_SCRIPT}')
+    return True
+
+@module.handles_action('output_sslsplit')
+def output_sslsplit(request: Request):
+    # Fetch current log file : by date - by output ?
+    return {
+        'sslsplit_output': "ABCD"
     }
 
 if __name__ == '__main__':

@@ -21,6 +21,7 @@ export class sslsplitComponent implements OnInit {
                         job_id: job_id
                     },
                     (response) => {
+
                         if (response.is_complete) {
                             if (action === 'poll_dependencies') {
                                 this.check_dependencies();
@@ -29,6 +30,21 @@ export class sslsplitComponent implements OnInit {
                             }
                             clearInterval(this.poll_interval);
                         }
+
+                        if (action === 'poll_sslsplit' && !response.is_complete) {
+                            this.API.request(
+                                {
+                                    module: 'sslsplit',
+                                    action: 'output_sslsplit'
+                                },
+                                (response) => {
+                                    this.sslsplit_output = response.sslsplit_output;
+                                }
+                            )
+                        } else if (action === 'poll_sslsplit' && response.is_complete) {
+                            clearInterval(this.poll_interval);
+                        }
+
                     }
                 )
             }, 5000
@@ -101,6 +117,34 @@ export class sslsplitComponent implements OnInit {
                 this.poll_job('poll_certificate', response.job_id);
             }
         )        
+    }
+
+    sslsplit_status : boolean = false;
+    sslsplit_output : string = '';
+
+    start_sslsplit(): void {
+        this.API.request(
+            {
+                module: 'sslsplit',
+                action: 'start_sslsplit'
+            },
+            (response) => {
+                this.sslsplit_status = !this.sslsplit_status;
+                this.poll_job('poll_sslsplit', response.job_id);
+            }
+        )
+    }
+
+    stop_sslsplit(): void {
+        this.API.request(
+            {
+                module: 'sslsplit',
+                action: 'stop_sslsplit'
+            },
+            (response) => {
+                this.sslsplit_status = !this.sslsplit_status;
+            }
+        )
     }
 
     ngOnInit() {
