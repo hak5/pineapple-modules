@@ -7,11 +7,7 @@
                 <input matInput [(ngModel)]="userInput" />
             </mat-form-field>
             <div *ngIf="!validIP">
-                <span
-                    ><strong
-                        >Please enter a valid IP address or domain name!</strong
-                    ></span
-                >
+                <span><strong>Please enter a valid IP address or domain name!</strong></span>
             </div>
             <div *ngIf="lookup_ip" class="locate-results">
                 <br />
@@ -35,12 +31,7 @@
                     <span style="display: flex; align-items: center">
                         <strong>Country Flag:</strong>
                         <div>
-                            <img
-                                width="25"
-                                height="18"
-                                style="margin-left: 0.25em"
-                                src="{{ country_flag }}"
-                            />
+                            <img width="25" height="18" style="margin-left: 0.25em" src="{{ country_flag }}" />
                         </div>
                     </span>
                     <span>
@@ -56,12 +47,7 @@
                 </div>
             </div>
 
-            <button
-                mat-flat-button
-                class="macinfo-lookup-button"
-                color="accent"
-                (click)="locate_ip()"
-            >
+            <button mat-flat-button class="macinfo-lookup-button" color="accent" (click)="locate_ip()">
                 <span *ngIf="!isLoading">Locate IP</span>
                 <span class="spinner" *ngIf="isLoading">
                     <mat-spinner diameter="20"></mat-spinner>
