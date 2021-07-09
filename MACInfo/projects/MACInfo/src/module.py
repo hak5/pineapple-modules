@@ -26,7 +26,10 @@ def check_mac_online(request: Request):
     strip_mac = mac.replace(' ','')
     if '-' in strip_mac:
         strip_mac = mac.replace('-',':')
-    strip_mac = re.search("^[a-fA-F0-9]{2}([:\-]?[a-fA-F0-9]{2}){2,5}$",strip_mac).group(0)
+    module.logger.debug("Running regex check")
+    strip_mac = re.search("^[a-fA-F0-9]{2}([:\-]?[a-fA-F0-9]{2}){2,5}$",strip_mac)
+    if strip_mac:
+        strip_mac = strip_mac.group(0)
 
     if strip_mac:
         module.logger.debug("MATCH FOUND")
@@ -59,9 +62,10 @@ def check_mac(request: Request):
     elif '-' in nospace_mac:
         strip_mac = mac.replace('-','')
 
-    reg_mac = re.search("^[a-fA-F0-9]{2}([:\-]?[a-fA-F0-9]{2}){2,5}$",nospace_mac).group(0)
+    reg_mac = re.search("^[a-fA-F0-9]{2}([:\-]?[a-fA-F0-9]{2}){2,5}$",nospace_mac)
 
     if reg_mac:
+        reg_mac = reg_mac.group(0)
         module.logger.debug("User inputted: " + mac)
         module.logger.debug(strip_mac[:6])
         new_mac = strip_mac[:6]
