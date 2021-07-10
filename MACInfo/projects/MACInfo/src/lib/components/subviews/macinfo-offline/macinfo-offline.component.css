@@ -1,0 +1,12 @@
+.macinfo-offline-card {
+    min-width: 40%;
+}
+
+.macinfo-offline-lookup-field {
+    width: 100%;
+}
+
+.macinfo-offline-card-content {
+    display: flex;
+    flex-direction: column;
+}

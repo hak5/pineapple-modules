@@ -1,0 +1,42 @@
+.locate-center-card {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.locate-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 4vh;
+}
+.locate-card {
+    min-width: 40%;
+}
+
+.locate-card-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.locate-lookup-field {
+    width: 100%;
+}
+
+.locate-results {
+    display: flex;
+    justify-content: space-evenly;
+}
+.locate-results-left {
+    word-break: break-word;
+    padding: 1vw;
+    max-width: 300px;
+}
+.locate-results-right {
+    padding: 1vw;
+}
+.spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 4vh;
+}

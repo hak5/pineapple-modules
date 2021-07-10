@@ -1,0 +1,14 @@
+.macinfo-center-card {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.macinfo-lookup-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    height: 34px;
+}
+

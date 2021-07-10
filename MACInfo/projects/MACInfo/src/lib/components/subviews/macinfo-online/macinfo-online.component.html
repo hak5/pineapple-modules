@@ -1,0 +1,57 @@
+<div class="macinfo-center-card">
+    <mat-card class="macinfo-online-card">
+        <mat-card-title>MAC Address Online Lookup</mat-card-title>
+        <mat-card-content class="macinfo-online-card-content">
+            <mat-form-field class="macinfo-online-lookup-field">
+                <mat-label>MAC Address</mat-label>
+                <input matInput [(ngModel)]="userInput" />
+            </mat-form-field>
+
+            <div *ngIf="!validMAC">
+                <span><strong>Please enter a valid MAC address</strong></span>
+            </div>
+            <div *ngIf="company" class="macinfo-online-results">
+                <br/>
+                <div class="macinfo-online-results-left">
+                    <span>
+                        <strong>Company:</strong> {{ company }}
+                    </span>
+                    <br/>
+                    <span>
+                        <strong>Address:</strong> {{ address }}
+                    </span>
+                    <br/>
+                    <span>
+                        <strong>Type:</strong> {{ mactype }}
+                    </span>
+                </div>
+                <div>
+                    <span>
+                        <strong>Country:</strong> {{ maccountry }}
+                    </span>
+                    <br/>
+                    <span>
+                        <strong>Start hex:</strong> {{ start_hex }}
+                    </span>
+                    <br/>
+                    <span>
+                        <strong>End hex:</strong> {{ end_hex }}
+                    </span>
+                </div>
+                <br/>
+            </div>
+
+            <button mat-flat-button class="macinfo-lookup-button"
+                                    color="accent"
+                                    (click)="check_mac_online();"
+                                    [disabled]="isLoading">
+                <span *ngIf="!isLoading">Lookup MAC Address Online</span>
+                <span *ngIf="isLoading">
+                    <mat-spinner diameter="20"></mat-spinner>
+                </span>
+            </button>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<br/>
