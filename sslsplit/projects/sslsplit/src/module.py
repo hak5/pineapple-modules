@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import os
+import glob
+import base64
 import pathlib
 import logging
 import subprocess
@@ -25,6 +27,9 @@ _CERTIFICATE_FILE_PATHLIB = pathlib.Path(_CERTIFICATE_FILE)
 _GENERATE_CERTIFICATE_SCRIPT = '/pineapple/modules/sslsplit/assets/scripts/generate-certificate.sh'
 _START_SSLSPLIT_SCRIPT = '/pineapple/modules/sslsplit/assets/scripts/start-sslsplit.sh'
 _STOP_SSLSPLIT_SCRIPT = '/pineapple/modules/sslsplit/assets/scripts/stop-sslsplit.sh'
+
+_LOGS_DIRECTORY = '/root/sslsplit/logs/'
+_LOGS_DIRECTORY_PATHLIB = pathlib.Path(_LOGS_DIRECTORY)
 
 # OBJECTS
 
@@ -162,6 +167,30 @@ def output_sslsplit(request: Request):
 
 @module.handles_action('check_logs')
 def check_logs(request: Request):
+    if _LOGS_DIRECTORY_PATHLIB.exists():
+        logs = glob.glob(f'{_LOGS_DIRECTORY}*.log')
+        return {
+            'sslsplit_logs': logs
+        }
+    else:
+        return {
+            'sslsplit_logs': False
+        }
+
+@module.handles_action('view_log')
+def view_log(request: Request):
+    log = request.log
+    with open(log, 'rb') as reader:
+        # error	"read unix @->/tmp/modules/sslsplit.sock: read: connection reset by peer"
+        content = reader.read()
+        return {
+            'log_output': base64.b64encode(content)
+        }
+
+@module.handles_action('delete_log')
+def delete_log(request: Request):
+    log = request.log
+    os.remove(log)
     return True
 
 if __name__ == '__main__':

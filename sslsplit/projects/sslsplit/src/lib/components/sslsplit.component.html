@@ -69,6 +69,12 @@
         </div>
 
         <div *ngIf="logs_status">
+
+            <mat-form-field appearance="fill" [style.width.%]="100">
+                <mat-label>Filter</mat-label>
+                <input matInput placeholder="password">
+            </mat-form-field>
+
             <mat-form-field appearance="outline" [style.width.%]="100">
                 <mat-label>SSLsplit log output</mat-label>
                 <textarea matTextareaAutosize matInput>{{ sslsplit_output }}</textarea>
@@ -79,6 +85,9 @@
                     <span matLine>{{log}}</span>
                     <button mat-icon-button (click)="view_log(log);">
                         <mat-icon>visibility</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="download_log(log);">
+                        <mat-icon>attachment</mat-icon>
                     </button>
                     <button mat-icon-button (click)="delete_log(log);">
                         <mat-icon>delete</mat-icon>

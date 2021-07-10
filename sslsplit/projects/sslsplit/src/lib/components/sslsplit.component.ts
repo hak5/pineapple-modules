@@ -42,6 +42,8 @@ export class sslsplitComponent implements OnInit {
                                 }
                             )
                         } else if (action === 'poll_sslsplit' && response.is_complete) {
+                            this.logs_status = !this.logs_status;
+                            this.check_logs();
                             clearInterval(this.poll_interval);
                         }
 
@@ -147,8 +149,8 @@ export class sslsplitComponent implements OnInit {
         )
     }
 
-    logs : string[] = [];
     logs_status : boolean = false;
+    logs : string[] = [];
     check_logs(): void {
         this.API.request(
             {
@@ -156,18 +158,43 @@ export class sslsplitComponent implements OnInit {
                 action: 'check_logs'
             },
             (response) => {
-                this.logs = ['output_0.log', 'output_1.log', 'output_2.log', 'output_3.log'];
-                this.logs_status = !this.logs_status;
+                if (response.sslsplit_logs && (response.sslsplit_logs.length >= 1) ) {
+                    this.logs = response.sslsplit_logs;
+                    this.logs_status = !this.logs_status;
+                }
             }
         )
     }
 
     view_log(log): void {
+        this.API.request(
+            {
+                module: 'sslsplit',
+                action: 'view_log',
+                log: log
+            },
+            (response) => {
+                this.sslsplit_output = atob(response.log_output);
+            }
+        )
+    }
+
+    download_log(log): void {
         //
     }
 
     delete_log(log): void {
-        //
+        this.API.request(
+            {
+                module: 'sslsplit',
+                action: 'delete_log',
+                log: log
+            },
+            (response) => {
+                this.logs_status = !this.logs_status;
+                this.check_logs();
+            }
+        )
     }
 
     ngOnInit() {
