@@ -147,10 +147,34 @@ export class sslsplitComponent implements OnInit {
         )
     }
 
+    logs : string[] = [];
+    logs_status : boolean = false;
+    check_logs(): void {
+        this.API.request(
+            {
+                module: 'sslsplit',
+                action: 'check_logs'
+            },
+            (response) => {
+                this.logs = ['output_0.log', 'output_1.log', 'output_2.log', 'output_3.log'];
+                this.logs_status = !this.logs_status;
+            }
+        )
+    }
+
+    view_log(log): void {
+        //
+    }
+
+    delete_log(log): void {
+        //
+    }
+
     ngOnInit() {
         this.check_network();
         this.check_dependencies();
         this.check_certificate();
+        this.check_logs();
     }
 
     ngOnDestroy() {

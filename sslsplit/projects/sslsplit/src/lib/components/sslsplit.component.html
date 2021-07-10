@@ -35,7 +35,7 @@
             </button>
         </div>
 
-        <div *ngIf="network_status">
+        <div *ngIf="network_status && dependency_sslsplit">
             <p>
                 <u>Encryption</u>
             </p>
@@ -52,31 +52,39 @@
             </button>
         </div>
 
-        <div *ngIf="network_status && certificate_sslsplit">
+        <div *ngIf="network_status && dependency_sslsplit && certificate_sslsplit">
             <p>
                 <u>SSLsplit</u>
             </p>
             <p>
-                <!-- Start -->
                 <button *ngIf="!sslsplit_status" mat-flat-button color="accent" (click)="start_sslsplit();">
                     <span>Start</span>
                 </button>
             </p>
             <p>
-                <!-- Stop -->
                 <button *ngIf="sslsplit_status" mat-flat-button color="warn" (click)="stop_sslsplit();">
                     <span>Stop</span>
                 </button>
             </p>
+        </div>
 
+        <div *ngIf="logs_status">
             <mat-form-field appearance="outline" [style.width.%]="100">
                 <mat-label>SSLsplit log output</mat-label>
-                <textarea matTextareaAutosize matInput>
-                {{ sslsplit_output }}
-                </textarea>
+                <textarea matTextareaAutosize matInput>{{ sslsplit_output }}</textarea>
             </mat-form-field>
 
-            <!-- https://material.angular.io/components/list/overview -->
+            <mat-nav-list>
+                <mat-list-item *ngFor="let log of logs">
+                    <span matLine>{{log}}</span>
+                    <button mat-icon-button (click)="view_log(log);">
+                        <mat-icon>visibility</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="delete_log(log);">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </mat-list-item>
+            </mat-nav-list>
         </div>
 
     </mat-card-content>
