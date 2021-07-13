@@ -181,10 +181,10 @@ def check_logs(request: Request):
 def view_log(request: Request):
     log = request.log
     with open(log, 'rb') as reader:
-        # error	"read unix @->/tmp/modules/sslsplit.sock: read: connection reset by peer"
-        content = reader.read()
+        content = base64.b64encode(reader.read())
+        content = content.decode('ascii')
         return {
-            'log_output': base64.b64encode(content)
+            'log_output': content
         }
 
 @module.handles_action('delete_log')

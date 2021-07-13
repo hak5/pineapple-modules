@@ -42,7 +42,6 @@ export class sslsplitComponent implements OnInit {
                                 }
                             )
                         } else if (action === 'poll_sslsplit' && response.is_complete) {
-                            this.logs_status = !this.logs_status;
                             this.check_logs();
                             clearInterval(this.poll_interval);
                         }
@@ -132,6 +131,7 @@ export class sslsplitComponent implements OnInit {
             },
             (response) => {
                 this.sslsplit_status = !this.sslsplit_status;
+                this.logs_status = true;
                 this.poll_job('poll_sslsplit', response.job_id);
             }
         )
@@ -160,7 +160,9 @@ export class sslsplitComponent implements OnInit {
             (response) => {
                 if (response.sslsplit_logs && (response.sslsplit_logs.length >= 1) ) {
                     this.logs = response.sslsplit_logs;
-                    this.logs_status = !this.logs_status;
+                    this.logs_status = true;
+                } else {
+                    this.logs_status = false;
                 }
             }
         )
@@ -180,7 +182,7 @@ export class sslsplitComponent implements OnInit {
     }
 
     download_log(log): void {
-        //
+        this.API.APIDownload(log, log.replace(/.*\//, ''));
     }
 
     delete_log(log): void {
@@ -191,7 +193,6 @@ export class sslsplitComponent implements OnInit {
                 log: log
             },
             (response) => {
-                this.logs_status = !this.logs_status;
                 this.check_logs();
             }
         )
