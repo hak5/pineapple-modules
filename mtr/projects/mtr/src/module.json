@@ -1,0 +1,9 @@
+{
+    "name": "mtr",
+    "title": "MTR",
+    "description": "Traceroute and ping a host.",
+    "version": "1.0",
+    "author": "KoalaV2",
+    "firmware_required": "1.0.0"
+}
+
