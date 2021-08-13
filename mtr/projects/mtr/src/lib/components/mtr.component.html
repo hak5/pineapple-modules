@@ -1,0 +1,21 @@
+<mat-card>
+    <mat-card-title>Welcome to mtr</mat-card-title>
+    <mat-card-content>
+        <mat-form-field class="locate-lookup-field">
+            <mat-label> IP address / Domain. </mat-label>
+            <input matInput [(ngModel)]="userInput" />
+        </mat-form-field>
+
+        <button
+            mat-flat-button
+            class="macinfo-lookup-button"
+            color="accent"
+            (click)="startmtr()"
+        >
+            <span *ngIf="!isLoading">Locate IP / Domain</span>
+            <span class="spinner" *ngIf="isLoading">
+                <mat-spinner diameter="20"></mat-spinner>
+            </span>
+        </button>
+    </mat-card-content>
+</mat-card>
