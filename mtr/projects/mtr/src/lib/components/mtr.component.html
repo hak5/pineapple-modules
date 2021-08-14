@@ -19,8 +19,27 @@
         </button>
 
         <span> From {{ src }} to {{ dst }} </span>
-        <div *ngFor="let hub of hubs">
-            <span> {{ hub.host }} </span>
-        </div>
+        <!-- <div *ngFor="let hub of hubs"> -->
+        <!--     <span> {{ hub.host }} </span> -->
+        <!-- </div> -->
+        <table
+            class="mat-table"
+            style="min-width: 100%; overflow-x: auto; justify-content: left"
+        >
+            <thead>
+                <tr class="mat-header-row">
+                    <th class="mat-header-cell">Host</th>
+                </tr>
+            </thead>
+            <tbody>
+                <ng-container *ngFor="let hub of hubs">
+                    <tr class="mat-row">
+                        <td class="mat-cell">
+                            {{ hub.host }}
+                        </td>
+                    </tr>
+                </ng-container>
+            </tbody>
+        </table>
     </mat-card-content>
 </mat-card>

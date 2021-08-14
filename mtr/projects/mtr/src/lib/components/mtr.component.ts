@@ -49,7 +49,7 @@ export class mtrComponent implements OnInit {
             (result: JobResultDTO<boolean>) => {
                 this.isLoading = false;
                 // this.getScanOutput(this.scanOutputFileName);
-                this.getoutput()
+                this.getoutput();
                 console.log("MTR has finished.");
             },
             () => {
@@ -65,13 +65,13 @@ export class mtrComponent implements OnInit {
                 action: "load_output",
             },
             (response) => {
-                console.log(response.report)
+                console.log(response.report);
                 this.hubs = response.report.hubs;
                 this.dst = response.report.mtr.dst;
                 this.src = response.report.mtr.src;
-                console.log(this.hubs)
-                console.log(this.src)
-                console.log(this.dst)
+                console.log(this.hubs);
+                console.log(this.src);
+                console.log(this.dst);
                 // response.report.hubs.forEach(thing=>console.log(thing.host))
             }
         );
