@@ -28,14 +28,22 @@
         >
             <thead>
                 <tr class="mat-header-row">
+                    <th class="mat-header-cell">Count</th>
                     <th class="mat-header-cell">Host</th>
+                    <th class="mat-header-cell">Average ping m/s</th>
                 </tr>
             </thead>
             <tbody>
                 <ng-container *ngFor="let hub of hubs">
                     <tr class="mat-row">
                         <td class="mat-cell">
+                            {{ hub.count }}
+                        </td>
+                        <td class="mat-cell">
                             {{ hub.host }}
+                        </td>
+                        <td class="mat-cell">
+                            {{ hub.Avg }}
                         </td>
                     </tr>
                 </ng-container>
