@@ -17,5 +17,10 @@
                 <mat-spinner diameter="20"></mat-spinner>
             </span>
         </button>
+
+        <span> From {{ src }} to {{ dst }} </span>
+        <div *ngFor="let hub of hubs">
+            <span> {{ hub.host }} </span>
+        </div>
     </mat-card-content>
 </mat-card>

@@ -16,6 +16,8 @@ export class mtrComponent implements OnInit {
     hubs = "";
     backgroundJobInterval = null;
     fileoutput = "";
+    src = "";
+    dst = "";
 
     pollBackgroundJob<T>(
         jobId: string,
@@ -48,10 +50,10 @@ export class mtrComponent implements OnInit {
                 this.isLoading = false;
                 // this.getScanOutput(this.scanOutputFileName);
                 this.getoutput()
-                console.log("Finished");
+                console.log("MTR has finished.");
             },
             () => {
-                console.log("Not finished");
+                console.log("MTR still running..");
             }
         );
     }
@@ -63,8 +65,14 @@ export class mtrComponent implements OnInit {
                 action: "load_output",
             },
             (response) => {
-                this.fileoutput = response;
-                console.log(this.fileoutput)
+                console.log(response.report)
+                this.hubs = response.report.hubs;
+                this.dst = response.report.mtr.dst;
+                this.src = response.report.mtr.src;
+                console.log(this.hubs)
+                console.log(this.src)
+                console.log(this.dst)
+                // response.report.hubs.forEach(thing=>console.log(thing.host))
             }
         );
     }
