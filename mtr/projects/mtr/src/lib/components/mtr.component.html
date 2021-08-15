@@ -1,24 +1,23 @@
 <mat-card>
-    <mat-card-title>Welcome to mtr</mat-card-title>
+    <mat-card-title>Traceroute and Ping</mat-card-title>
     <mat-card-content>
-        <mat-form-field class="locate-lookup-field">
-            <mat-label> IP address / Domain. </mat-label>
+        <mat-form-field class="mtr-lookup-field">
+            <mat-label> IP Address or Domain </mat-label>
             <input matInput [(ngModel)]="userInput" />
         </mat-form-field>
 
         <button
             mat-flat-button
-            class="macinfo-lookup-button"
+            class="mtr-button"
             color="accent"
             (click)="startmtr()"
         >
-            <span *ngIf="!isLoading">Locate IP / Domain</span>
+            <span *ngIf="!isLoading">Start Traceroute</span>
             <span class="spinner" *ngIf="isLoading">
                 <mat-spinner diameter="20"></mat-spinner>
             </span>
         </button>
 
-        <span> From {{ src }} to {{ dst }} </span>
         <table
             class="mat-table"
             style="min-width: 100%; overflow-x: auto; justify-content: left"

@@ -1,0 +1,15 @@
+.spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 4vh;
+}
+.mtr-button {
+    /* display: flex; */
+    /* justify-content: center; */
+    /* align-items: center; */
+    height: 4vh;
+}
+.mtr-lookup-field {
+    padding-right: 2vh;
+}

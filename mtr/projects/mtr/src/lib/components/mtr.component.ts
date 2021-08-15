@@ -67,11 +67,7 @@ export class mtrComponent implements OnInit {
             (response) => {
                 console.log(response.report);
                 this.hubs = response.report.hubs;
-                this.dst = response.report.mtr.dst;
-                this.src = response.report.mtr.src;
                 console.log(this.hubs);
-                console.log(this.src);
-                console.log(this.dst);
             }
         );
     }
