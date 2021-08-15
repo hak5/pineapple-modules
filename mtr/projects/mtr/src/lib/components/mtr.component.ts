@@ -15,6 +15,8 @@ export class mtrComponent implements OnInit {
     commandfinished: boolean = false;
     hubs = "";
     backgroundJobInterval = null;
+    hasDependencies: boolean = true;
+    isInstalling: boolean = false;
     fileoutput = "";
     src = "";
     dst = "";
@@ -42,13 +44,68 @@ export class mtrComponent implements OnInit {
             );
         }, 2000);
     }
+    checkForDependencies(): void {
+        this.API.request(
+            {
+                module: "mtr",
+                action: "check_dependencies",
+            },
+            (response) => {
+                this.hasDependencies = response;
+            }
+        );
+    }
+    private monitorInstall(jobId: string): void {
+        this.isInstalling = true;
+        this.pollBackgroundJob(jobId, (result: JobResultDTO<boolean>) => {
+            this.isInstalling = false;
+            this.checkForDependencies();
+        });
+    }
+
+    rebindLastJob(): void {
+        this.API.request(
+            {
+                module: "mtr",
+                action: "rebind_last_job",
+            },
+            (response) => {
+                if (response.error) {
+                    // this.handleError(response.error);
+                    return;
+                }
+
+                if (response.job_id && response.job_type) {
+                    switch (response.job_type) {
+                        case "opkg":
+                            this.monitorInstall(response.job_id);
+                            break;
+                    }
+                }
+            }
+        );
+    }
+    installDependencies(): void {
+        this.API.request({
+            module: 'mtr',
+            action: 'manage_dependencies',
+            install: true
+        }, (response) => {
+            if (response.error) {
+                // this.handleError(response.error);
+                return;
+            }
+
+            this.monitorInstall(response.job_id);
+        });
+    }
+
     private monitormtr(jobId: string): void {
         this.isLoading = true;
         this.pollBackgroundJob(
             jobId,
             (result: JobResultDTO<boolean>) => {
                 this.isLoading = false;
-                // this.getScanOutput(this.scanOutputFileName);
                 this.getoutput();
                 console.log("MTR has finished.");
             },
@@ -86,5 +143,8 @@ export class mtrComponent implements OnInit {
         );
     }
 
-    ngOnInit() {}
+    ngOnInit() {
+        this.checkForDependencies();
+        this.rebindLastJob();
+    }
 }
