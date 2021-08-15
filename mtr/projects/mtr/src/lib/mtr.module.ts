@@ -1,20 +1,20 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { NgModule } from "@angular/core";
+import { CommonModule } from "@angular/common";
 
-import { mtrComponent } from './components/mtr.component';
-import { RouterModule, Routes } from '@angular/router';
+import { mtrComponent } from "./components/mtr.component";
+import { RouterModule, Routes } from "@angular/router";
 
-import {MaterialModule} from './modules/material/material.module';
-import {FlexLayoutModule} from '@angular/flex-layout';
+import { MaterialModule } from "./modules/material/material.module";
+import { FlexLayoutModule } from "@angular/flex-layout";
 
-import {FormsModule} from '@angular/forms';
+import { FormsModule } from "@angular/forms";
 
-const routes: Routes = [
-    { path: '', component: mtrComponent }
-];
+import { LicenseDialogComponent } from "./components/helpers/license-dialog/license-dialog.component";
+
+const routes: Routes = [{ path: "", component: mtrComponent }];
 
 @NgModule({
-    declarations: [mtrComponent],
+    declarations: [mtrComponent, LicenseDialogComponent],
     imports: [
         CommonModule,
         RouterModule.forChild(routes),
@@ -22,6 +22,7 @@ const routes: Routes = [
         FlexLayoutModule,
         FormsModule,
     ],
-    exports: [mtrComponent]
+    exports: [mtrComponent],
+    entryComponents: [LicenseDialogComponent],
 })
-export class mtrModule { }
+export class mtrModule {}

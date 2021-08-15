@@ -1,6 +1,8 @@
 import { Component, OnInit } from "@angular/core";
 import { ApiService } from "../services/api.service";
 import { JobResultDTO } from "../interfaces/jobresult.interface";
+import { MatDialog } from "@angular/material/dialog";
+import {LicenseDialogComponent} from "./helpers/license-dialog/license-dialog.component";
 
 @Component({
     selector: "lib-mtr",
@@ -8,7 +10,7 @@ import { JobResultDTO } from "../interfaces/jobresult.interface";
     styleUrls: ["./mtr.component.css"],
 })
 export class mtrComponent implements OnInit {
-    constructor(private API: ApiService) {}
+    constructor(private API: ApiService, private dialog: MatDialog) {}
 
     userInput = "";
     isLoading: boolean = false;
@@ -70,11 +72,6 @@ export class mtrComponent implements OnInit {
                 action: "rebind_last_job",
             },
             (response) => {
-                if (response.error) {
-                    // this.handleError(response.error);
-                    return;
-                }
-
                 if (response.job_id && response.job_type) {
                     switch (response.job_type) {
                         case "opkg":
@@ -86,18 +83,16 @@ export class mtrComponent implements OnInit {
         );
     }
     installDependencies(): void {
-        this.API.request({
-            module: 'mtr',
-            action: 'manage_dependencies',
-            install: true
-        }, (response) => {
-            if (response.error) {
-                // this.handleError(response.error);
-                return;
+        this.API.request(
+            {
+                module: "mtr",
+                action: "manage_dependencies",
+                install: true,
+            },
+            (response) => {
+                this.monitorInstall(response.job_id);
             }
-
-            this.monitorInstall(response.job_id);
-        });
+        );
     }
 
     private monitormtr(jobId: string): void {
@@ -141,6 +136,12 @@ export class mtrComponent implements OnInit {
                 this.monitormtr(response.job_id);
             }
         );
+    }
+    showLicenseDialog(): void {
+        this.dialog.open(LicenseDialogComponent, {
+            hasBackdrop: true,
+            width: "900px",
+        });
     }
 
     ngOnInit() {
