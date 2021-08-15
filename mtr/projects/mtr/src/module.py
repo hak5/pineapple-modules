@@ -48,6 +48,9 @@ def startmtr(request: Request):
 def load_output(request: Request):
     with open(json_file,"r") as f:
         file = json.load(f)
+        file2 = file["report"]["hubs"]
+        for k in file2:
+            k['LossPerc'] = k.pop('Loss%')
         return file
 
 

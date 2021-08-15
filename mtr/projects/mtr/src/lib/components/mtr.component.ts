@@ -72,7 +72,6 @@ export class mtrComponent implements OnInit {
                 console.log(this.hubs);
                 console.log(this.src);
                 console.log(this.dst);
-                // response.report.hubs.forEach(thing=>console.log(thing.host))
             }
         );
     }

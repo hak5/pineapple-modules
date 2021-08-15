@@ -19,17 +19,15 @@
         </button>
 
         <span> From {{ src }} to {{ dst }} </span>
-        <!-- <div *ngFor="let hub of hubs"> -->
-        <!--     <span> {{ hub.host }} </span> -->
-        <!-- </div> -->
         <table
             class="mat-table"
             style="min-width: 100%; overflow-x: auto; justify-content: left"
         >
             <thead>
                 <tr class="mat-header-row">
-                    <th class="mat-header-cell">Count</th>
+                    <th class="mat-header-cell">Hops</th>
                     <th class="mat-header-cell">Host</th>
+                    <th class="mat-header-cell">Packet loss %</th>
                     <th class="mat-header-cell">Average ping m/s</th>
                 </tr>
             </thead>
@@ -41,6 +39,9 @@
                         </td>
                         <td class="mat-cell">
                             {{ hub.host }}
+                        </td>
+                        <td class="mat-cell">
+                            {{ hub.LossPerc }}
                         </td>
                         <td class="mat-cell">
                             {{ hub.Avg }}
