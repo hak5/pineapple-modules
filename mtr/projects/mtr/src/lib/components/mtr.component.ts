@@ -1,27 +1,27 @@
-import { Component, OnInit } from "@angular/core";
-import { ApiService } from "../services/api.service";
-import { JobResultDTO } from "../interfaces/jobresult.interface";
-import { MatDialog } from "@angular/material/dialog";
-import {LicenseDialogComponent} from "./helpers/license-dialog/license-dialog.component";
+import { Component, OnInit } from '@angular/core';
+import { ApiService } from '../services/api.service';
+import { JobResultDTO } from '../interfaces/jobresult.interface';
+import { MatDialog } from '@angular/material/dialog';
+import {LicenseDialogComponent} from './helpers/license-dialog/license-dialog.component';
 
 @Component({
-    selector: "lib-mtr",
-    templateUrl: "./mtr.component.html",
-    styleUrls: ["./mtr.component.css"],
+    selector: 'lib-mtr',
+    templateUrl: './mtr.component.html',
+    styleUrls: ['./mtr.component.css'],
 })
 export class mtrComponent implements OnInit {
     constructor(private API: ApiService, private dialog: MatDialog) {}
 
-    userInput = "";
+    userInput = '';
     isLoading: boolean = false;
     commandfinished: boolean = false;
-    hubs = "";
+    hubs = '';
     backgroundJobInterval = null;
     hasDependencies: boolean = true;
     isInstalling: boolean = false;
-    fileoutput = "";
-    src = "";
-    dst = "";
+    fileoutput = '';
+    src = '';
+    dst = '';
 
     pollBackgroundJob<T>(
         jobId: string,
@@ -31,8 +31,8 @@ export class mtrComponent implements OnInit {
         this.backgroundJobInterval = setInterval(() => {
             this.API.request(
                 {
-                    module: "mtr",
-                    action: "poll_job",
+                    module: 'mtr',
+                    action: 'poll_job',
                     job_id: jobId,
                 },
                 (response: JobResultDTO<T>) => {
@@ -49,8 +49,8 @@ export class mtrComponent implements OnInit {
     checkForDependencies(): void {
         this.API.request(
             {
-                module: "mtr",
-                action: "check_dependencies",
+                module: 'mtr',
+                action: 'check_dependencies',
             },
             (response) => {
                 this.hasDependencies = response;
@@ -68,13 +68,13 @@ export class mtrComponent implements OnInit {
     rebindLastJob(): void {
         this.API.request(
             {
-                module: "mtr",
-                action: "rebind_last_job",
+                module: 'mtr',
+                action: 'rebind_last_job',
             },
             (response) => {
                 if (response.job_id && response.job_type) {
                     switch (response.job_type) {
-                        case "opkg":
+                        case 'opkg':
                             this.monitorInstall(response.job_id);
                             break;
                     }
@@ -85,8 +85,8 @@ export class mtrComponent implements OnInit {
     installDependencies(): void {
         this.API.request(
             {
-                module: "mtr",
-                action: "manage_dependencies",
+                module: 'mtr',
+                action: 'manage_dependencies',
                 install: true,
             },
             (response) => {
@@ -102,10 +102,10 @@ export class mtrComponent implements OnInit {
             (result: JobResultDTO<boolean>) => {
                 this.isLoading = false;
                 this.getoutput();
-                console.log("MTR has finished.");
+                console.log('MTR has finished.');
             },
             () => {
-                console.log("MTR still running..");
+                console.log('MTR still running..');
             }
         );
     }
@@ -113,8 +113,8 @@ export class mtrComponent implements OnInit {
     getoutput(): void {
         this.API.request(
             {
-                module: "mtr",
-                action: "load_output",
+                module: 'mtr',
+                action: 'load_output',
             },
             (response) => {
                 console.log(response.report);
@@ -128,8 +128,8 @@ export class mtrComponent implements OnInit {
         this.isLoading = true;
         this.API.request(
             {
-                module: "mtr",
-                action: "startmtr",
+                module: 'mtr',
+                action: 'startmtr',
                 user_input: this.userInput,
             },
             (response) => {
@@ -140,7 +140,7 @@ export class mtrComponent implements OnInit {
     showLicenseDialog(): void {
         this.dialog.open(LicenseDialogComponent, {
             hasBackdrop: true,
-            width: "900px",
+            width: '900px',
         });
     }
 
