@@ -72,11 +72,7 @@ def rebind_last_job(request: Request):
 
     if len(job_manager.jobs) >= 1:
         last_job_id = list(job_manager.jobs.keys())[-1]
-        if type(job_manager.jobs[last_job_id].job) is ScanJob:
-            last_job_type = 'scan'
-            job_info = job_manager.jobs[last_job_id].job.file_name
-
-        elif type(job_manager.jobs[last_job_id].job) is OpkgJob:
+        if type(job_manager.jobs[last_job_id].job) is OpkgJob:
             last_job_type = 'opkg'
         else:
             last_job_type = 'unknown'
