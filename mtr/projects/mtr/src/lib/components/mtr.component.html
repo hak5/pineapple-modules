@@ -1,0 +1,101 @@
+<div class="dependency-card-centered" *ngIf="!hasDependencies">
+    <mat-card class="dependency-card">
+        <mat-card-content>
+            <mat-card-title>Welcome To MTR</mat-card-title>
+            <mat-card-subtitle>Lets get started.</mat-card-subtitle>
+
+            <mat-divider></mat-divider>
+            <br />
+
+            <p>
+                You need to install some dependencies before you can use this
+                module.
+            </p>
+            <p>This will make a request to the internet.</p>
+
+            <br />
+            <br />
+            <div class="dependency-card-centered">
+                <button
+                    mat-raised-button
+                    color="accent"
+                    class="dependency-card-button"
+                    (click)="installDependencies()"
+                    [disabled]="isInstalling"
+                >
+                    <span *ngIf="isInstalling">
+                        <mat-spinner
+                            [diameter]="20"
+                            class="spinner-padding"
+                            color="accent"
+                        ></mat-spinner>
+                    </span>
+                    <span *ngIf="!isInstalling"> Install Dependencies </span>
+                </button>
+            </div>
+            <br />
+            <div class="dependency-card-centered">
+                <button mat-button color="accent" (click)="showLicenseDialog()">
+                    View MTR License
+                </button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<div *ngIf="hasDependencies">
+    <mat-card>
+        <mat-card-title>MTR: Traceroute and Ping</mat-card-title>
+        <mat-card-content>
+            <mat-form-field class="mtr-lookup-field">
+                <mat-label> IP Address or Domain </mat-label>
+                <input matInput [(ngModel)]="userInput" />
+            </mat-form-field>
+
+            <button
+                mat-flat-button
+                class="mtr-button"
+                color="accent"
+                (click)="startmtr()"
+                [disabled]="isLoading"
+            >
+                <span *ngIf="!isLoading">Start Traceroute</span>
+                <span class="spinner" *ngIf="isLoading">
+                    <mat-spinner diameter="20"></mat-spinner>
+                </span>
+            </button>
+
+            <table
+                class="mat-table"
+                style="min-width: 100%; overflow-x: auto; justify-content: left"
+            >
+                <thead>
+                    <tr class="mat-header-row">
+                        <th class="mat-header-cell">Hops</th>
+                        <th class="mat-header-cell">Host</th>
+                        <th class="mat-header-cell">Packet loss %</th>
+                        <th class="mat-header-cell">Average ping m/s</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ng-container *ngFor="let hub of hubs">
+                        <tr class="mat-row">
+                            <td class="mat-cell">
+                                {{ hub.count }}
+                            </td>
+                            <td class="mat-cell">
+                                {{ hub.host }}
+                            </td>
+                            <td class="mat-cell">
+                                {{ hub.LossPerc }}
+                            </td>
+                            <td class="mat-cell">
+                                {{ hub.Avg }}
+                            </td>
+                        </tr>
+                    </ng-container>
+                </tbody>
+            </table>
+        </mat-card-content>
+    </mat-card>
+</div>
