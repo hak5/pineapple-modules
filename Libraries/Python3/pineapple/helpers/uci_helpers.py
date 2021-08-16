@@ -1,21 +1,36 @@
+from logging import Logger
+from typing import Optional, Tuple, List, Union
 import subprocess
+import os
 
 
-def uci_get(property_name) -> str:
+def uci_set(key: str, value) -> bool:
     """
-    Get the value of a specified UCI property.
-    :param property_name: The UCI property to look up.
-    :return: The property value if found, empty string if not found.
-    """
-    return subprocess.run(['uci', 'get', property_name], capture_output=True, check=True).stdout
-
-
-def uci_set(property_name, value) -> bool:
-    """
-    Set the value of a specified UCI property to a value.
-    :param property_name: The UCI property to set.
-    :param value: The value to set the property to
+    Set a UCI property to value
+    :param key: The UCI key to target
+    :param value: The value to set the UCI key to
     :return: True if successful, false if not.
     """
-    uci_string = property_name + '=' + value
-    return subprocess.run(['uci', 'set', uci_string], check=True).returncode == 0
+
+    argument = f"{key}='{value}'"
+    out = subprocess.run(["uci", "set", argument])
+
+    if out.returncode != 0:
+        return False
+
+    out = subprocess.run(["uci", "commit"])
+    if out.returncode != 0:
+        return False
+
+    return True
+
+
+def uci_get(key: str) -> str:
+    """
+    Get a UCI value from it's key
+    :param key: The UCI key to target
+    :return: str
+    """
+
+    out = subprocess.run(["uci", "get", key])
+    return out.stdout

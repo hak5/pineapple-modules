@@ -32,15 +32,21 @@ class Module:
         # A dictionary mapping an action to a function.
         self._action_handlers: Dict[str, Callable[[Request], Union[Any, Tuple[bool, Any]]]] = {}
 
-        self._running: bool = False  # set to False to stop the module loop
+        # Set to False to stop the module loop
+        self._running: bool = False
 
-        # api requests will be received over this socket
+        # Create a storage folder for the module by default
+        self._storage_folder_path = f'/root/.{name}/'
+        if not os.path.exists(self._storage_folder_path):
+            os.mkdir(self._storage_folder_path)
+
+        # API requests will be received over this socket
         self._module_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self._module_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self._module_socket_path = f'/tmp/modules/{name}.sock'  # apth to the socket
         self._buffer_size = 10485760
 
-        # if the socket already exists attempt to delete it.
+        # If the socket already exists attempt to delete it.
         try:
             os.unlink(self._module_socket_path)
         except OSError:
