@@ -32,5 +32,5 @@ def uci_get(key: str) -> str:
     :return: str
     """
 
-    out = subprocess.run(["uci", "get", key])
-    return out.stdout
+    out = subprocess.check_output(["uci", "get", key]).decode("utf-8")
+    return out
