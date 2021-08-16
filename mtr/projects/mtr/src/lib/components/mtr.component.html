@@ -57,6 +57,7 @@
                 class="mtr-button"
                 color="accent"
                 (click)="startmtr()"
+                [disabled]="isLoading"
             >
                 <span *ngIf="!isLoading">Start Traceroute</span>
                 <span class="spinner" *ngIf="isLoading">
