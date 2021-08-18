@@ -1,0 +1,36 @@
+.spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 4vh;
+}
+.mtr-button {
+    /* display: flex; */
+    /* justify-content: center; */
+    /* align-items: center; */
+    height: 4vh;
+}
+.mtr-lookup-field {
+    padding-right: 2vh;
+}
+.dependency-card {
+    max-width: 600px;
+    min-height: 246px;
+}
+
+.dependency-card-centered {
+    display: flex;
+    justify-content: center;
+    align-self: center;
+}
+
+.dependency-card-button {
+    width: 75%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.spinner-padding {
+    margin-top: 6px;
+    margin-bottom: 7px;
+}
