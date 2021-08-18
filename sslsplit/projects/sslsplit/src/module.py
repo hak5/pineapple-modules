@@ -160,7 +160,7 @@ def stop_sslsplit(request: Request):
 
 @module.handles_action('output_sslsplit')
 def output_sslsplit(request: Request):
-    # Fetch current log file : by date - by output - by process ?
+    # Fetch current log file : by date - by output - by process - or not ?
     return {
         'sslsplit_output': "ABCD"
     }
