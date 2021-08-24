@@ -1,0 +1,9 @@
+{
+    "name": "deauth",
+    "title": "Deauth",
+    "description": "Deauthentication attacks of all devices connected to APs nearby",
+    "version": "1.0",
+    "author": "TW-D",
+    "firmware_required": "1.0.0"
+}
+

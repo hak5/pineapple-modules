@@ -1,0 +1,36 @@
+<mat-card>
+
+    <mat-card-title>Select "Recon - Previous scans"</mat-card-title>
+
+    <mat-card-content>
+
+        <mat-form-field appearance="fill" style="width: 25vw;">
+            <select matNativeControl required (change)="check_previous_scan($event);">
+                <option></option>
+                <option *ngFor="let previous_scan of previous_scans" value="{{previous_scan.date}}">{{previous_scan.date | date:'full'}}</option>
+            </select>
+        </mat-form-field>
+
+        <div *ngIf="deauth_stats">
+            <p><b>Access Points with Clients: </b>{{accessPoints_clients.length}}</p>
+            <p><b>Clients: </b>{{clients}}</p>
+        </div>
+
+        <div *ngIf="deauth_actions">
+            <button mat-flat-button color="accent" style="width: 256px;" (click)="deauth_all();">
+                <span>Deauth All</span>
+            </button>
+        </div>
+
+        <mat-nav-list *ngIf="deauth_status">
+            <mat-divider></mat-divider>
+            <mat-list-item *ngFor="let accessPoint_deauthed of accessPoints_deauthed">
+                <span matLine>Clients on "<i>{{accessPoint_deauthed}}</i>" Access Point successfull deauthenticated.</span>
+                <mat-divider></mat-divider>
+            </mat-list-item>
+            <mat-divider></mat-divider>
+        </mat-nav-list>
+
+    </mat-card-content>
+
+</mat-card>
