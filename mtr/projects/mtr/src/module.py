@@ -48,6 +48,7 @@ def startmtr(request: Request):
     user_input = request.user_input
     job_id = job_manager.execute_job(MTRJob(user_input))
     return {'job_id':job_id}
+
 @module.handles_action("load_output")
 def load_output(request: Request):
     with open(json_file,"r") as f:
@@ -80,13 +81,15 @@ def rebind_last_job(request: Request):
     module.logger.debug(
         'BACKGROUND: ' + json.dumps(({'job_id': last_job_id, 'job_type': last_job_type, 'job_info': job_info})))
     return {'job_id': last_job_id, 'job_type': last_job_type, 'job_info': job_info}
+
 @module.handles_action('check_dependencies')
 def check_dependencies(request: Request):
-    return opkg.check_if_installed('mtr', module.logger)
+    return opkg.check_if_installed('mtr-json', module.logger)
+
 @module.handles_action('manage_dependencies')
 def manage_dependencies(request: Request):
     return {
-        'job_id': job_manager.execute_job(OpkgJob('mtr', request.install), callbacks=[_notify_dependencies_finished])
+        'job_id': job_manager.execute_job(OpkgJob('mtr-json', request.install), callbacks=[_notify_dependencies_finished])
     }
 
 
