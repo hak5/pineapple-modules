@@ -4,6 +4,7 @@
     "description": "An example module!",
     "version": "1.0",
     "author": "Hak5",
-    "firmware_required": "1.0.0"
+    "firmware_required": "1.0.0",
+    "devices": ["wifipineapplemk7"]
 }
 
