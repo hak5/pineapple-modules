@@ -4,5 +4,6 @@
     "author": "newbi3",
     "description": "A simple browser based file manager for the WiFi Pineapple.",
     "version": "1.2",
-    "firmware_required": "1.0.0"
+    "firmware_required": "1.0.0",
+    "devices": ["wifipineapplemk7"]
 }

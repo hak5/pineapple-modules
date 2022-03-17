@@ -4,5 +4,6 @@
     "description": "An evil captive portal for the WiFi Pineapple.",
     "author": "newbi3",
     "version": "1.4",
-    "firmware_required": "1.0.0"
+    "firmware_required": "1.0.0",
+    "devices": ["wifipineapplemk7"]
 }

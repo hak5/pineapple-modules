@@ -4,5 +4,6 @@
     "description": "Web GUI for Nmap, the popular network mapping tool.",
     "author": "newbi3",
     "version": "1.3",
-    "firmware_required": "1.0.0"
+    "firmware_required": "1.0.0",
+    "devices": ["wifipineapplemk7"]
 }

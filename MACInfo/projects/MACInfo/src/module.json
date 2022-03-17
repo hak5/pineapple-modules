@@ -4,6 +4,7 @@
     "description": "Lookup information on MAC Adresses",
     "version": "1.1",
     "author": "KoalaV2",
-    "firmware_required": "1.0.0"
+    "firmware_required": "1.0.0",
+    "devices": ["wifipineapplemk7"]
 }
 
