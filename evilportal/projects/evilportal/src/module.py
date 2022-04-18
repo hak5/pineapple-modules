@@ -45,6 +45,9 @@ def _post_install(job: OpkgJob):
     os.system(f'cp {_ASSETS_PATH}/evilportal.sh /etc/init.d/evilportal')
     os.system('chmod +x /etc/init.d/evilportal')
 
+    os.system('uci set nginx.global.uci_enable=false')
+    os.system('uci commit')
+
 
 def _deactivate_portal(name: str) -> bool:
     # return false if the portal is not active
