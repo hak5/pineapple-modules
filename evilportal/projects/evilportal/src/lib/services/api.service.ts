@@ -29,11 +29,22 @@ export class ApiService {
         this.apiModuleBusy.style.display = 'none';
     }
 
+    static extractBaseHref(): string {
+        // Duplicated from injector because we have to be able to support
+        // a static method here
+        if (window['_app_base']) {
+            if (window['_app_base'].endsWith('/')) {
+                return window['_app_base'].slice(0, -1)
+            }
+        }
+        return window['_app_base'] || '';
+    }
+
     request(payload: any, callback: (any) => void) {
         this.setBusy();
         let resp;
 
-        this.http.post('/api/module/request', payload).subscribe((r: any) => {
+        this.http.post(`${this.extractBaseHref()}/api/module/request`, payload).subscribe((r: any) => {
             if (r === undefined || r === null) {
                 resp = this.emptyResponse;
             } else if (r.error) {
@@ -61,7 +72,7 @@ export class ApiService {
 
         let resp;
 
-        this.http.get(path).subscribe((r) => {
+        this.http.get(`${this.extractBaseHref()}${path}`).subscribe((r) => {
             if (r === undefined || r === null) {
                 r = this.emptyResponse;
             }
@@ -80,7 +91,7 @@ export class ApiService {
     async APIGetAsync(path: string): Promise<any> {
         ApiService.totalRequests++;
 
-        return await this.http.get(path).toPromise();
+        return await this.http.get(`${this.extractBaseHref()}${path}`).toPromise();
     }
 
     APIPut(path: string, body: any, callback: (any) => void): any {
@@ -88,7 +99,7 @@ export class ApiService {
 
         let resp;
 
-        this.http.put(path, body).subscribe((r) => {
+        this.http.put(`${this.extractBaseHref()}${path}`, body).subscribe((r) => {
             if (r === undefined || r === null) {
                 r = this.emptyResponse;
             }
@@ -105,7 +116,7 @@ export class ApiService {
     }
 
     async APIPutAsync(path: string, body: any): Promise<any> {
-        return await this.http.put(path, body).toPromise();
+        return await this.http.put(`${this.extractBaseHref()}/${path}`, body).toPromise();
     }
 
     APIPost(path: string, body: any, callback: (any) => void): any {
@@ -113,7 +124,7 @@ export class ApiService {
 
         let resp;
 
-        this.http.post(path, body).subscribe((r) => {
+        this.http.post(`${this.extractBaseHref()}${path}`, body).subscribe((r) => {
             if (r === undefined || r === null) {
                 resp = this.emptyResponse;
             }
@@ -130,7 +141,7 @@ export class ApiService {
     }
 
     async APIPostAsync(path: string, body: any): Promise<any> {
-        return await this.http.post(path, body).toPromise();
+        return await this.http.post(`${this.extractBaseHref()}/${path}`, body).toPromise();
     }
 
     APIDelete(path: string, body: any, callback: (any) => void): any {
@@ -143,7 +154,7 @@ export class ApiService {
 
         let resp;
 
-        this.http.delete(path, opts).subscribe((r) => {
+        this.http.delete(`${this.extractBaseHref()}/${path}`, opts).subscribe((r) => {
             if (r === undefined || r === null) {
                 r = this.emptyResponse;
             }
@@ -160,7 +171,7 @@ export class ApiService {
     }
 
     async APIDeleteAsync(path: string, body: any): Promise<any> {
-        return await this.http.delete(path, body).toPromise();
+        return await this.http.delete(`${this.extractBaseHref()}${path}`, body).toPromise();
     }
 
     APIDownload(fullpath: string, filename: string): void {
@@ -170,7 +181,7 @@ export class ApiService {
             filename: fullpath
         };
 
-        this.http.post('/api/download', body, {responseType: 'blob'}).subscribe((r) => {
+        this.http.post(`${this.extractBaseHref()}/api/download`, body, {responseType: 'blob'}).subscribe((r) => {
             const url = window.URL.createObjectURL(r);
             const a = document.createElement('a');
             document.body.appendChild(a);
