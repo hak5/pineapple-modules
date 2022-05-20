@@ -3,7 +3,7 @@
     "title": "HTTPeek",
     "description": "View plaintext HTTP traffic, such as cookies and images.",
     "author": "newbi3",
-    "version": "1.2",
+    "version": "1.2.1",
     "firmware_required": "1.0.0",
-    "devices": ["wifipineapplemk7"]
+    "devices": ["wifipineapplemk7","wifipineappleent1"]
 }
