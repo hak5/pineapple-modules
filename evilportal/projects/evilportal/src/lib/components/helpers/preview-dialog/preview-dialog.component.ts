@@ -8,9 +8,6 @@ import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
 })
 export class PreviewDialogComponent implements OnInit {
 
-    hostname = '';
-    hostnamediv = '';
-
     constructor(public dialogRef: MatDialogRef<PreviewDialogComponent>,
                 @Inject(MAT_DIALOG_DATA) public data: any) {}
 
@@ -19,9 +16,8 @@ export class PreviewDialogComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.hostname = 'http://'+window.location.hostname;
         let hostnamediv = document.getElementById('preview');
-        hostnamediv.setAttribute('src', this.hostname);
+        hostnamediv.setAttribute('src', 'http://'+window.location.hostname);
     }
 
 }
