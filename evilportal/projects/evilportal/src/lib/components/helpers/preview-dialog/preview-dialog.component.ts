@@ -16,6 +16,8 @@ export class PreviewDialogComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        let hostnamediv = document.getElementById('preview');
+        hostnamediv.setAttribute('src', 'http://'+window.location.hostname);
     }
 
 }
