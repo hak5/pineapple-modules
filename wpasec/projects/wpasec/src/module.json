@@ -1,0 +1,10 @@
+{
+    "name": "wpasec",
+    "title": "WpaSec",
+    "description": "Provides UI to submit WPA handshakes to https://wpa-sec.stanev.org",
+    "version": "1.0",
+    "author": "makcanca",
+    "firmware_required": "1.0.0",
+    "devices": ["wifipineapplemk7"]
+}
+

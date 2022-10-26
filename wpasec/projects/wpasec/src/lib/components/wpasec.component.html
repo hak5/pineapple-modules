@@ -1,0 +1,51 @@
+<mat-card>
+    <mat-card-title>WpaSec Handshake Submitter</mat-card-title>
+    <mat-card-content>
+        <mat-form-field>
+            <mat-label>Your WpaSec Key</mat-label>
+            <input matInput [(ngModel)]="apiKey" />
+            <br />
+        </mat-form-field>
+        <button mat-flat-button color="accent" (click)="saveApiKey();">
+            Save
+        </button>
+        <i>(you can get it from https://wpa-sec.stanev.org/?get_key)</i>
+        <br />
+        <br />
+        <span>Result: {{ apiResponse }}</span>
+        <br />
+        <button mat-flat-button color="accent" (click)="submitWpaHandshakes();">
+            Submit Selected Handshakes
+        </button>
+        <table mat-table class="lessons-table mat-elevation-z8" style="min-width: 100%;" matSort matSortDisableClear
+            matSortDirection="asc" [dataSource]="handshakes" multiTemplateDataRows>
+            <ng-container matColumnDef="select" sticky>
+                <th mat-header-cell *matHeaderCellDef>
+                    <mat-checkbox [checked]="selection.length > 0 && isAllSelected()"
+                        [indeterminate]="selection.length > 0 && !isAllSelected()" (change)="toggleAll()">
+                    </mat-checkbox>
+                </th>
+                <td mat-cell *matCellDef="let lesson" (click)="$event.stopPropagation()">
+                    <mat-checkbox (change)="onLessonToggled(lesson)" [checked]="selection.includes(lesson)">
+                    </mat-checkbox>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="mac">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>MAC</th>
+                <td mat-cell *matCellDef="let lesson">{{lesson.mac}}</td>
+            </ng-container>
+            <ng-container matColumnDef="client">
+                <th mat-header-cell *matHeaderCellDef>Client</th>
+                <td class="duration-cell" mat-cell *matCellDef="let lesson">{{lesson.client}}</td>
+            </ng-container>
+            <ng-container matColumnDef="timestamp">
+                <th mat-header-cell *matHeaderCellDef>Timestamp</th>
+                <td class="duration-cell" mat-cell *matCellDef="let lesson">{{lesson.timestamp}}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky:true">
+            </tr>
+            <tr mat-row (click)="onToggleLesson(lesson)" *matRowDef="let lesson;columns:displayedColumns">
+            </tr>
+        </table>
+    </mat-card-content>
+</mat-card>
