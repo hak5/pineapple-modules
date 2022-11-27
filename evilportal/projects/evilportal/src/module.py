@@ -139,7 +139,7 @@ def _stop_evilportal() -> bool:
     if os.path.exists(_CLIENTS_FILE):
         with open(_CLIENTS_FILE, 'r') as f:
             for line in f.readlines():
-                _revoke_client(line)
+                _revoke_client(line.strip())
 
         os.unlink(_CLIENTS_FILE)
 
