@@ -39,7 +39,7 @@ abstract class Portal
      */
     protected final function notify($message)
     {
-        $this->execBackground("notify {$message}");
+        $this->execBackground("PYTHONPATH=/usr/lib/pineapple; export PYTHONPATH; /usr/bin/python3 /usr/bin/notify info '{$message}' evilportal");
     }
 
     /**
