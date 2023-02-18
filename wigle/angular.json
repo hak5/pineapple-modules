@@ -1,0 +1,47 @@
+{
+    "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+    "version": 1,
+    "newProjectRoot": "projects",
+    "projects": {
+        "wigle": {
+            "projectType": "library",
+            "root": "projects/wigle",
+            "sourceRoot": "projects/wigle/src",
+            "prefix": "lib",
+            "architect": {
+                "build": {
+                    "builder": "@angular-devkit/build-ng-packagr:build",
+                    "options": {
+                        "tsConfig": "projects/wigle/tsconfig.lib.json",
+                        "project": "projects/wigle/ng-package.json"
+                    },
+                    "configurations": {
+                        "production": {
+                            "tsConfig": "projects/wigle/tsconfig.lib.prod.json"
+                        }
+                    }
+                },
+                "test": {
+                    "builder": "@angular-devkit/build-angular:karma",
+                    "options": {
+                        "main": "projects/wigle/src/test.ts",
+                        "tsConfig": "projects/wigle/tsconfig.spec.json",
+                        "karmaConfig": "projects/wigle/karma.conf.js"
+                    }
+                },
+                "lint": {
+                    "builder": "@angular-devkit/build-angular:tslint",
+                    "options": {
+                        "tsConfig": [
+                            "projects/wigle/tsconfig.lib.json",
+                            "projects/wigle/tsconfig.spec.json"
+                        ],
+                        "exclude": [
+                            "**/node_modules/**"
+                        ]
+                    }
+                }
+            }
+        }},
+    "defaultProject": "wigle"
+}
