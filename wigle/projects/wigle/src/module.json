@@ -1,0 +1,10 @@
+{
+    "name": "wigle",
+    "title": "WiGLE",
+    "description": "Information gathering of APs with the WiGLE.net database",
+    "version": "1.0.2",
+    "author": "90N45",
+    "firmware_required": "1.0.0",
+    "devices": ["wifipineapplemk7"]
+}
+

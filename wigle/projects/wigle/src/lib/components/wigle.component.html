@@ -1,0 +1,93 @@
+<div style="display: flex; justify-content: center; align-items: center;">
+    <mat-card *ngIf="!hasKey" style="width: 40%;">
+        <mat-card-content>
+            <mat-card-title>Welcome To WiGLE</mat-card-title>
+            <mat-card-subtitle>Lets get started.</mat-card-subtitle>
+            <mat-divider></mat-divider>
+            <br>
+            <p>To request data from the WiGLE.net database on your WiFi Pineapple, you need an API token, which is generated when you create a free account at WiGLE.net
+            </p>
+            <br>
+            <mat-form-field style="width: 100%;">
+                <mat-label>Encoded Token</mat-label>
+                <input class="control-input" matInput [(ngModel)]="userKey"/>
+            </mat-form-field>
+            <br>
+            <div style="display: flex; justify-content: center; align-items: center;">
+                <button style="width: 45%; height: 34px; display: flex; justify-content: center; align-items: center;" mat-flat-button color="accent" (click)="saveKey()">
+                    <span *ngIf="!isSubmittingKey">Save</span>
+                    <span *ngIf="isSubmittingKey">
+                        <mat-spinner [diameter]="20"></mat-spinner>
+                    </span>
+                </button>
+            </div>
+            <br>
+            <div style="display: flex; justify-content: center; align-items: center;">
+                <span><small>You can find your encoded API token at <a href="https://wigle.net/account">wigle.net/account</a></small></span>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card *ngIf="hasKey" style="width: 40%;">
+        <mat-card-content>
+            <mat-card-title>WiGLE Lookup</mat-card-title>
+            <div>
+                <div style="display: flex; justify-content: space-evenly;">
+                    <mat-form-field style="word-break: break-word; padding: 1vw; width: 49%">
+                        <mat-label>Country Code</mat-label>
+                        <input class="control-input" matInput [(ngModel)]="userCC"/>
+                    </mat-form-field>
+                    <mat-form-field style="padding: 1vw; width: 49%;">
+                        <mat-label>City</mat-label>
+                        <input class="control-input" matInput [(ngModel)]="userCity"/>
+                    </mat-form-field>
+                </div>
+                <div style="display: flex; justify-content: space-evenly;">
+                    <mat-form-field style="word-break: break-word; padding: 1vw; width: 49%">
+                        <mat-label>SSID</mat-label>
+                        <input class="control-input" matInput [(ngModel)]="userSSID"/>
+                    </mat-form-field>
+                    <mat-form-field style="padding: 1vw; width: 49%;">
+                        <mat-label>MAC Address</mat-label>
+                        <input class="control-input" matInput [(ngModel)]="userMAC"/>
+                    </mat-form-field>
+                </div>
+            </div>
+            <br>
+            <div *ngIf="apiResponse" style="display: flex; justify-content: space-evenly;">
+                <div style="word-break: break-word; padding: 1vw; max-width: 300px;">
+                    <span><strong>SSID: </strong>{{ ssid }}</span>
+                    <br>
+                    <span><strong>Channel: </strong>{{ channel }}</span>
+                    <br>
+                    <span><strong>Encryption: </strong>{{ enc }}</span>
+                    <br>
+                    <span><strong>MAC Address: </strong>{{ mac }}</span>
+                    <br>
+                    <span><strong>DHCP: </strong>{{ dhcp }}</span>
+                </div>
+                <div style="padding: 1vw;">
+                    <span><strong>CC: </strong>{{ country }}</span>
+                    <br>
+                    <span><strong>City: </strong>{{ city }}</span>
+                    <br>
+                    <span><strong>Road: </strong>{{ road }}</span>
+                    <br>
+                    <span><strong>Latitude: </strong>{{ lat }}</span>
+                    <br>
+                    <span><strong>Longitude: </strong>{{ long }}</span>
+                </div>
+            </div>
+            <span style="display: flex; justify-content: center; align-items: center;"><a href="{{ wiglenet }}"><small>{{ msg }}</small></a></span>
+            <br>
+            <div style="display: flex; justify-content: center; align-items: center;">
+                <button style="width: 45%; height: 34px; display: flex; justify-content: center; align-items: center;" mat-flat-button color="accent" (click)="fetch()">
+                    <span *ngIf="!isLoading">Search</span>
+                    <span *ngIf="isLoading">
+                        <mat-spinner [diameter]="20"></mat-spinner>
+                    </span>
+                </button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
