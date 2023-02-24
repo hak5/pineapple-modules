@@ -1,0 +1,10 @@
+{
+    "name": "hcxdumptool",
+    "title": "Hcxdumptool",
+    "description": "Small tool to capture packets from wlan devices.",
+    "version": "1.0",
+    "author": "lorenzoPrimi",
+    "firmware_required": "1.0.0",
+    "devices": ["wifipineapplemk7"]
+}
+
