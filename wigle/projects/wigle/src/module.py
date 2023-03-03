@@ -6,7 +6,6 @@ import urllib.request
 import urllib.parse
 import logging
 from pineapple.modules import Module, Request
-import pineapple.helpers.notification_helpers as notifier
 
 module = Module('wigle', logging.DEBUG)
 
