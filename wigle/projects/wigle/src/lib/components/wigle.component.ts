@@ -84,7 +84,6 @@ export class wigleComponent implements OnInit {
             }
             this.isSubmittingKey = false;
         })
-        window.location.reload();
     }
 
     checkKey(): void {
