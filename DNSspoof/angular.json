@@ -1,0 +1,47 @@
+{
+    "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+    "version": 1,
+    "newProjectRoot": "projects",
+    "projects": {
+        "dnsspoof": {
+            "projectType": "library",
+            "root": "projects/dnsspoof",
+            "sourceRoot": "projects/dnsspoof/src",
+            "prefix": "lib",
+            "architect": {
+                "build": {
+                    "builder": "@angular-devkit/build-ng-packagr:build",
+                    "options": {
+                        "tsConfig": "projects/dnsspoof/tsconfig.lib.json",
+                        "project": "projects/dnsspoof/ng-package.json"
+                    },
+                    "configurations": {
+                        "production": {
+                            "tsConfig": "projects/dnsspoof/tsconfig.lib.prod.json"
+                        }
+                    }
+                },
+                "test": {
+                    "builder": "@angular-devkit/build-angular:karma",
+                    "options": {
+                        "main": "projects/dnsspoof/src/test.ts",
+                        "tsConfig": "projects/dnsspoof/tsconfig.spec.json",
+                        "karmaConfig": "projects/dnsspoof/karma.conf.js"
+                    }
+                },
+                "lint": {
+                    "builder": "@angular-devkit/build-angular:tslint",
+                    "options": {
+                        "tsConfig": [
+                            "projects/dnsspoof/tsconfig.lib.json",
+                            "projects/dnsspoof/tsconfig.spec.json"
+                        ],
+                        "exclude": [
+                            "**/node_modules/**"
+                        ]
+                    }
+                }
+            }
+        }},
+    "defaultProject": "dnsspoof"
+}
