@@ -1,0 +1,27 @@
+<nav mat-tab-nav-bar color="accent">
+    <a mat-tab-link
+       *ngFor="let link of navLinks"
+       [routerLink]="link.link"
+       routerLinkActive #rla="routerLinkActive"
+       [routerLinkActiveOptions]="{exact: true}"
+       [active]="rla.isActive">
+        <mat-icon *ngIf="link.label === 'HCXdumptool'">
+            <svg style="width:24px;height:24px">
+                <path d="M 17 3 C 18.105469 3 19 3.894531 19 5 L 19 15 C 19 16.105469 18.105469 17 17 17 L 13 17 L 13 19 L 14 19 C 14.550781 19 15 19.449219 15 20 L 22 20 L 22 22 L 15 22 C 15 22.550781 14.550781 23 14 23 L 10 23 C 9.449219 23 9 22.550781 9 22 L 2 22 L 2 20 L 9 20 C 9 19.449219 9.449219 19 10 19 L 11 19 L 11 17 L 7 17 C 5.890625 17 5 16.101562 5 15 L 5 5 C 5 3.894531 5.894531 3 7 3 L 17 3 M 12 14.5 L 16.5 10 L 13 10 L 13 6 L 11 6 L 11 10 L 7.5 10 Z M 12 14.5 "></path>
+            </svg>
+        </mat-icon>
+        <mat-icon *ngIf="link.label === 'History'">
+            <svg style="width:24px;height:24px">
+                <path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zM4 9h4V5H4v4zm5 5h12v-4H9v4zm0 5h12v-4H9v4zM9 5v4h12V5H9z" />
+            </svg>
+        </mat-icon>
+        <div [fxShow.sm]="false" [fxShow.xs]="false">
+            &nbsp;&nbsp;
+            {{ link.label }}
+        </div>
+    </a>
+</nav>
+<br/>
+<div>
+    <router-outlet></router-outlet>
+</div>

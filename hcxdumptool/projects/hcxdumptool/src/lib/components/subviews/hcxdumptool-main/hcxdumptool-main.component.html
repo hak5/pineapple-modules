@@ -1,0 +1,113 @@
+<div class="dependency-card-centered" *ngIf="!hasDependencies">
+    <mat-card class="dependency-card">
+        <mat-card-content>
+            <mat-card-title>Welcome To hcxdumptool</mat-card-title>
+            <mat-card-subtitle>Lets get started.</mat-card-subtitle>
+
+            <mat-divider></mat-divider>
+            <br />
+
+            <p>You need to install some dependencies before you can use this module.</p>
+            <p>This will make a request to the internet.</p>
+
+            <br/>
+            <br/>
+            <div class="dependency-card-centered">
+                <button mat-raised-button color="accent"
+                        class="dependency-card-button"
+                        (click)="installDependencies()"
+                        [disabled]="isInstalling">
+                    <span *ngIf="isInstalling">
+                        <mat-spinner [diameter]="20" class="spinner-padding" color="accent"></mat-spinner>
+                    </span>
+                    <span *ngIf="!isInstalling">
+                        Install Dependencies
+                    </span>
+                </button>
+            </div>
+            <br/>
+            <div class="dependency-card-centered">
+                <button mat-button color="accent" (click)="showLicenseDialog();">View hcxdumptool License</button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<div *ngIf="hasDependencies" class="controls-container" fxLayoutGap="20px" fxLayout="row" fxLayout.xs="column" fxLayout.sm="column">
+    <mat-card class="control-item">
+        <mat-card-content>
+            <div class="right-left-split-container">
+                <mat-card-title>HCXdumptool</mat-card-title>
+                <span *ngIf="isCapturing"><mat-spinner [diameter]="24" color="accent" style="margin-left: 8px"></mat-spinner></span>
+                <span fxFlex></span>
+                <mat-menu #hcxdumptoolMenu>
+                    <button mat-menu-item (click)="showUninstallDialog();">Uninstall Dependencies</button>
+                    <button mat-menu-item (click)="showLicenseDialog();">Show License</button>
+                </mat-menu>
+
+                <button mat-icon-button [matMenuTriggerFor]="hcxdumptoolMenu">
+                    <mat-icon>more_vert</mat-icon>
+                </button>
+            </div>
+            <form>
+                <mat-form-field style="width: 100%;">
+                    <mat-label>Command</mat-label>
+                    <input matInput class="control-input" name="command" [(ngModel)]="hcxDumptoolState.command"/>
+                </mat-form-field>
+                <mat-form-field style="width: 100%;">
+                    <mat-label>Interface</mat-label>
+                    <mat-select name="interface" [(ngModel)]="hcxDumptoolState.selectedInterface" (ngModelChange)="update();">
+                        <mat-option>--</mat-option>
+                        <mat-option *ngFor="let iface of interfaces" value="{{ iface }}">{{ iface }}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field style="width: 100%;">
+                    <mat-label>Band</mat-label>
+                    <mat-select name="scanlist" [(ngModel)]="hcxDumptoolState.scanlist" (ngModelChange)="update();">
+                        <mat-option>--</mat-option>
+                        <mat-option value="-c 1,6,11,3,5,1,6,11,2,4,1,6,11,7,9,1,6,11,8,10,1,6,11,12,13">Optimized 2.4GHz</mat-option>
+                        <mat-option value="-c 1,2,3,4,5,6,7,8,9,10,11,12,13">Standard 2.4 GHz</mat-option>
+                        <mat-option value="-c 36,40,44,48,52,56,60,64,100,104,108,112,116,120,124,128,132,136,140,144,149,153,157,161,165">Standard 5GHz</mat-option>
+                        <mat-option value="-c 1,2,3,4,5,6,7,8,9,10,11,12,13,36,40,44,48,52,56,60,64,100,104,108,112,116,120,124,128,132,136,140,144,149,153,157,161,165">Standard 2.4GHz/5GHz</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <button mat-raised-button color="accent" style="width: 100%;" *ngIf="!isCapturing" (click)="startCapture();">Capture</button>
+                <button mat-raised-button color="warn" style="width: 100%;" *ngIf="isCapturing" (click)="stopCapture();">Stop</button>
+            </form>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card class="control-item">
+        <mat-card-content>
+            <div>
+                <mat-card-title>Options</mat-card-title>
+            </div>
+            <mat-checkbox [(ngModel)]="optionsState.disableClientAttacks.toggled" (ngModelChange)="update();">Do not attack clients</mat-checkbox>
+            <br/>
+            <mat-checkbox [(ngModel)]="optionsState.disableAPAttacks.toggled" (ngModelChange)="update();">Do not attack access points</mat-checkbox>
+        </mat-card-content>
+    </mat-card>
+
+</div>
+
+<br/>
+
+<mat-card *ngIf="hasDependencies">
+    <mat-card-content>
+        <div class="output-container">
+            <div class="right-left-split-container">
+                <mat-card-title>Output</mat-card-title>
+                <span fxFlex></span>
+                <button mat-icon-button [disabled]="isFetchingOutput || !isCapturing" (click)="getLogContent();"><mat-icon>refresh</mat-icon></button>
+                <button mat-icon-button [disabled]="captureFileName == null || isCapturing" (click)="downloadPcap();"><mat-icon>cloud_download</mat-icon></button>
+            </div>
+            <textarea class="output-textarea" [(ngModel)]="captureOutput" placeholder="No output to display..." readonly></textarea>
+            <div class="right-left-split-container">
+                <span *ngIf="isCapturing" style="margin-right: 8px;"><i>Refreshes every 5 seconds...</i></span>
+                <span *ngIf="isFetchingOutput"><mat-spinner [diameter]="24" color="accent"></mat-spinner></span>
+                <span fxFlex></span>
+            </div>
+        </div>
+    </mat-card-content>
+</mat-card>
+
