@@ -19,11 +19,11 @@
             "dom"
         ],
         "paths": {
-            "dnsspoof": [
-                "dist/dnsspoof"
+            "DNSspoof": [
+                "dist/DNSspoof"
             ],
-            "dnsspoof/*": [
-                "dist/dnsspoof/*"
+            "DNSspoof/*": [
+                "dist/DNSspoof/*"
             ]
         }
     },

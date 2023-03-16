@@ -3,38 +3,38 @@
     "version": 1,
     "newProjectRoot": "projects",
     "projects": {
-        "dnsspoof": {
+        "DNSspoof": {
             "projectType": "library",
-            "root": "projects/dnsspoof",
-            "sourceRoot": "projects/dnsspoof/src",
+            "root": "projects/DNSspoof",
+            "sourceRoot": "projects/DNSspoof/src",
             "prefix": "lib",
             "architect": {
                 "build": {
                     "builder": "@angular-devkit/build-ng-packagr:build",
                     "options": {
-                        "tsConfig": "projects/dnsspoof/tsconfig.lib.json",
-                        "project": "projects/dnsspoof/ng-package.json"
+                        "tsConfig": "projects/DNSspoof/tsconfig.lib.json",
+                        "project": "projects/DNSspoof/ng-package.json"
                     },
                     "configurations": {
                         "production": {
-                            "tsConfig": "projects/dnsspoof/tsconfig.lib.prod.json"
+                            "tsConfig": "projects/DNSspoof/tsconfig.lib.prod.json"
                         }
                     }
                 },
                 "test": {
                     "builder": "@angular-devkit/build-angular:karma",
                     "options": {
-                        "main": "projects/dnsspoof/src/test.ts",
-                        "tsConfig": "projects/dnsspoof/tsconfig.spec.json",
-                        "karmaConfig": "projects/dnsspoof/karma.conf.js"
+                        "main": "projects/DNSspoof/src/test.ts",
+                        "tsConfig": "projects/DNSspoof/tsconfig.spec.json",
+                        "karmaConfig": "projects/DNSspoof/karma.conf.js"
                     }
                 },
                 "lint": {
                     "builder": "@angular-devkit/build-angular:tslint",
                     "options": {
                         "tsConfig": [
-                            "projects/dnsspoof/tsconfig.lib.json",
-                            "projects/dnsspoof/tsconfig.spec.json"
+                            "projects/DNSspoof/tsconfig.lib.json",
+                            "projects/DNSspoof/tsconfig.spec.json"
                         ],
                         "exclude": [
                             "**/node_modules/**"
@@ -43,5 +43,5 @@
                 }
             }
         }},
-    "defaultProject": "dnsspoof"
+    "defaultProject": "DNSspoof"
 }
