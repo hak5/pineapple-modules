@@ -5,15 +5,15 @@ import os
 import subprocess
 from pineapple.modules import Module, Request
 
-module = Module('dnsspoof', logging.DEBUG)
+module = Module('DNSspoof', logging.DEBUG)
 
 @module.handles_action("backup")
 def backup(request):
 	try:
-		if not os.path.exists('modules/dnsspoof/host-backup.txt'):
+		if not os.path.exists('modules/DNSspoof/host-backup.txt'):
 			with open("/etc/hosts", "r") as file:
 				hosts = file.read()
-			with open("modules/dnsspoof/host-backup.txt", "w+") as backup:
+			with open("modules/DNSspoof/host-backup.txt", "w+") as backup:
 				backup.write(hosts)
 		return "ok"
 	except Exception as e:
@@ -51,7 +51,7 @@ def update_dns(request):
 @module.handles_action("reset")
 def reset_hosts(request):
 	try:
-		with open("modules/dnsspoof/host-backup.txt", "r") as backup:
+		with open("modules/DNSspoof/host-backup.txt", "r") as backup:
 			old = backup.read()
 		with open("/etc/hosts", "w+") as file:
 			file.write(old)

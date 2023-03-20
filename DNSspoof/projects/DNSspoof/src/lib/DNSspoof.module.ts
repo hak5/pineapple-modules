@@ -24,4 +24,4 @@ const routes: Routes = [
     ],
     exports: [dnsspoofComponent]
 })
-export class dnsspoofModule { }
+export class DNSspoofModule { }

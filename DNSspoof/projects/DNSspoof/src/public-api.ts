@@ -4,4 +4,4 @@
 
 export * from './lib/services/dnsspoof.service';
 export * from './lib/components/dnsspoof.component';
-export * from './lib/dnsspoof.module';
+export * from './lib/DNSspoof.module';

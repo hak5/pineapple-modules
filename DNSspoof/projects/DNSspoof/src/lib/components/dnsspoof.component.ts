@@ -21,7 +21,7 @@ export class dnsspoofComponent implements OnInit {
 
     handleBackup(): void {
         this.API.request({
-            module: 'dnsspoof',
+            module: 'DNSspoof',
             action: "backup"
         }, (response) => {
             if (response == "ok") {
@@ -35,7 +35,7 @@ export class dnsspoofComponent implements OnInit {
     add(): void {
         this.isAdding = true;
         this.API.request({
-            module: 'dnsspoof',
+            module: 'DNSspoof',
             action: "add",
             user_ip: this.userIP,
             user_domain: this.userDomain
@@ -53,7 +53,7 @@ export class dnsspoofComponent implements OnInit {
 
     get(): void {
         this.API.request({
-            module: 'dnsspoof',
+            module: 'DNSspoof',
             action: "get"
         }, (response) => {
             this.allocation = response;
@@ -63,7 +63,7 @@ export class dnsspoofComponent implements OnInit {
     update(): void {
         this.isUpdating = true;
         this.API.request({
-            module: 'dnsspoof',
+            module: 'DNSspoof',
             action: "update"
         }, (response) => {
             if (response != "ok") {
@@ -76,7 +76,7 @@ export class dnsspoofComponent implements OnInit {
     reset(): void {
         this.isResetting = true;
         this.API.request({
-            module: 'dnsspoof',
+            module: 'DNSspoof',
             action: "reset"
         }, (response) => {
             if (response != "ok") {
