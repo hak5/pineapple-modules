@@ -1,0 +1,60 @@
+<div style="display: flex; justify-content: center; align-items: center;">
+    <span *ngIf="!hasInit" style="display: flex; justify-content: center; align-items: center; height: 10vh;">
+        <mat-spinner diameter="25"></mat-spinner>
+    </span>
+    <mat-card *ngIf="hasInit" style="width: 40%;">
+        <mat-card-content>
+            <mat-card-title style="text-align: center;">BlackIP</mat-card-title>
+            <mat-divider></mat-divider>
+            <br>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="width: 45%;">
+                    <i style="color: grey;"><small>IPv4 Blacklist</small></i>
+                    <textarea style="width: 100%; height: 150px; background-color: #efefef; border-color: #cecece; border-radius: 2px; resize: vertical;" disabled>{{ addresses4 }}</textarea>
+                </div>
+                <div style="width: 45%;">
+                    <i style="color: grey;"><small>IPv6 Blacklist</small></i>
+                    <textarea style="width: 100%; height: 150px; background-color: #efefef; border-color: #cecece; border-radius: 2px; resize: vertical;" disabled>{{ addresses6 }}</textarea>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <mat-form-field style="width: 75%;">
+                    <mat-label>IP Address (Local Or Public)</mat-label>
+                    <input class="control-input" matInput [(ngModel)]="userIP"/>
+                </mat-form-field>
+                <mat-form-field style="width: 15%">
+                    <mat-label>IPv4/IPv6</mat-label>
+                    <mat-select [(ngModel)]="userType">
+                        <mat-option value="">--</mat-option>
+                        <mat-option value="4">IPv4</mat-option>
+                        <mat-option value="6">IPv6</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <button style="width: 45%; height: 5vh;" mat-flat-button color="accent" (click)="add();">
+                    <span *ngIf="!isAdding">Add</span>
+                    <span *ngIf="isAdding" style="display: flex; justify-content: center; align-items: center; height: 5vh;">
+                        <mat-spinner diameter="20"></mat-spinner>
+                    </span>
+                </button>
+                <button style="width: 45%; height: 5vh; background-color: red;" mat-flat-button color="accent" (click)="clear();">
+                    <span *ngIf="!isResetting">Clear</span>
+                    <span *ngIf="isResetting" style="display: flex; justify-content: center; align-items: center; height: 5vh;">
+                        <mat-spinner diameter="20"></mat-spinner>
+                    </span>
+                </button>
+            </div>
+            <br>
+            <div style="display: flex; justify-content: space-evenly; align-items: center;">
+                <button style="width: 100%; height: 5vh;" mat-flat-button color="accent" (click)="update();">
+                    <span *ngIf="!isUpdating">Update Firewall</span>
+                    <span *ngIf="isUpdating" style="display: flex; justify-content: center; align-items: center; height: 5vh;">
+                        <mat-spinner diameter="20"></mat-spinner>
+                    </span>
+                </button>
+            </div>
+            <span style="display: flex; justify-content: center; align-items: center;"><small>{{ error }}</small></span>
+        </mat-card-content>
+    </mat-card>
+</div>
