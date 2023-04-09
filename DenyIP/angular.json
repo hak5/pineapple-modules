@@ -3,38 +3,38 @@
     "version": 1,
     "newProjectRoot": "projects",
     "projects": {
-        "BlackIP": {
+        "DenyIP": {
             "projectType": "library",
-            "root": "projects/BlackIP",
-            "sourceRoot": "projects/BlackIP/src",
+            "root": "projects/DenyIP",
+            "sourceRoot": "projects/DenyIP/src",
             "prefix": "lib",
             "architect": {
                 "build": {
                     "builder": "@angular-devkit/build-ng-packagr:build",
                     "options": {
-                        "tsConfig": "projects/BlackIP/tsconfig.lib.json",
-                        "project": "projects/BlackIP/ng-package.json"
+                        "tsConfig": "projects/DenyIP/tsconfig.lib.json",
+                        "project": "projects/DenyIP/ng-package.json"
                     },
                     "configurations": {
                         "production": {
-                            "tsConfig": "projects/BlackIP/tsconfig.lib.prod.json"
+                            "tsConfig": "projects/DenyIP/tsconfig.lib.prod.json"
                         }
                     }
                 },
                 "test": {
                     "builder": "@angular-devkit/build-angular:karma",
                     "options": {
-                        "main": "projects/BlackIP/src/test.ts",
-                        "tsConfig": "projects/BlackIP/tsconfig.spec.json",
-                        "karmaConfig": "projects/BlackIP/karma.conf.js"
+                        "main": "projects/DenyIP/src/test.ts",
+                        "tsConfig": "projects/DenyIP/tsconfig.spec.json",
+                        "karmaConfig": "projects/DenyIP/karma.conf.js"
                     }
                 },
                 "lint": {
                     "builder": "@angular-devkit/build-angular:tslint",
                     "options": {
                         "tsConfig": [
-                            "projects/BlackIP/tsconfig.lib.json",
-                            "projects/BlackIP/tsconfig.spec.json"
+                            "projects/DenyIP/tsconfig.lib.json",
+                            "projects/DenyIP/tsconfig.spec.json"
                         ],
                         "exclude": [
                             "**/node_modules/**"
@@ -43,5 +43,5 @@
                 }
             }
         }},
-    "defaultProject": "BlackIP"
+    "defaultProject": "DenyIP"
 }

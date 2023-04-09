@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { BlackIPComponent } from './components/BlackIP.component';
+import { DenyIPComponent } from './components/DenyIP.component';
 import { RouterModule, Routes } from '@angular/router';
 
 import {MaterialModule} from './modules/material/material.module';
@@ -10,11 +10,11 @@ import {FlexLayoutModule} from '@angular/flex-layout';
 import {FormsModule} from '@angular/forms';
 
 const routes: Routes = [
-    { path: '', component: BlackIPComponent }
+    { path: '', component: DenyIPComponent }
 ];
 
 @NgModule({
-    declarations: [BlackIPComponent],
+    declarations: [DenyIPComponent],
     imports: [
         CommonModule,
         RouterModule.forChild(routes),
@@ -22,6 +22,6 @@ const routes: Routes = [
         FlexLayoutModule,
         FormsModule,
     ],
-    exports: [BlackIPComponent]
+    exports: [DenyIPComponent]
 })
-export class BlackIPModule { }
+export class DenyIPModule { }

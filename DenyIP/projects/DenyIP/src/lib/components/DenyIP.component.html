@@ -4,16 +4,16 @@
     </span>
     <mat-card *ngIf="hasInit" style="width: 40%;">
         <mat-card-content>
-            <mat-card-title style="text-align: center;">BlackIP</mat-card-title>
+            <mat-card-title style="text-align: center;">DenyIP</mat-card-title>
             <mat-divider></mat-divider>
             <br>
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div style="width: 45%;">
-                    <i style="color: grey;"><small>IPv4 Blacklist</small></i>
+                    <i style="color: grey;"><small>IPv4 Deny List</small></i>
                     <textarea style="width: 100%; height: 150px; background-color: #efefef; border-color: #cecece; border-radius: 2px; resize: vertical;" disabled>{{ addresses4 }}</textarea>
                 </div>
                 <div style="width: 45%;">
-                    <i style="color: grey;"><small>IPv6 Blacklist</small></i>
+                    <i style="color: grey;"><small>IPv6 Deny List</small></i>
                     <textarea style="width: 100%; height: 150px; background-color: #efefef; border-color: #cecece; border-radius: 2px; resize: vertical;" disabled>{{ addresses6 }}</textarea>
                 </div>
             </div>

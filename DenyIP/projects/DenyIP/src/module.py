@@ -5,7 +5,7 @@ import os
 import subprocess
 from pineapple.modules import Module, Request
 
-module = Module('BlackIP', logging.DEBUG)
+module = Module('DenyIP', logging.DEBUG)
 
 addresses_4 = []
 addresses_6 = []
@@ -13,12 +13,12 @@ addresses_6 = []
 @module.handles_action("init")
 def init(request):
 	try:
-		blacklist = str(os.popen("ipset list").read())
-		if not "Name: blacklist" in blacklist:
-			subprocess.run(["ipset", "create", "blacklist", "hash:ip", "hashsize", "4096"])
-			subprocess.run(["ipset", "create", "blacklist6", "hash:net", "hashsize", "4096", "family", "inet6"])
-			subprocess.run(["iptables", "-I", "FORWARD", "-m", "set", "--match-set", "blacklist", "src", "-j", "DROP",])
-			subprocess.run(["iptables", "-I", "FORWARD", "-m", "set", "--match-set", "blacklist6", "src", "-j", "DROP",])
+		denylist = str(os.popen("ipset list").read())
+		if not "Name: denylist" in denylist:
+			subprocess.run(["ipset", "create", "denylist", "hash:ip", "hashsize", "4096"])
+			subprocess.run(["ipset", "create", "denylist6", "hash:net", "hashsize", "4096", "family", "inet6"])
+			subprocess.run(["iptables", "-I", "FORWARD", "-m", "set", "--match-set", "denylist", "src", "-j", "DROP",])
+			subprocess.run(["iptables", "-I", "FORWARD", "-m", "set", "--match-set", "denylist6", "src", "-j", "DROP",])
 		return "ok"
 	except Exception as e:
 		return "Error: " + str(e)
@@ -39,27 +39,27 @@ def add_ip(request):
 		return "ok"
 
 @module.handles_action("get4")
-def fetch_blacklist4(request):
+def fetch_denylist4(request):
 	try:
-		blacklist = ""
+		denylist = ""
 		for address in addresses_4:
-			blacklist = blacklist + address + "\n"
-		return blacklist
+			denylist = denylist + address + "\n"
+		return denylist
 	except Exception as e:
 		return "Error: " + str(e)
 
 @module.handles_action("get6")
-def fetch_blacklist6(request):
+def fetch_denylist6(request):
 	try:
-		blacklist = ""
+		denylist = ""
 		for address in addresses_6:
-			blacklist = blacklist + address + "\n"
-		return blacklist
+			denylist = denylist + address + "\n"
+		return denylist
 	except Exception as e:
 		return "Error: " + str(e)
 
 @module.handles_action("clear")
-def clear_blacklist(request):
+def clear_denylist(request):
 	addresses_4.clear()
 	addresses_6.clear()
 	return "ok"
@@ -67,14 +67,14 @@ def clear_blacklist(request):
 @module.handles_action("update")
 def update(request):
 	try:
-		blacklist = ""
-		subprocess.run(["ipset", "flush", "blacklist"])
-		subprocess.run(["ipset", "flush", "blacklist6"])
+		denylist = ""
+		subprocess.run(["ipset", "flush", "denylist"])
+		subprocess.run(["ipset", "flush", "denylist6"])
 
 		for address in addresses_4:
-			subprocess.run(["ipset", "add", "blacklist", address])
+			subprocess.run(["ipset", "add", "denylist", address])
 		for address in addresses_6:
-			subprocess.run(["ipset", "add", "blacklist6", address])
+			subprocess.run(["ipset", "add", "denylist6", address])
 		return "ok"
 	except Exception as e:
 		return "Error: " + str(e)

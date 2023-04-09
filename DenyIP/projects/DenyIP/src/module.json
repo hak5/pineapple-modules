@@ -1,7 +1,7 @@
 {
-    "name": "BlackIP",
-    "title": "BlackIP",
-    "description": "Blacklist IP addresses and refuse their traffic",
+    "name": "DenyIP",
+    "title": "DenyIP",
+    "description": "Declare IP addresses and refuse their traffic",
     "version": "1.0.0",
     "author": "90N45",
     "firmware_required": "1.0.0",

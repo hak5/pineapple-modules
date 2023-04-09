@@ -1,5 +1,5 @@
 {
-    "name": "BlackIP",
+    "name": "DenyIP",
     "version": "0.0.0",
     "scripts": {
         "ng": "ng",

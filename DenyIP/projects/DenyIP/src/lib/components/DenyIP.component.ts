@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../services/api.service';
 
 @Component({
-    selector: 'lib-BlackIP',
-    templateUrl: './BlackIP.component.html',
-    styleUrls: ['./BlackIP.component.css']
+    selector: 'lib-DenyIP',
+    templateUrl: './DenyIP.component.html',
+    styleUrls: ['./DenyIP.component.css']
 })
-export class BlackIPComponent implements OnInit {
+export class DenyIPComponent implements OnInit {
     constructor(private API: ApiService) { }
 
     error = "";
@@ -22,7 +22,7 @@ export class BlackIPComponent implements OnInit {
 
     init(): void {
         this.API.request({
-            module: 'BlackIP',
+            module: 'DenyIP',
             action: "init"
         }, (response) => {
             if (response != "ok") {
@@ -35,7 +35,7 @@ export class BlackIPComponent implements OnInit {
 
     get4(): void {
         this.API.request({
-            module: 'BlackIP',
+            module: 'DenyIP',
             action: "get4"
         }, (response) => {
             this.addresses4 = response;
@@ -44,7 +44,7 @@ export class BlackIPComponent implements OnInit {
 
     get6(): void {
         this.API.request({
-            module: 'BlackIP',
+            module: 'DenyIP',
             action: "get6"
         }, (response) => {
             this.addresses6 = response;
@@ -54,7 +54,7 @@ export class BlackIPComponent implements OnInit {
     add(): void {
         this.isAdding = true;
         this.API.request({
-            module: 'BlackIP',
+            module: 'DenyIP',
             action: "add",
             user_ip: this.userIP,
             user_type: this.userType
@@ -73,7 +73,7 @@ export class BlackIPComponent implements OnInit {
     clear(): void {
         this.isResetting = true;
         this.API.request({
-            module: 'BlackIP',
+            module: 'DenyIP',
             action: "clear"
         }, (response) => {
             if (response != "ok") {
@@ -89,7 +89,7 @@ export class BlackIPComponent implements OnInit {
     update(): void {
         this.isUpdating = true;
         this.API.request({
-            module: 'BlackIP',
+            module: 'DenyIP',
             action: "update"
         }, (response) => {
             if (response != "ok") {
