@@ -4,11 +4,33 @@ import logging
 import os
 import subprocess
 from pineapple.modules import Module, Request
+import pineapple.helpers.opkg_helpers as opkg
 
 module = Module('DenyIP', logging.DEBUG)
 
 addresses_4 = []
 addresses_6 = []
+
+@module.handles_action("ipsetCheck")
+def ipset_check(request):
+	try:
+		if opkg.check_if_installed("ipset", module.logger) == True:
+			return "ok"
+		else:
+			return "Not installed"
+	except Exception as e:
+		return "Error: " + str(e)
+
+@module.handles_action("ipsetInstall")
+def ipset_install(request):
+	try:
+		status, error = opkg.install_dependency("ipset", module.logger)
+		if status == True:
+			return "ok"
+		else:
+			return "Error: " + error
+	except Exception as e:
+		return "Error: " + str(e)
 
 @module.handles_action("init")
 def init(request):

@@ -15,10 +15,41 @@ export class DenyIPComponent implements OnInit {
 
     userIP = "";
     userType = "";
+    hasIpset: boolean = true;
     hasInit: boolean = false;
+    isInstalling: boolean = false;
     isAdding: boolean = false;
     isResetting: boolean = false;
     isUpdating: boolean = false;
+
+    ipsetCheck(): void {
+        this.API.request({
+            module: 'DenyIP',
+            action: "ipsetCheck"
+        }, (response) => {
+            if (response == "ok") {
+                this.hasIpset = true;
+                this.init();
+            } else {
+                this.hasIpset = false;
+            }
+        })
+    }
+
+    ipsetInstall(): void {
+        this.isInstalling = true;
+        this.API.request({
+            module: 'DenyIP',
+            action: "ipsetInstall"
+        }, (response) => {
+            if (response == "ok") {
+                this.ipsetCheck()
+            } else {
+                this.error = response;
+            }
+            this.isInstalling = false;
+        })
+    }
 
     init(): void {
         this.API.request({
@@ -29,6 +60,8 @@ export class DenyIPComponent implements OnInit {
                 this.error = response;
             } else {
                 this.hasInit = true;
+                this.get4();
+                this.get6();
             }
         })
     }
@@ -100,8 +133,6 @@ export class DenyIPComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.init();
-        this.get4();
-        this.get6();
+        this.ipsetCheck();
     }
 }

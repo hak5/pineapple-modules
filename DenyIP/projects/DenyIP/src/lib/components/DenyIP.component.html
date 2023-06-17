@@ -1,8 +1,31 @@
 <div style="display: flex; justify-content: center; align-items: center;">
-    <span *ngIf="!hasInit" style="display: flex; justify-content: center; align-items: center; height: 10vh;">
+    <span *ngIf="!hasInit && hasIpset" style="display: flex; justify-content: center; align-items: center; height: 10vh;">
         <mat-spinner diameter="25"></mat-spinner>
     </span>
-    <mat-card *ngIf="hasInit" style="width: 40%;">
+    <mat-card *ngIf="!hasIpset" style="width: 40%;">
+        <mat-card-content>
+            <mat-card-title>Welcome To DenyIP</mat-card-title>
+            <mat-card-subtitle>Lets get started.</mat-card-subtitle>
+            <mat-divider></mat-divider>
+            <br>
+            <p>To manage the firewall, DenyIP needs the ipset package. The download of ipset will make a request to the internet.
+            </p>
+            <br>
+            <div style="display: flex; justify-content: center; align-items: center;">
+                <button style="width: 45%; height: 34px; display: flex; justify-content: center; align-items: center;" mat-flat-button color="accent" (click)="ipsetInstall()">
+                    <span *ngIf="!isInstalling">Install ipset</span>
+                    <span *ngIf="isInstalling">
+                        <mat-spinner [diameter]="20"></mat-spinner>
+                    </span>
+                </button>
+            </div>
+            <br>
+            <div style="display: flex; justify-content: center; align-items: center;">
+                <span><small>You can find out more about ipset at <a href="https://openwrt.org/packages/pkgdata/ipset">openwrt.org/packages/pkgdata/ipset</a><br>If you have installed ipset and this window does not update, please reload this module/page a few times and be patient...</small></span>
+            </div>
+        </mat-card-content>
+    </mat-card>
+    <mat-card *ngIf="hasInit && hasIpset" style="width: 40%;">
         <mat-card-content>
             <mat-card-title style="text-align: center;">DenyIP</mat-card-title>
             <mat-divider></mat-divider>
