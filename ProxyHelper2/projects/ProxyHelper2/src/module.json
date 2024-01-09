@@ -1,0 +1,10 @@
+{
+    "name": "ProxyHelper2",
+    "title": "Proxy Helper (The Sequel)",
+    "description": "Module to force client device TCP traffic to Burp Suite Proxy",
+    "version": "1.0",
+    "author": "hoodoer",
+    "firmware_required": "1.0.0",
+    "devices": ["wifipineapplemk7"]
+}
+

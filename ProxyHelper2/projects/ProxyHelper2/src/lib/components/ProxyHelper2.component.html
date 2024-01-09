@@ -1,0 +1,94 @@
+<mat-card>
+    <mat-card-title>Welcome to ProxyHelper2</mat-card-title>
+    <mat-card-subtitle>Updated version of Kc57's ProxyHelper</mat-card-subtitle>
+    <mat-card-content>
+        This module sets the iptables rules to force network traffic of client devices to Burp Suite Proxy. This is useful for mobile applications that do not honor proxy settings on the device.<br>
+        Enter the ports you would like to force to Burp Suite Proxy, and the IP and port your Burp Suite Proxy is listening on.<br><br>
+        You'll need to configure your Burp Suite Proxy Listener to listen on all interfaces (not just Loopback only) and set it's Request handling to Support invisible proxying. <br><br>
+        The github repo for this project is here:<br>
+        https://github.com/hoodoer/proxy-helper-the-sequel<br><br>
+        If you have an older pineapple using the older module development style, use the original ProxyHelper module here:<br>
+        https://github.com/trustedsec/proxy_helper<br>
+        https://trustedsec.com/blog/introducing-proxy-helper-a-new-wifi-pineapple-module
+    </mat-card-content>
+</mat-card>
+
+<mat-card>
+    <mat-card-content>
+        <b>Firewall Rules - Backup and Restore:</b><br><br>
+        <button mat-flat-button color="primary" (click)="saveFirewallRules();">Backup Firewall Rules</button>
+    
+        <!-- Loader spinner -->
+        <div *ngIf="!backendLoaded" class="text-center">
+            <mat-spinner diameter="100"></mat-spinner>
+        </div>
+        <br>
+        <ul>
+          <li *ngFor="let backup of backups">
+            <span style="margin-right: 20px;">{{ backup }}</span>
+            <button mat-flat-button color="accent" (click)="restoreBackup(backup)">Restore</button>
+            <button mat-flat-button color="warn" (click)="deleteBackup(backup)">Delete</button>
+        </li>
+    </ul>       
+</mat-card-content>
+</mat-card>
+
+
+<mat-card>
+    <mat-card-content>
+        <b>TCP Ports to forward to Burp Proxy:</b><br><br>
+        <div *ngFor="let port of ports">
+          <mat-checkbox [(ngModel)]="port.checked" [disabled]="isChecked">{{ port.value }}</mat-checkbox>
+      </div> 
+
+      <mat-form-field>
+          <mat-label>New Port</mat-label>
+          <input matInput [(ngModel)]="newPort" name="newPort" #newPortInput="ngModel" required pattern="^([1-9]\d{0,4}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$">
+          <mat-error *ngIf="newPortInput.invalid && (newPortInput.dirty || newPortInput.touched)">
+            Please enter a valid port number.
+        </mat-error>
+    </mat-form-field>
+
+
+    <br>
+    <button mat-flat-button color="primary" (click)="addNewPort()" [disabled]="newPortInput.invalid || !newPortInput.dirty || isChecked">Add Port</button>
+</mat-card-content>
+</mat-card>
+
+
+<mat-card>
+    <mat-card-content>
+        <b>Burp Proxy Configuration:</b><br>
+
+        <mat-form-field>
+          <mat-label>IP Address of Proxy</mat-label>
+          <input matInput [(ngModel)]="proxyIpAddress" name="proxyIpAddress" #ipInput="ngModel" [disabled]="isChecked" required pattern="^((25[0-5]|2[0-4][0-9]|[0-1]?[0-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|[0-1]?[0-9]?[0-9])$">
+          <mat-error *ngIf="ipInput.invalid && (ipInput.dirty || ipInput.touched)">
+            Please enter a valid IP address.
+        </mat-error>
+    </mat-form-field>
+
+    <br>
+
+
+    <mat-form-field>
+      <mat-label>Port of Proxy</mat-label>
+      <input matInput [(ngModel)]="proxyPort" name="proxyPort" #portInput="ngModel" [disabled]="isChecked" required pattern="^([1-9]\d{0,4}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$">
+      <mat-error *ngIf="portInput.invalid && (portInput.dirty || portInput.touched)">
+        Please enter a valid port number.
+    </mat-error>
+</mat-form-field>
+<br>
+<mat-slide-toggle [(ngModel)]="isChecked" (change)="routingToggle()" [disabled]="portInput.invalid || !portInput.dirty || ipInput.invalid || !ipInput.dirty">Route to Proxy</mat-slide-toggle>
+</mat-card-content>
+</mat-card>
+
+
+<mat-card>
+    <mat-card-content>
+        <b><i>Contact Info</i></b><br><br>
+        If you're having issues feel free to contact me:<br>
+        @hoodoer<br>
+        hoodoer@bitwisemunitions.dev
+    </mat-card-content>
+</mat-card>

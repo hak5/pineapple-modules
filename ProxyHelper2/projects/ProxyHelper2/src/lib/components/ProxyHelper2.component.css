@@ -1,0 +1,35 @@
+.mat-card-content {
+  padding-bottom: 10px; /* Optional: Add padding for spacing */
+}
+
+.mat-card-content + .mat-card-content {
+  padding-top: 10px; /* Optional: Add padding for spacing */
+}
+
+
+
+.mat-selection-list {
+  border: 1px solid #ccc; /* Border color and width */
+  border-radius: 4px;     /* Optional: Add border-radius for rounded corners */
+  padding: 8px;           /* Optional: Add padding for spacing */
+  max-width: 250px;
+}
+
+.mat-list-option {
+  font-size: 12px;
+}
+
+
+.mat-card {
+  margin-bottom: 10px; /* Adjust the value to set the desired bottom margin */
+}
+
+
+
+
+.mat-flat-button {
+  height: 28px; /* Adjust the height to make the buttons smaller vertically */
+  margin-right: 8px; /* Add spacing to the right of each button */
+  margin-bottom: 8px; /* Add spacing below each button */
+  align-items: center;
+}
