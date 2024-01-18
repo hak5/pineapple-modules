@@ -5,6 +5,6 @@
     "version": "1.0",
     "author": "hoodoer",
     "firmware_required": "1.0.0",
-    "devices": ["wifipineapplemk7"]
+    "devices": ["wifipineapplemk7", "wifipineappleent1"]
 }
 
