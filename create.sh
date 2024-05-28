@@ -7,10 +7,10 @@
 # | |  | | (_| |   < ___) |
 # |_|  |_|\__,_|_|\_\____/
 
-MODULE_NAME="NOTSPECIFIED"
-MODULE_TITLE="NOTSPECIFIED"
-MODULE_AUTHOR="NOTSPECIFIED"
-MODULE_DESC="NOTSPECIFIED"
+MODULE_NAME="pineapple"
+MODULE_TITLE="Wifi-pineapple"
+MODULE_AUTHOR="bansheeman"
+MODULE_DESC="pineappleUI"
 
 print_banner() {
     echo " __          ___ ______ _   _____ _                              _       "
