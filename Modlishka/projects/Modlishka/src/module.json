@@ -1,0 +1,10 @@
+{
+    "name": "Modlishka",
+    "title": "Modlishka",
+    "description": "proxy any website through modlishka to bypass 2fa and capture credentials",
+    "version": "1.0",
+    "author": "p4p1",
+    "firmware_required": "1.0.0",
+    "devices": ["wifipineapplemk7"]
+}
+

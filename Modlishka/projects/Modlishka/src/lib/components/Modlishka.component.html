@@ -1,0 +1,66 @@
+<mat-card class="modlishka_container">
+    <mat-card-title>Modlishka</mat-card-title>
+    <mat-card-content>
+      <mat-label>Control modlishka here</mat-label>
+      <br />
+      <button mat-flat-button color="accent" (click)="runModlishka();">
+        start modlishka
+      </button>
+      <button mat-flat-button color="accent" (click)="stopModlishka();">
+        stop modlishka
+      </button>
+      <br />
+      <span>The Api said: {{apiResponse}}</span>
+      <br />
+    </mat-card-content>
+</mat-card>
+
+<div class="input_container">
+  <mat-card class="modlishka_container input_element">
+      <mat-card-title>Modlishka Config</mat-card-title>
+      <mat-card-content>
+        <mat-label>Set here the modlishka config</mat-label>
+        <br />
+        <textarea #configInput
+          class="modlishka_textinput"
+          [(ngModel)]="configData">
+        </textarea>
+        <br />
+        <button mat-flat-button color="accent" (click)="setConfig();">
+          set modlishka config
+        </button>
+      </mat-card-content>
+  </mat-card>
+
+  <mat-card class="modlishka_container input_element">
+      <mat-card-title>Dns Mask Config</mat-card-title>
+      <mat-card-content>
+        <mat-label>Set here the dnsmask config</mat-label>
+        <br />
+        <textarea #dnsInput
+          class="modlishka_textinput"
+          [(ngModel)]="dnsData">
+        </textarea>
+        <br />
+        <button mat-flat-button color="accent" (click)="setDnsConfig();">
+          set dns config
+        </button>
+      </mat-card-content>
+  </mat-card>
+</div>
+
+<mat-card class="modlishka_container">
+    <mat-card-title>Logs</mat-card-title>
+    <mat-card-content>
+      <button mat-flat-button color="accent" (click)="getModlishkaLogs();">
+        Refresh
+      </button>
+      <br />
+     <textarea #configInput
+        class="log_area"
+        [(ngModel)]="modlishkaLog"
+        (mouseup)="getModlishkaLogs();"
+        readonly>
+      </textarea>
+    </mat-card-content>
+</mat-card>
