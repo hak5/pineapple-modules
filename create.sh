@@ -11,6 +11,13 @@ MODULE_NAME="NOTSPECIFIED"
 MODULE_TITLE="NOTSPECIFIED"
 MODULE_AUTHOR="NOTSPECIFIED"
 MODULE_DESC="NOTSPECIFIED"
+SED_LOCALE="-i"
+MAC="0"
+
+if [[ $OSTYPE == 'darwin'* ]]; then
+    MAC="1"
+    SED_LOCALE="-i.pbak"
+fi
 
 print_banner() {
     echo " __          ___ ______ _   _____ _                              _       "
@@ -20,7 +27,7 @@ print_banner() {
     echo "    \  /\  /  | | |    | | | |   | | | | |  __/ (_| | |_) | |_) | |  __/ "
     echo "     \/  \/   |_|_|    |_| |_|   |_|_| |_|\___|\__,_| .__/| .__/|_|\___| Mark 7"
     echo " Module Creation Helper                             | |   | |            "
-    echo " Version 1.1                                        |_|   |_|            "
+    echo " Version 1.1.1                                      |_|   |_|            "
     echo " "
     echo " "
 }
@@ -49,17 +56,18 @@ create_from_template() {
 
     cp -r Misc/module-template $MODULE_NAME
 
-    grep -rl examplemodule $MODULE_NAME/ | xargs sed -i "s/examplemodule/$MODULE_NAME/g"
-    grep -rl example-module $MODULE_NAME/ | xargs sed -i "s/example-module/$MODULE_NAME/g"
-    grep -rl example-service $MODULE_NAME/ | xargs sed -i "s/example-service/$MODULE_NAME/g"
-    grep -rl ExampleModuleComponent $MODULE_NAME/ | xargs sed -i "s/ExampleModuleComponent/${MODULE_NAME}Component/g"
-    grep -rl ExampleServiceService $MODULE_NAME/ | xargs sed -i "s/ExampleServiceService/${MODULE_NAME}Service/g"
-    grep -rl ExampleModuleModule $MODULE_NAME/ | xargs sed -i "s/ExampleModuleModule/${MODULE_NAME}Module/g"
+    grep -rl examplemodule $MODULE_NAME/ | xargs sed $SED_LOCALE "s/examplemodule/$MODULE_NAME/g"
+    grep -rl example-module $MODULE_NAME/ | xargs sed $SED_LOCALE "s/example-module/$MODULE_NAME/g"
+    grep -rl example-service $MODULE_NAME/ | xargs sed $SED_LOCALE "s/example-service/$MODULE_NAME/g"
+    grep -rl ExampleModuleComponent $MODULE_NAME/ | xargs sed $SED_LOCALE "s/ExampleModuleComponent/${MODULE_NAME}Component/g"
+    grep -rl ExampleServiceService $MODULE_NAME/ | xargs sed $SED_LOCALE "s/ExampleServiceService/${MODULE_NAME}Service/g"
+    grep -rl ExampleModuleModule $MODULE_NAME/ | xargs sed $SED_LOCALE "s/ExampleModuleModule/${MODULE_NAME}Module/g"
     
-    grep -rl "the Example Module!" $MODULE_NAME/ | xargs sed -i "s/the Example Module!/${MODULE_NAME}/g"
-    grep -rl ": \"Example Module" $MODULE_NAME/ | xargs sed -i "s/: \"Example Module/: \"${MODULE_TITLE}/g"
-    grep -rl "An example module!" $MODULE_NAME/ | xargs sed -i "s/An example module!/${MODULE_DESC}/g"
-    grep -rl ": \"Hak5" $MODULE_NAME/ | xargs sed -i "s/: \"Hak5/: \"${MODULE_AUTHOR}/g"
+    grep -rl "the Example Module!" $MODULE_NAME/ | xargs sed $SED_LOCALE "s/the Example Module!/${MODULE_NAME}/g"
+    echo "here"
+    grep -rl ": \"Example Module" $MODULE_NAME/ | xargs sed $SED_LOCALE "s/: \"Example Module/: \"${MODULE_TITLE}/g"
+    grep -rl "An example module!" $MODULE_NAME/ | xargs sed $SED_LOCALE "s/An example module!/${MODULE_DESC}/g"
+    grep -rl ": \"Hak5" $MODULE_NAME/ | xargs sed $SED_LOCALE "s/: \"Hak5/: \"${MODULE_AUTHOR}/g"
 
     mv $MODULE_NAME/projects/examplemodule $MODULE_NAME/projects/$MODULE_NAME
     mv $MODULE_NAME/projects/$MODULE_NAME/src/lib/components/example-module.component.html $MODULE_NAME/projects/$MODULE_NAME/src/lib/components/$MODULE_NAME.component.html
@@ -96,6 +104,14 @@ prepare_node() {
 
 finish() {
     echo "[*] A new module has been created! Exiting."
+    if [ MAC == "1" ]; then
+        cleanup_mac
+    fi
+}
+
+cleanup_mac() {
+    find . -iname "*.pbak" | xargs rm -f
+    echo "Cleaned up sed backup files!"
 }
 
 main() {
