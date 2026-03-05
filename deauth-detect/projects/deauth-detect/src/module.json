@@ -1,0 +1,9 @@
+{
+    "name": "deauth-detect",
+    "title": "NullSec DeauthDetect",
+    "description": "Real-time WiFi deauthentication attack detection with alerting. Monitors for deauth/disassoc frames, tracks attacker MACs, and sends webhook notifications.",
+    "author": "NullSec (bad-antics)",
+    "version": "1.0.0",
+    "firmware_required": "1.0.0",
+    "devices": ["wifipineapplemk7", "wifipineappleent1"]
+}
