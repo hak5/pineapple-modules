@@ -1,0 +1,50 @@
+<h2 mat-dialog-title>
+    <mat-icon color="accent" style="vertical-align: middle; margin-right: 6px;">
+        {{ data.isNew ? 'note_add' : 'edit' }}
+    </mat-icon>
+    {{ title }}
+</h2>
+
+<mat-dialog-content>
+    <!-- Loading spinner -->
+    <div *ngIf="isLoading" class="loading-container">
+        <mat-spinner [diameter]="40" color="accent"></mat-spinner>
+        <p>Loading file...</p>
+    </div>
+
+    <div *ngIf="!isLoading">
+        <!-- New file: ask for filename -->
+        <mat-form-field *ngIf="data.isNew" style="width: 100%; margin-bottom: 12px;">
+            <mat-label>File Name</mat-label>
+            <input matInput [(ngModel)]="newFileName" name="newFileName"
+                   placeholder="index.html"
+                   autocomplete="off" />
+            <mat-hint *ngIf="data.basePath">Will be created in /{{ data.basePath }}/</mat-hint>
+        </mat-form-field>
+
+        <!-- Editor -->
+        <mat-form-field style="width: 100%">
+            <mat-label>Content</mat-label>
+            <textarea matInput
+                      [(ngModel)]="content"
+                      name="content"
+                      class="code-editor"
+                      rows="22"
+                      spellcheck="false"></textarea>
+        </mat-form-field>
+
+        <!-- Error -->
+        <p *ngIf="errorMessage" class="error-text">{{ errorMessage }}</p>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close [disabled]="isSaving">Cancel</button>
+    <button mat-raised-button color="accent"
+            [disabled]="saveDisabled"
+            (click)="save()">
+        <mat-spinner *ngIf="isSaving" [diameter]="18" color="accent"
+                     style="display:inline-block; margin-right:6px;"></mat-spinner>
+        Save
+    </button>
+</mat-dialog-actions>

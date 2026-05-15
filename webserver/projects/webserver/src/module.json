@@ -1,0 +1,10 @@
+{
+    "name": "webserver",
+    "title": "Web Server",
+    "description": "Host multiple websites for DNS spoofing attacks.",
+    "author": "beerbeedi",
+    "version": "1.0.0",
+    "firmware_required": "1.0.0",
+    "devices": ["wifipineapplemk7"],
+    "icon": "public"
+}

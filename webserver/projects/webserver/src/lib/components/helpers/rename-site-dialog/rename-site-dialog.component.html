@@ -1,0 +1,40 @@
+<h2 mat-dialog-title>
+    <mat-icon color="accent" style="vertical-align:middle; margin-right:6px;">drive_file_rename_outline</mat-icon>
+    Edit Site
+</h2>
+
+<mat-dialog-content>
+    <form>
+        <mat-form-field style="width:100%">
+            <mat-label>Site Name</mat-label>
+            <input matInput [(ngModel)]="newName" name="newName" autocomplete="off" />
+            <mat-hint>Internal directory name (lowercase, underscores)</mat-hint>
+        </mat-form-field>
+
+        <br/><br/>
+
+        <mat-form-field style="width:100%">
+            <mat-label>Hostname (VirtualHost)</mat-label>
+            <input matInput [(ngModel)]="newHostname" name="newHostname" autocomplete="off" />
+        </mat-form-field>
+
+        <br/><br/>
+
+        <mat-form-field style="width:100%">
+            <mat-label>Aliases</mat-label>
+            <input matInput [(ngModel)]="newAliases" name="newAliases"
+                   placeholder="www.example.com, mail.example.com"
+                   autocomplete="off" />
+            <mat-hint>Additional hostnames, comma-separated (optional)</mat-hint>
+        </mat-form-field>
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Cancel</button>
+    <button mat-raised-button color="accent"
+            [disabled]="!isValid"
+            (click)="save()">
+        Save
+    </button>
+</mat-dialog-actions>

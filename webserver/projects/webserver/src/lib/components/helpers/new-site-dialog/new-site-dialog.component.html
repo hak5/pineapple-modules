@@ -1,0 +1,69 @@
+<h2 mat-dialog-title>
+    <mat-icon color="accent" style="vertical-align: middle; margin-right: 6px;">add_circle_outline</mat-icon>
+    Add New Site
+</h2>
+
+<mat-dialog-content>
+    <form>
+        <mat-form-field style="width: 100%">
+            <mat-label>Site Name</mat-label>
+            <input matInput [(ngModel)]="siteName" name="siteName"
+                   placeholder="google_com"
+                   autocomplete="off" />
+            <mat-hint>Unique internal identifier (letters, numbers, underscores)</mat-hint>
+        </mat-form-field>
+
+        <br/><br/>
+
+        <mat-form-field style="width: 100%">
+            <mat-label>Hostname (VirtualHost)</mat-label>
+            <input matInput [(ngModel)]="hostname" name="hostname"
+                   placeholder="google.com"
+                   autocomplete="off" />
+            <mat-hint>DNS spoofing target — clients connecting to this hostname will see this site</mat-hint>
+        </mat-form-field>
+
+        <br/><br/>
+
+        <mat-form-field style="width: 100%">
+            <mat-label>Aliases</mat-label>
+            <input matInput [(ngModel)]="aliases" name="aliases"
+                   placeholder="www.google.com, mail.google.com"
+                   autocomplete="off" />
+            <mat-hint>Additional hostnames, comma-separated (optional)</mat-hint>
+        </mat-form-field>
+
+        <br/><br/>
+
+        <mat-checkbox [(ngModel)]="php" name="php">
+            Enable PHP support
+            <span style="font-size: 11px; color: #888; margin-left: 6px;">(requires php7-fpm)</span>
+        </mat-checkbox>
+
+        <br/><br/>
+
+        <div style="font-size: 13px; font-weight: 500; margin-bottom: 8px; color: #555;">Template</div>
+        <mat-radio-group [(ngModel)]="template" name="template"
+                         style="display: flex; flex-direction: column; gap: 10px;">
+            <mat-radio-button *ngFor="let t of templates" [value]="t.id" color="accent"
+                              (click)="onTemplateChange(t.id)">
+                <span style="font-weight: 500;">{{ t.label }}</span>
+                <span *ngIf="t.requiresPhp"
+                      style="font-size: 10px; background:#fff3e0; color:#e65100;
+                             padding:1px 5px; border-radius:4px; margin-left:6px; vertical-align:middle;">
+                    PHP
+                </span>
+                <span style="font-size: 11px; color: #888; margin-left: 6px;">{{ t.description }}</span>
+            </mat-radio-button>
+        </mat-radio-group>
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Cancel</button>
+    <button mat-raised-button color="accent"
+            [disabled]="!isValid"
+            (click)="create()">
+        Create
+    </button>
+</mat-dialog-actions>
