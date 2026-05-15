@@ -1,0 +1,21 @@
+mat-dialog-content {
+    min-width: 380px;
+}
+
+.info-box {
+    background: #e3f2fd;
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #1565c0;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.info-box code {
+    background: rgba(0,0,0,0.08);
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-family: monospace;
+}

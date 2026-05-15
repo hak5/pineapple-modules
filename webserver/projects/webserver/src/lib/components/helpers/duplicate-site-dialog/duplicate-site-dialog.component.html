@@ -1,0 +1,39 @@
+<h2 mat-dialog-title>
+    <mat-icon color="accent" style="vertical-align:middle; margin-right:6px;">content_copy</mat-icon>
+    Duplicate Site
+</h2>
+
+<mat-dialog-content>
+    <p style="font-size:13px; color:#888; margin-bottom:20px;">
+        Copying all files from <strong>{{ data.sourceName }}</strong>.
+        The duplicate starts disabled.
+    </p>
+    <form>
+        <mat-form-field style="width:100%">
+            <mat-label>New Site Name</mat-label>
+            <input matInput [(ngModel)]="newName" name="newName"
+                   [placeholder]="data.sourceName + '_copy'"
+                   autocomplete="off" />
+            <mat-hint>Internal identifier for the duplicate</mat-hint>
+        </mat-form-field>
+
+        <br/><br/>
+
+        <mat-form-field style="width:100%">
+            <mat-label>New Hostname (VirtualHost)</mat-label>
+            <input matInput [(ngModel)]="newHostname" name="newHostname"
+                   placeholder="copy.example.com"
+                   autocomplete="off" />
+            <mat-hint>Must be different from the original</mat-hint>
+        </mat-form-field>
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Cancel</button>
+    <button mat-raised-button color="accent"
+            [disabled]="!isValid"
+            (click)="duplicate()">
+        Duplicate
+    </button>
+</mat-dialog-actions>

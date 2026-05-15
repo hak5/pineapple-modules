@@ -1,0 +1,392 @@
+<!-- ─── Install dependencies ─────────────────────────────────────────────── -->
+<div class="dependency-wrapper" *ngIf="!hasDependencies">
+    <mat-card class="dependency-card">
+        <mat-card-content>
+            <mat-card-title>Welcome to Web Server</mat-card-title>
+            <mat-card-subtitle>Setup required</mat-card-subtitle>
+            <br/><mat-divider></mat-divider><br/>
+            <p>
+                This module needs <strong>nginx</strong> and <strong>php7-fpm</strong> to work.
+                Click the button below to install them via opkg.
+            </p>
+            <p style="color: #888; font-size: 13px; margin-top: 8px;">
+                The Pineapple must have internet access. Installation may take a few minutes.
+            </p>
+            <br/>
+            <div style="text-align: center;">
+                <button mat-raised-button color="accent" class="dependency-btn"
+                        [disabled]="isInstalling" (click)="installDependencies()">
+                    <mat-spinner *ngIf="isInstalling" [diameter]="20" color="accent"
+                                 style="display:inline-block; margin-right:8px;"></mat-spinner>
+                    <span *ngIf="!isInstalling">Install Dependencies</span>
+                    <span *ngIf="isInstalling">Installing… please wait</span>
+                </button>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<!-- ─── Main UI ─────────────────────────────────────────────────────────────── -->
+<div *ngIf="hasDependencies">
+
+    <!-- ─── Controls ──────────────────────────────────────────────────────── -->
+    <mat-card>
+        <mat-card-content>
+            <div class="header-row">
+                <mat-card-title>Web Server</mat-card-title>
+                <span *ngIf="controlState.isBusy" style="margin-left:10px;">
+                    <mat-spinner [diameter]="24" color="accent"></mat-spinner>
+                </span>
+            </div>
+
+            <br/><mat-divider></mat-divider><br/>
+
+            <div fxLayout="row" fxLayoutGap="12px" fxLayout.xs="column">
+                <button mat-raised-button
+                        [color]="controlState.running ? 'warn' : 'accent'"
+                        [disabled]="controlState.isBusy"
+                        (click)="toggleWebserver()"
+                        style="flex:1">
+                    {{ controlState.running ? 'Stop Web Server' : 'Start Web Server' }}
+                </button>
+                <button mat-raised-button color="primary"
+                        [disabled]="controlState.isBusy || !controlState.running"
+                        (click)="reloadWebserver()"
+                        style="flex:1"
+                        matTooltip="Reload nginx config without restart">
+                    <mat-icon style="font-size:16px;height:16px;width:16px;margin-right:4px;">refresh</mat-icon>
+                    Reload Config
+                </button>
+            </div>
+
+            <div class="boot-toggle-row">
+                <mat-slide-toggle [checked]="controlState.startAtBoot"
+                                  (change)="toggleStartAtBoot($event.checked)" color="accent">
+                    Start at boot
+                </mat-slide-toggle>
+                <span class="boot-hint" *ngIf="controlState.startAtBoot">
+                    nginx starts automatically when the Pineapple boots
+                </span>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+    <br/>
+
+    <!-- ─── Site Library ────────────────────────────────────────────────── -->
+    <mat-card *ngIf="libraryState.showLibrary">
+        <mat-card-content>
+            <div class="header-row">
+                <mat-card-title>Sites</mat-card-title>
+                <span *ngIf="libraryState.isBusy" style="margin-left:10px;">
+                    <mat-spinner [diameter]="24" color="accent"></mat-spinner>
+                </span>
+                <span fxFlex></span>
+                <button mat-raised-button color="accent" (click)="showNewSiteDialog()">
+                    <mat-icon>add</mat-icon> Add Site
+                </button>
+            </div>
+
+            <br/><mat-divider></mat-divider><br/>
+
+            <p *ngIf="libraryState.sites.length === 0 && !libraryState.isBusy" class="empty-hint">
+                No sites configured yet. Click <strong>Add Site</strong> to get started.
+            </p>
+            <p *ngIf="libraryState.sites.length === 0 && libraryState.isBusy" class="empty-hint">
+                <em>Loading...</em>
+            </p>
+
+            <table *ngIf="libraryState.sites.length > 0" class="site-table">
+                <colgroup>
+                    <col style="width:18%">
+                    <col style="width:20%">
+                    <col style="width:7%">
+                    <col style="width:13%">
+                    <col style="width:42%">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>Site Name</th>
+                        <th>Hostname (VHost)</th>
+                        <th class="col-center">PHP</th>
+                        <th>DNS / Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let site of libraryState.sites">
+                        <td>
+                            <span class="site-link" (click)="openWorkbench(site)">{{ site.name }}</span>
+                        </td>
+                        <td class="hostname-cell">
+                            {{ site.hostname }}
+                            <span *ngIf="site.aliases?.length" class="alias-hint"
+                                  [matTooltip]="site.aliases.join(', ')">
+                                +{{ site.aliases.length }}
+                            </span>
+                        </td>
+                        <td class="col-center">
+                            <mat-icon [style.color]="site.php ? '#4caf50' : '#bbb'"
+                                      [matTooltip]="site.php ? 'PHP enabled' : 'PHP disabled'">
+                                {{ site.php ? 'check_circle' : 'remove_circle_outline' }}
+                            </mat-icon>
+                        </td>
+                        <td>
+                            <span class="site-status-badge"
+                                  [class.site-enabled]="site.enabled"
+                                  [class.site-disabled]="!site.enabled"
+                                  [matTooltip]="site.enabled ? 'DNS entry active in /etc/hosts' : 'No DNS entry'">
+                                <mat-icon style="font-size:13px;height:13px;width:13px;vertical-align:middle;">
+                                    {{ site.enabled ? 'wifi_tethering' : 'wifi_tethering_off' }}
+                                </mat-icon>
+                                {{ site.enabled ? 'Active' : 'Inactive' }}
+                            </span>
+                        </td>
+                        <td class="action-cell">
+                            <button mat-stroked-button
+                                    [color]="site.enabled ? 'warn' : 'accent'"
+                                    class="action-btn"
+                                    [disabled]="libraryState.isBusy"
+                                    (click)="toggleSite(site)">
+                                {{ site.enabled ? 'Disable' : 'Enable' }}
+                            </button>
+                            <button mat-stroked-button color="accent" class="action-btn"
+                                    (click)="openWorkbench(site)">Edit</button>
+                            <button mat-stroked-button color="warn" class="action-btn"
+                                    (click)="showDeleteSiteDialog(site)">Delete</button>
+                            <button mat-icon-button class="action-btn"
+                                    [matMenuTriggerFor]="siteMenu"
+                                    matTooltip="More actions">
+                                <mat-icon>more_vert</mat-icon>
+                            </button>
+                            <mat-menu #siteMenu="matMenu">
+                                <button mat-menu-item (click)="showRenameSiteDialog(site)">
+                                    <mat-icon>drive_file_rename_outline</mat-icon>
+                                    <span>Rename / Edit hostname</span>
+                                </button>
+                                <button mat-menu-item (click)="showDuplicateSiteDialog(site)">
+                                    <mat-icon>content_copy</mat-icon>
+                                    <span>Duplicate</span>
+                                </button>
+                            </mat-menu>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- ─── Workbench ───────────────────────────────────────────────────── -->
+    <mat-card *ngIf="!libraryState.showLibrary">
+        <mat-card-content>
+            <div class="header-row">
+                <mat-card-title>
+                    Workbench &mdash; <em>{{ workbenchState.site?.name }}</em>
+                    <span class="hostname-chip">{{ workbenchState.site?.hostname }}</span>
+                </mat-card-title>
+                <span *ngIf="workbenchState.isBusy" style="margin-left:10px;">
+                    <mat-spinner [diameter]="24" color="accent"></mat-spinner>
+                </span>
+                <span fxFlex></span>
+                <button mat-stroked-button class="action-btn"
+                        (click)="libraryState.showLibrary = true">
+                    <mat-icon>arrow_back</mat-icon> Back
+                </button>
+                <button mat-stroked-button color="accent" class="action-btn"
+                        *ngIf="workbenchState.currentPath" (click)="navigateUp()">
+                    <mat-icon>arrow_upward</mat-icon> Up
+                </button>
+                <button mat-stroked-button color="accent" class="action-btn"
+                        (click)="openFileEditor(null)">
+                    <mat-icon>note_add</mat-icon> New File
+                </button>
+                <input #uploadInput type="file" style="display:none"
+                       (change)="uploadFile($event)" />
+                <button mat-stroked-button color="accent" class="action-btn"
+                        (click)="uploadInput.click()"
+                        matTooltip="Upload a file to the current directory">
+                    <mat-icon>upload_file</mat-icon> Upload
+                </button>
+                <button mat-icon-button matTooltip="Refresh"
+                        (click)="loadDirectory(workbenchState.currentPath)">
+                    <mat-icon>refresh</mat-icon>
+                </button>
+            </div>
+
+            <div *ngIf="workbenchState.currentPath" class="breadcrumb">
+                <mat-icon>folder_open</mat-icon>
+                <span>/{{ workbenchState.currentPath }}</span>
+            </div>
+
+            <br/><mat-divider></mat-divider><br/>
+
+            <p *ngIf="workbenchState.files.length === 0 && !workbenchState.isBusy" class="empty-hint">
+                This directory is empty.
+            </p>
+
+            <table *ngIf="workbenchState.files.length > 0" class="site-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Size</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let file of workbenchState.files">
+                        <td class="file-name-cell">
+                            <mat-icon class="file-icon"
+                                      [style.color]="file.is_dir ? '#ff9800' : '#607d8b'">
+                                {{ file.is_dir ? 'folder' : 'insert_drive_file' }}
+                            </mat-icon>
+                            <span [class.dir-name]="file.is_dir"
+                                  [style.cursor]="file.is_dir ? 'pointer' : 'default'"
+                                  (click)="file.is_dir ? loadDirectory(file.path) : null">
+                                {{ file.name }}
+                            </span>
+                        </td>
+                        <td class="size-cell">{{ formatSize(file.size) }}</td>
+                        <td class="action-cell">
+                            <button mat-stroked-button color="accent" class="action-btn"
+                                    *ngIf="file.is_dir" (click)="loadDirectory(file.path)">
+                                Open
+                            </button>
+                            <button mat-stroked-button color="accent" class="action-btn"
+                                    *ngIf="!file.is_dir" (click)="openFileEditor(file)">
+                                Edit
+                            </button>
+                            <button mat-stroked-button color="warn" class="action-btn"
+                                    (click)="showDeleteFileDialog(file)">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </mat-card-content>
+    </mat-card>
+
+    <br/>
+
+    <!-- ─── Monitor ─────────────────────────────────────────────────────── -->
+    <mat-card>
+        <mat-card-content>
+            <div class="header-row">
+                <mat-card-title>Monitor</mat-card-title>
+                <span *ngIf="monitorState.isBusy" style="margin-left:10px;">
+                    <mat-spinner [diameter]="24" color="accent"></mat-spinner>
+                </span>
+                <span fxFlex></span>
+                <button mat-stroked-button (click)="toggleMonitor()">
+                    {{ monitorState.show ? 'Hide' : 'Show' }}
+                </button>
+            </div>
+
+            <div *ngIf="monitorState.show">
+                <br/><mat-divider></mat-divider>
+
+                <mat-tab-group (selectedIndexChange)="onMonitorTabChange($event)">
+
+                    <!-- Statistics -->
+                    <mat-tab label="Statistics">
+                        <div class="monitor-tab-content">
+                            <p *ngIf="libraryState.sites.length === 0" class="empty-hint">
+                                No sites configured.
+                            </p>
+                            <table *ngIf="libraryState.sites.length > 0" class="site-table stats-table">
+                                <thead>
+                                    <tr>
+                                        <th>Site</th>
+                                        <th>Hostname</th>
+                                        <th class="col-right">Visits</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let site of libraryState.sites">
+                                        <td>{{ site.name }}</td>
+                                        <td class="hostname-cell">{{ site.hostname }}</td>
+                                        <td class="col-right">
+                                            <strong>{{ siteStats[site.name] !== undefined ? siteStats[site.name] : '—' }}</strong>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p class="monitor-note">
+                                Visit counts are based on per-site nginx access logs. Reset when nginx restarts.
+                            </p>
+                        </div>
+                    </mat-tab>
+
+                    <!-- Access Log -->
+                    <mat-tab label="Access Log">
+                        <div class="monitor-tab-content">
+                            <div class="log-toolbar">
+                                <select class="log-site-select" [(ngModel)]="monitorState.logSite"
+                                        (change)="loadAccessLog()">
+                                    <option value="">All sites</option>
+                                    <option *ngFor="let site of libraryState.sites"
+                                            [value]="site.name">{{ site.name }}</option>
+                                </select>
+                                <button mat-icon-button matTooltip="Refresh" (click)="loadAccessLog()">
+                                    <mat-icon>refresh</mat-icon>
+                                </button>
+                            </div>
+                            <pre class="log-viewer">{{ monitorState.log || '(no traffic yet)' }}</pre>
+                        </div>
+                    </mat-tab>
+
+                    <!-- Credentials -->
+                    <mat-tab label="Credentials">
+                        <div class="monitor-tab-content">
+                            <div class="log-toolbar">
+                                <span style="font-size:13px; color:#888;">
+                                    Captured by Credential Harvester template
+                                </span>
+                                <span fxFlex></span>
+                                <button mat-stroked-button color="warn"
+                                        [disabled]="monitorState.credentials.length === 0"
+                                        (click)="clearCredentials()">
+                                    <mat-icon style="font-size:16px;height:16px;width:16px;margin-right:4px;">
+                                        delete_sweep
+                                    </mat-icon>
+                                    Clear All
+                                </button>
+                                <button mat-icon-button matTooltip="Refresh" (click)="loadCredentials()">
+                                    <mat-icon>refresh</mat-icon>
+                                </button>
+                            </div>
+
+                            <p *ngIf="monitorState.credentials.length === 0" class="empty-hint">
+                                No credentials captured yet.
+                            </p>
+
+                            <table *ngIf="monitorState.credentials.length > 0"
+                                   class="site-table cred-table">
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>Site</th>
+                                        <th>IP</th>
+                                        <th>Username</th>
+                                        <th>Password</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let c of monitorState.credentials">
+                                        <td class="size-cell">{{ c.timestamp }}</td>
+                                        <td>{{ c.site }}</td>
+                                        <td class="hostname-cell">{{ c.ip }}</td>
+                                        <td>{{ c.username }}</td>
+                                        <td class="cred-password">{{ c.password }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </mat-tab>
+
+                </mat-tab-group>
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+</div><!-- end *ngIf="hasDependencies" -->
