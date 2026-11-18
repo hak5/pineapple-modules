@@ -1,0 +1,102 @@
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+/* The recommended channel, shown on a small screen like the spectrum */
+.verdict {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.verdict-ch {
+    flex-shrink: 0;
+    min-width: 76px;
+    height: 76px;
+    padding: 0 10px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    background: var(--sn-screen);
+    color: var(--sn-marker);
+    font-size: 42px;
+    font-weight: 500;
+}
+
+.table {
+    display: flex;
+    flex-direction: column;
+    overflow-x: auto;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 64px minmax(140px, 1.1fr) 70px 130px minmax(160px, 2fr);
+    gap: 14px;
+    align-items: center;
+    padding: 10px 6px;
+    border-top: 1px solid var(--sn-line);
+    font-size: 14px;
+    min-width: 640px;
+}
+
+.row.head {
+    border-top: 0;
+    font-size: 12px;
+    opacity: 0.7;
+    padding-top: 0;
+}
+
+.row.is-best {
+    background: var(--sn-well);
+}
+
+.ch {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.r {
+    text-align: right;
+}
+
+.aps {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.aps mat-progress-bar {
+    flex: 1;
+}
+
+.nets {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.footnote {
+    margin: 14px 0 0;
+    font-size: 12px;
+    max-width: 70ch;
+}
+
+@media (max-width: 600px) {
+    .verdict {
+        flex-direction: column;
+        gap: 12px;
+    }
+}
+
+.refresh-note {
+    margin: 0;
+    font-size: 12px;
+    opacity: 0.6;
+    text-align: right;
+}

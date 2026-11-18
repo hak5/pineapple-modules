@@ -1,0 +1,195 @@
+/*
+ * Tokens for the few hand-drawn parts. Everything else is Angular Material
+ * and follows the Pineapple theme on its own. --sn-primary, --sn-card and
+ * --sn-text are overwritten at runtime from the live theme.
+ */
+.sn {
+    --sn-primary: #3f51b5;
+    --sn-on-primary: #fff;
+    --sn-card: #fff;
+    --sn-text: rgba(0, 0, 0, 0.87);
+    --sn-line: rgba(128, 128, 128, 0.25);
+    --sn-well: rgba(128, 128, 128, 0.12);
+
+    /* Spectrum screen */
+    --sn-bezel: #1d2b3a;
+    --sn-screen: #0f1f30;
+    --sn-screen-grid: #22384f;
+    --sn-marker: #f0a83a;
+
+    /* Grades drawn on the dark screen */
+    --sn-good: #3cc59a;
+    --sn-low: #5aa9e6;
+    --sn-medium: #e9c544;
+    --sn-high: #f08a3c;
+    --sn-critical: #f0545a;
+
+    /* Grades as text on a light card */
+    --sn-good-ink: #1d8a64;
+    --sn-low-ink: #2a6fb0;
+    --sn-medium-ink: #8a6d00;
+    --sn-high-ink: #bd5410;
+    --sn-critical-ink: #c62f37;
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Lighter grade text on a dark Pineapple theme */
+.sn.sn-dark {
+    --sn-good-ink: #4fd1a5;
+    --sn-low-ink: #7ab8ee;
+    --sn-medium-ink: #ecd060;
+    --sn-high-ink: #f4a065;
+    --sn-critical-ink: #f7787d;
+    --sn-bezel: #0b1622;
+}
+
+.probes {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Status card */
+.status-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.identity {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.mark {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+}
+
+.mark .shield {
+    fill: var(--sn-primary);
+}
+
+.mark .waves {
+    fill: none;
+    stroke: var(--sn-on-primary);
+    stroke-width: 2.6;
+    stroke-linecap: round;
+}
+
+.mark .dot {
+    fill: var(--sn-on-primary);
+}
+
+.lamp {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.bulb {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #9e9e9e;
+}
+
+.lamp-on .bulb {
+    background: #2fb67f;
+    box-shadow: 0 0 0 3px rgba(47, 182, 127, 0.25);
+}
+
+.lamp-stalled .bulb {
+    background: var(--sn-critical-ink);
+    box-shadow: 0 0 0 3px rgba(198, 47, 55, 0.2);
+}
+
+.lamp-wait .bulb {
+    background: #f0a83a;
+    box-shadow: 0 0 0 3px rgba(240, 168, 58, 0.25);
+}
+
+.radios {
+    margin-top: 2px;
+    font-size: 14px;
+    opacity: 0.72;
+}
+
+.radio-err {
+    color: var(--sn-critical-ink);
+}
+
+.alert-line {
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    color: var(--sn-critical-ink);
+    font-size: 14px;
+}
+
+.alert-line span {
+    flex: 1 1 200px;
+}
+
+/* Tabs that are not built yet read quieter */
+.soon {
+    opacity: 0.55;
+}
+
+.tab-body {
+    padding: 16px 2px 4px;
+}
+
+.recon-note {
+    margin: 0 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--sn-medium-ink);
+}
+
+.recon-note mat-icon {
+    flex: none;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.recon-note span {
+    flex: 1 1 auto;
+}
+
+.recon-note .note-close {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    color: inherit;
+}
+
+.recon-note .note-close mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.clock-note {
+    margin: 0 0 12px;
+    font-size: 12px;
+    opacity: 0.7;
+}

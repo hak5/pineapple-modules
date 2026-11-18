@@ -1,0 +1,62 @@
+<div class="screen">
+    <svg [attr.viewBox]="'0 0 ' + W + ' ' + height" preserveAspectRatio="xMidYMid meet" role="img"
+         [attr.aria-label]="band + ' GHz spectrum: ' + count + ' networks'">
+        <defs>
+            <linearGradient [attr.id]="'sweep-' + band" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0" stop-color="#8fd3ff" stop-opacity="0"></stop>
+                <stop offset="1" stop-color="#8fd3ff" stop-opacity="0.07"></stop>
+            </linearGradient>
+            <clipPath [attr.id]="'plot-' + band">
+                <rect [attr.x]="left" [attr.y]="0" [attr.width]="plotW" [attr.height]="baseY + 1"></rect>
+            </clipPath>
+        </defs>
+
+        <!-- dBm grid -->
+        <g class="grid">
+            <ng-container *ngFor="let g of grid">
+                <line [attr.x1]="left" [attr.x2]="W - right" [attr.y1]="g.y" [attr.y2]="g.y"></line>
+                <text [attr.x]="left - 8" [attr.y]="g.y + 4" text-anchor="end">{{ g.label }}</text>
+            </ng-container>
+            <line class="base" [attr.x1]="left" [attr.x2]="W - right" [attr.y1]="baseY" [attr.y2]="baseY"></line>
+        </g>
+
+        <!-- Channel axis -->
+        <g class="axis">
+            <ng-container *ngFor="let t of ticks">
+                <line [attr.x1]="t.x" [attr.x2]="t.x" [attr.y1]="baseY" [attr.y2]="baseY + 5"></line>
+                <text [attr.x]="t.x" [attr.y]="baseY + 20" text-anchor="middle">{{ t.label }}</text>
+            </ng-container>
+        </g>
+
+        <!-- Recommended channel -->
+        <g class="reco" *ngIf="recoX !== null">
+            <line [attr.x1]="recoX" [attr.x2]="recoX" [attr.y1]="top" [attr.y2]="baseY"></line>
+            <rect [attr.x]="recoX - 25" [attr.y]="top - 2" width="50" height="17" rx="8.5"></rect>
+            <text [attr.x]="recoX" [attr.y]="top + 10" text-anchor="middle">best</text>
+        </g>
+
+        <!-- Networks -->
+        <g class="arcs" [attr.clip-path]="'url(#plot-' + band + ')'">
+            <path *ngFor="let a of arcs; trackBy: trackArc" [attr.d]="a.path" [ngClass]="'g-' + a.grade" [class.mine]="a.mine">
+                <title>{{ a.title }}</title>
+            </path>
+        </g>
+
+        <g class="labels">
+            <text *ngFor="let a of labelled" [attr.x]="labelX(a)" [attr.y]="a.peakY - 7" text-anchor="middle">{{ a.label }}</text>
+        </g>
+
+        <!-- Live scan sweep -->
+        <g *ngIf="live" class="sweep">
+            <animateTransform attributeName="transform" type="translate" from="-20 0" [attr.to]="sweepTo + ' 0'"
+                              dur="8s" repeatCount="indefinite"></animateTransform>
+            <rect [attr.x]="left - 60" [attr.y]="top" width="60" [attr.height]="plotH"
+                  [attr.fill]="'url(#sweep-' + band + ')'"></rect>
+            <line [attr.x1]="left" [attr.x2]="left" [attr.y1]="top" [attr.y2]="baseY"></line>
+        </g>
+
+        <text *ngIf="!count" class="none" [attr.x]="left + plotW / 2" [attr.y]="top + plotH / 2" text-anchor="middle">
+            No network picked up on this band
+        </text>
+    </svg>
+</div>

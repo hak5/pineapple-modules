@@ -1,0 +1,108 @@
+<div class="stack" *ngIf="form">
+
+    <mat-card class="card suggestion" *ngIf="fiveGhzSuggestion as s">
+        <mat-icon color="primary">settings_input_antenna</mat-icon>
+        <p>
+            <strong>{{ s.name }}</strong> can receive 5 GHz, so it is probably your MK7AC adapter.
+            Use it as the second radio to watch both bands at the same time.
+        </p>
+        <button mat-flat-button color="primary" (click)="useSuggestion()">Use {{ s.name }}</button>
+    </mat-card>
+
+    <div class="split">
+        <mat-card class="card radio" *ngFor="let radio of form.radios; let i = index" [class.off]="!radio.enabled">
+            <div class="radio-head">
+                <h2 class="card-title">Radio {{ i + 1 }}</h2>
+                <mat-slide-toggle color="primary" [(ngModel)]="radio.enabled">{{ radio.enabled ? 'On' : 'Off' }}</mat-slide-toggle>
+            </div>
+
+            <div class="live" *ngIf="radioStatus(i) as rs">
+                <span class="bulb" [class.err]="rs.error"></span>
+                <span *ngIf="!rs.error">Capturing<ng-container *ngIf="rs.current_channel"> on channel {{ rs.current_channel }}</ng-container></span>
+                <span *ngIf="rs.error">{{ rs.error }}</span>
+            </div>
+            <div class="needs-mon" *ngIf="radioWarning(i)">
+                <span>{{ radioWarning(i) }}</span>
+            </div>
+
+            <mat-form-field class="full">
+                <mat-label>Interface</mat-label>
+                <mat-select [(ngModel)]="radio.iface">
+                    <mat-option value="">None</mat-option>
+                    <mat-option *ngFor="let it of interfaces" [value]="it.name">
+                        {{ it.name }}{{ bandsLabel(it) ? ', ' + bandsLabel(it) : '' }}{{ it.monitor ? ', monitor' : '' }}
+                    </mat-option>
+                    <mat-option *ngIf="radio.iface && !iface(radio.iface)" [value]="radio.iface">{{ radio.iface }} (not found)</mat-option>
+                </mat-select>
+                <mat-hint *ngIf="radioKind(radio.iface) === '2.4'">
+                    Receives 2.4 GHz only (the Pineapple's built-in radio). If Recon is running on it, turn off channel hopping.
+                </mat-hint>
+                <mat-hint *ngIf="radioKind(radio.iface) === '5'">
+                    Receives 5 GHz (an adapter such as the MK7AC). While it listens, Sentinel takes an idle
+                    {{ parentOf(radio.iface) }} down so the radio can change channel.
+                </mat-hint>
+            </mat-form-field>
+
+            <div class="needs-mon" *ngIf="iface(radio.iface) && !iface(radio.iface).monitor">
+                <span>Not in monitor mode yet: saving creates {{ radio.iface }}mon and uses it.</span>
+                <button mat-stroked-button color="primary" (click)="createMonitor(i)">Create {{ radio.iface }}mon</button>
+            </div>
+
+            <mat-slide-toggle color="primary" [(ngModel)]="radio.hopping">Hop between channels</mat-slide-toggle>
+
+            <ng-container *ngIf="radio.hopping">
+                <div class="presets">
+                    <button mat-stroked-button *ngFor="let p of presetsFor(radio.iface)" (click)="applyPreset(i, p.channels)">{{ p.label }}</button>
+                </div>
+                <mat-form-field class="full">
+                    <mat-label>Channels to scan</mat-label>
+                    <input matInput [(ngModel)]="channelText[i]" placeholder="1, 6, 11">
+                    <mat-hint class="warn" *ngIf="radioKind(radio.iface) === '2.4' && has5Channels(i)">
+                        This radio can't receive 5 GHz: those channels will be skipped. Use an adapter such as the MK7AC for 5 GHz.
+                    </mat-hint>
+                    <mat-hint *ngIf="!(radioKind(radio.iface) === '2.4' && has5Channels(i)) && radioStatus(i)?.unusable_channels?.length">
+                        Skipped because the adapter refused them: {{ radioStatus(i).unusable_channels.join(', ') }}
+                    </mat-hint>
+                </mat-form-field>
+            </ng-container>
+        </mat-card>
+    </div>
+
+    <mat-card class="card">
+        <h2 class="card-title">Behaviour</h2>
+        <div class="general-grid">
+            <mat-form-field>
+                <mat-label>Time spent on each channel</mat-label>
+                <input matInput type="number" min="200" max="5000" step="50" [(ngModel)]="form.dwell_ms">
+                <span matSuffix>ms</span>
+                <mat-hint>Shorter scans faster. Longer misses fewer frames on each channel.</mat-hint>
+            </mat-form-field>
+            <div class="toggles">
+                <mat-slide-toggle color="primary" [(ngModel)]="form.track_clients">Track devices connected to networks</mat-slide-toggle>
+                <mat-slide-toggle color="primary" [(ngModel)]="form.track_probes">Record the network names nearby devices search for</mat-slide-toggle>
+                <p class="hint">Both are off by default: they store the MAC addresses of other people's devices and
+                    the networks they look for. Turn them on only for your own lab devices.</p>
+                <mat-slide-toggle color="primary" [(ngModel)]="form.wids_enabled">Intrusion detection</mat-slide-toggle>
+                <p class="hint">Watches for imitations of your networks, deauthentication bursts and forged access points.
+                    Passive: it never answers what it sees.</p>
+                <mat-slide-toggle color="primary" [(ngModel)]="form.autostart">Start monitoring when the module opens</mat-slide-toggle>
+            </div>
+        </div>
+        <mat-card-actions align="end">
+            <button mat-flat-button color="primary" (click)="save()" [disabled]="saving">
+                {{ saving ? 'Saving…' : 'Save settings' }}
+            </button>
+        </mat-card-actions>
+    </mat-card>
+
+    <mat-card class="card" *ngIf="status?.log?.length && !status?.running">
+        <h2 class="card-title">Latest engine messages</h2>
+        <pre class="log">{{ status.log.join('\n') }}</pre>
+    </mat-card>
+
+    <div class="danger">
+        <button mat-button color="warn" (click)="clearData()">
+            <mat-icon>delete_sweep</mat-icon> Clear collected data
+        </button>
+    </div>
+</div>

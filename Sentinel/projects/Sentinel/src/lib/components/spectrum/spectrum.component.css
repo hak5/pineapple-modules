@@ -1,0 +1,105 @@
+:host {
+    display: block;
+}
+
+/* The inset screen: the one place Sentinel goes dark */
+.screen {
+    background: var(--sn-screen);
+    border-radius: 8px;
+    box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    padding: 6px 4px 2px;
+    overflow: hidden;
+}
+
+svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    font-family: inherit;
+    overflow: hidden;
+}
+
+.grid line {
+    stroke: var(--sn-screen-grid);
+    stroke-width: 1;
+}
+
+.grid line.base {
+    stroke: #3a5571;
+}
+
+.grid text,
+.axis text {
+    fill: #7f97ad;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+.axis line {
+    stroke: #3a5571;
+}
+
+.arcs path {
+    stroke-width: 1.6;
+    fill-opacity: 0.16;
+    transition: fill-opacity 0.15s ease;
+    cursor: default;
+}
+
+.arcs path:hover {
+    fill-opacity: 0.42;
+}
+
+.g-good { stroke: var(--sn-good); fill: var(--sn-good); }
+.g-low { stroke: var(--sn-low); fill: var(--sn-low); }
+.g-medium { stroke: var(--sn-medium); fill: var(--sn-medium); }
+.g-high { stroke: var(--sn-high); fill: var(--sn-high); }
+.g-critical { stroke: var(--sn-critical); fill: var(--sn-critical); }
+.g-info { stroke: #9fb3c6; fill: #9fb3c6; }
+
+.labels text {
+    fill: #e6eef5;
+    font-size: 12.5px;
+    font-weight: 500;
+    paint-order: stroke;
+    stroke: var(--sn-screen);
+    stroke-width: 3px;
+    stroke-linejoin: round;
+    pointer-events: none;
+}
+
+.reco line {
+    stroke: var(--sn-marker);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 4;
+}
+
+.reco rect {
+    fill: var(--sn-marker);
+}
+
+.reco text {
+    fill: #2a1d05;
+    font-size: 11.5px;
+    font-weight: 600;
+}
+
+.none {
+    fill: #7f97ad;
+    font-size: 15px;
+}
+
+.sweep line {
+    stroke: #8fd3ff;
+    stroke-opacity: 0.35;
+    stroke-width: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sweep { display: none; }
+}
+
+/* Your networks: a thicker outline, labelled first */
+.arcs path.mine {
+    stroke-width: 3.5;
+}

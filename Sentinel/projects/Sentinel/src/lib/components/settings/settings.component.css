@@ -1,0 +1,132 @@
+.notice {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.notice mat-progress-bar {
+    flex-basis: 100%;
+}
+
+.suggestion {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+}
+
+.suggestion p {
+    flex: 1 1 280px;
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.45;
+}
+
+.radio {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.radio.off mat-form-field,
+.radio.off .presets,
+.radio.off mat-slide-toggle:not(:first-child) {
+    opacity: 0.55;
+}
+
+.radio-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.radio-head .card-title {
+    margin: 0;
+}
+
+.live {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    background: var(--sn-well);
+}
+
+.bulb {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #2fb67f;
+    box-shadow: 0 0 0 3px rgba(47, 182, 127, 0.2);
+}
+
+.bulb.err {
+    background: var(--sn-critical-ink);
+    box-shadow: none;
+}
+
+mat-form-field.full {
+    margin-bottom: 10px;
+}
+
+.needs-mon {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--sn-high-ink);
+}
+
+.presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.general-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 20px;
+}
+
+@media (max-width: 760px) {
+    .general-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.toggles {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 12px;
+}
+
+.log {
+    margin: 0;
+    font-size: 13px;
+    white-space: pre-wrap;
+    opacity: 0.75;
+}
+
+.danger {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.toggles .hint {
+    margin: 2px 0 0;
+    font-size: 12px;
+    line-height: 1.4;
+    opacity: .72;
+}
+
+.warn {
+    color: var(--sn-high-ink);
+}

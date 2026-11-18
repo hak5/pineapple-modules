@@ -1,0 +1,56 @@
+<div class="stack">
+    <p class="refresh-note">Updates every {{ every }} s<ng-container *ngIf="updated"> · last update {{ updated | date:'HH:mm:ss' }}</ng-container></p>
+    <mat-card class="card notice" *ngIf="data && !data.enabled">
+        <strong>Intrusion detection is turned off</strong>
+        <span>Turn it back on in Settings. Listening and the security audit keep working without it.</span>
+        <div><button mat-stroked-button color="primary" (click)="open.emit('settings')">Open settings</button></div>
+    </mat-card>
+
+    <mat-card class="card notice" *ngIf="data?.enabled && !data.my_networks">
+        <strong>Mark your own networks in the Security tab so Sentinel knows what to protect</strong>
+        <span>Until then, Sentinel still watches for deauthentication bursts, forged access points and access points
+            that answer for any network name.</span>
+        <div><button mat-stroked-button color="primary" (click)="open.emit('security')">Open Security</button></div>
+    </mat-card>
+
+    <mat-card class="card counters" *ngIf="data">
+        <div class="counter" *ngFor="let s of severities" [class.zero]="!count(s)">
+            <span class="value num" [ngClass]="'t-' + (s === 'info' ? 'low' : s)">{{ count(s) }}</span>
+            <span class="label">{{ severityLabels[s] }}</span>
+        </div>
+        <div class="counter-actions">
+            <span class="soft">Unread alerts, by severity</span>
+            <button mat-stroked-button [disabled]="!data.unacknowledged" (click)="markAllRead()">Mark all as read</button>
+        </div>
+    </mat-card>
+
+    <mat-card class="card empty" *ngIf="data && !data.events.length">
+        <strong>No alerts</strong>
+        <span>Nothing suspicious was seen. A radio that hops between channels can miss a short burst: no alert does not
+            prove that nothing happened.</span>
+    </mat-card>
+
+    <mat-accordion multi class="list" *ngIf="data?.events.length">
+        <mat-expansion-panel *ngFor="let e of data.events; trackBy: trackEvent" [class.unread]="!e.acknowledged"
+                             [ngClass]="'edge-' + (e.severity === 'info' ? 'low' : e.severity)">
+            <mat-expansion-panel-header>
+                <mat-panel-title>
+                    <span class="grade" [ngClass]="'t-' + (e.severity === 'info' ? 'low' : e.severity)">{{ severityLabels[e.severity] || e.severity }}</span>
+                    <span class="name">{{ e.title }}</span>
+                </mat-panel-title>
+                <mat-panel-description>
+                    <span class="meta">{{ kindLabels[e.kind] || e.kind }}</span>
+                    <span class="meta">{{ ago(e.ts) }}</span>
+                </mat-panel-description>
+            </mat-expansion-panel-header>
+            <dl class="facts">
+                <ng-container *ngIf="e.bssid"><dt>BSSID</dt><dd class="num">{{ e.bssid }}</dd></ng-container>
+                <ng-container *ngFor="let f of fields(e)"><dt>{{ f.label }}</dt><dd>{{ f.value }}</dd></ng-container>
+            </dl>
+            <div class="event-actions" *ngIf="rebaselineKinds.indexOf(e.kind) >= 0 && e.bssid">
+                <button mat-stroked-button (click)="rebaseline(e)">Accept current settings as reference</button>
+                <span class="soft">If you updated or moved this access point yourself.</span>
+            </div>
+        </mat-expansion-panel>
+    </mat-accordion>
+</div>
