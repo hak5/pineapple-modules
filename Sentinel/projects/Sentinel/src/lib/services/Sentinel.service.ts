@@ -45,6 +45,8 @@ export class SentinelService {
 
     getDetection(): Promise<any> { return this.request('get_detection'); }
 
+    setAlertMuted(kind: string, muted: boolean): Promise<any> { return this.request('set_alert_muted', { kind, muted }); }
+
     getMyNetworks(): Promise<any> { return this.request('get_my_networks'); }
     setMyNetwork(bssid: string, mine: boolean): Promise<any> {
         return this.request('set_my_network', { bssid, mine });

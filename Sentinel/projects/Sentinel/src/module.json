@@ -2,7 +2,7 @@
     "name": "Sentinel",
     "title": "Sentinel",
     "description": "Passive Wi-Fi defence suite: live spectrum, channel advisor, WPA3/PMF security audit, your networks and passive intrusion detection. Notifications, drone Remote ID and reports are on the way.",
-    "version": "0.8.2",
+    "version": "0.8.3",
     "author": "Not_Hackerman",
     "firmware_required": "1.0.0",
     "devices": ["wifipineapplemk7"]

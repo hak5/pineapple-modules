@@ -60,6 +60,24 @@ export class DetectionComponent implements OnInit, OnDestroy {
         this.sentinel.ackEvents().then(() => { this.read.emit(); this.load(); }).catch((e) => this.toast(e));
     }
 
+    isMuted(kind: string): boolean {
+        return !!this.data && (this.data.muted || []).indexOf(kind) >= 0;
+    }
+
+    /** Alert types that can be muted (not the "alerts suppressed" notice). */
+    canMute(kind: string): boolean {
+        return kind !== 'suppressed' && !!this.kindLabels[kind];
+    }
+
+    setMuted(kind: string, muted: boolean): void {
+        this.sentinel.setAlertMuted(kind, muted).then(() => {
+            this.toast(muted ? `"${this.kindLabels[kind]}" muted: still recorded, but already marked as read`
+                             : `"${this.kindLabels[kind]}" alerts are back`);
+            this.read.emit();
+            this.load();
+        }).catch((err) => this.toast(err));
+    }
+
     rebaseline(e: any): void {
         this.sentinel.rebaselineMyNetwork(e.bssid)
             .then(() => this.toast('Current settings accepted as the reference'))

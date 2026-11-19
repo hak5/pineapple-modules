@@ -92,13 +92,15 @@ def connect(path, readonly=False):
     return conn
 
 
-def add_event(conn, source, kind, severity, title, details=None, bssid=None, ts=None):
-    """The shared event bus: every tab writes its alerts here."""
+def add_event(conn, source, kind, severity, title, details=None, bssid=None, ts=None,
+              acknowledged=False):
+    """The shared event bus: every tab writes its alerts here. `acknowledged`: written as
+    already read (a muted alert type, see muted.py)."""
     conn.execute(
-        'INSERT INTO events (ts, source, kind, severity, title, details, bssid) '
-        'VALUES (?, ?, ?, ?, ?, ?, ?)',
+        'INSERT INTO events (ts, source, kind, severity, title, details, bssid, acknowledged) '
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
         (ts or time.time(), source, kind, severity, title,
-         json.dumps(details) if details is not None else None, bssid))
+         json.dumps(details) if details is not None else None, bssid, 1 if acknowledged else 0))
 
 
 def set_meta(conn, values):

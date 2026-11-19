@@ -26,6 +26,7 @@ import collections
 import os
 
 import dot11
+import muted
 import mynets
 import store
 
@@ -96,6 +97,7 @@ class Detector(object):
 
     def __init__(self, conn, my_networks_path, local_bssids, track_clients):
         self.path = my_networks_path
+        self.muted = muted.Cache(os.path.join(os.path.dirname(my_networks_path) or '.', muted.FILENAME))
         self.local = set(local_bssids or ())
         self.track_clients = track_clients
         self.pending = []
@@ -352,10 +354,11 @@ class Detector(object):
         if not self.pending:
             return
         pending, self.pending = self.pending, []
+        silenced = self.muted.get()
         try:
             with conn:
                 for ts, kind, severity, bssid, title, details in pending:
                     store.add_event(conn, 'wids', kind, severity, title, details=details,
-                                    bssid=bssid, ts=ts)
+                                    bssid=bssid, ts=ts, acknowledged=kind in silenced)
         except Exception:
             self.errors += 1

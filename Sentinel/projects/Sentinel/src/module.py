@@ -805,9 +805,53 @@ def get_detection(request: Request):
             'by_severity': by_severity,
             'my_networks': len(mine),
             'enabled': enabled,
+            'muted': silenced,
         }
+    silenced = sorted(_muted())
     return _with_db(build, {'events': [], 'unacknowledged': 0, 'by_severity': {},
-                            'my_networks': len(mine), 'enabled': enabled})
+                            'my_networks': len(mine), 'enabled': enabled, 'muted': silenced})
+
+
+def _muted_path():
+    import muted
+    return os.path.join(DATA_DIR, muted.FILENAME)
+
+
+def _muted():
+    import muted
+    return muted.load(_muted_path())
+
+
+@module.handles_action('set_alert_muted')
+def set_alert_muted(request: Request):
+    """Mute or unmute one type of alert. Muting also marks its unread alerts as read."""
+    import muted
+    kind = getattr(request, 'kind', None)
+    if kind not in muted.KINDS:
+        return 'Unknown alert type', False
+    on = getattr(request, 'muted', None)
+    if not isinstance(on, bool):
+        return 'muted must be true or false', False
+    kinds = _muted()
+    if on:
+        kinds.add(kind)
+    else:
+        kinds.discard(kind)
+    try:
+        _ensure_data_dir()
+        saved = muted.save(_muted_path(), kinds)
+    except (IOError, OSError) as e:
+        return 'Could not save the setting: %s' % e, False
+    if on and os.path.exists(DB_PATH):
+        import store
+        conn = store.connect(DB_PATH)
+        try:
+            with conn:
+                conn.execute("UPDATE events SET acknowledged = 1 "
+                             "WHERE source = 'wids' AND kind = ? AND acknowledged = 0", (kind,))
+        finally:
+            conn.close()
+    return {'muted': saved}
 
 
 # --------------------------------------------------------------------------

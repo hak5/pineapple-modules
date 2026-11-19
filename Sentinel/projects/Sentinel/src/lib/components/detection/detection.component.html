@@ -22,6 +22,13 @@
             <span class="soft">Unread alerts, by severity</span>
             <button mat-stroked-button [disabled]="!data.unacknowledged" (click)="markAllRead()">Mark all as read</button>
         </div>
+        <div class="muted-line" *ngIf="data.muted?.length">
+            <span class="soft">Muted, recorded but marked as read:</span>
+            <span class="muted-kind" *ngFor="let k of data.muted">
+                {{ kindLabels[k] || k }}
+                <button mat-button color="primary" (click)="setMuted(k, false)">Unmute</button>
+            </span>
+        </div>
     </mat-card>
 
     <mat-card class="card empty" *ngIf="data && !data.events.length">
@@ -39,7 +46,7 @@
                     <span class="name">{{ e.title }}</span>
                 </mat-panel-title>
                 <mat-panel-description>
-                    <span class="meta">{{ kindLabels[e.kind] || e.kind }}</span>
+                    <span class="meta">{{ kindLabels[e.kind] || e.kind }}<ng-container *ngIf="isMuted(e.kind)"> (muted)</ng-container></span>
                     <span class="meta">{{ ago(e.ts) }}</span>
                 </mat-panel-description>
             </mat-expansion-panel-header>
@@ -50,6 +57,11 @@
             <div class="event-actions" *ngIf="rebaselineKinds.indexOf(e.kind) >= 0 && e.bssid">
                 <button mat-stroked-button (click)="rebaseline(e)">Accept current settings as reference</button>
                 <span class="soft">If you updated or moved this access point yourself.</span>
+            </div>
+            <div class="event-actions" *ngIf="canMute(e.kind)">
+                <button mat-stroked-button *ngIf="!isMuted(e.kind)" (click)="setMuted(e.kind, true)">Mute "{{ kindLabels[e.kind] }}" alerts</button>
+                <button mat-stroked-button *ngIf="isMuted(e.kind)" (click)="setMuted(e.kind, false)">Unmute "{{ kindLabels[e.kind] }}" alerts</button>
+                <span class="soft">Muted alerts are still recorded here, but no longer count as unread.</span>
             </div>
         </mat-expansion-panel>
     </mat-accordion>

@@ -9,6 +9,9 @@ running at home as a sentinel for your Wi-Fi.
 - Passive intrusion detection: someone copying your network's name, deauthentication bursts, floods of fake
   access points, an access point answering for any name, and a few more
 
+A type of alert that is just noise for you (say, your router changing channel) can be muted: still recorded,
+but no longer counted as unread.
+
 It only listens: it never transmits, and by default it doesn't keep any info about other people's devices.
 
 It needs `python3-sqlite3`. If it's missing, the module shows a button to install it with opkg (the Pineapple

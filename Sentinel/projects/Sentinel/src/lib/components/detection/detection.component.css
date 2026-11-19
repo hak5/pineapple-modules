@@ -104,3 +104,21 @@
     opacity: 0.6;
     text-align: right;
 }
+
+.muted-line {
+    flex: 1 1 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 16px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--sn-line);
+    font-size: 13px;
+}
+
+.muted-kind {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
