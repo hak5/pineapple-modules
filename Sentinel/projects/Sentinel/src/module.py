@@ -812,6 +812,17 @@ def get_detection(request: Request):
                             'my_networks': len(mine), 'enabled': enabled, 'muted': silenced})
 
 
+@module.handles_action('get_report')
+def get_report(request: Request):
+    """The Reports tab: the last 1, 7 or 30 days."""
+    import report
+    days = getattr(request, 'days', 7)
+    if days not in (1, 7, 30) or isinstance(days, bool):
+        return 'days must be 1, 7 or 30', False
+    return _with_db(lambda c: report.build(c, _mynets_path(), days=days), None) or {
+        'empty': True, 'days': days}
+
+
 def _muted_path():
     import muted
     return os.path.join(DATA_DIR, muted.FILENAME)

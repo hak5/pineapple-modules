@@ -83,9 +83,7 @@
                     <lib-sentinel-coming-soon *ngSwitchCase="'drones'" title="Nearby drones"
                         text="Drones broadcasting their Remote ID over Wi-Fi will show up here with their ID, position and altitude.">
                     </lib-sentinel-coming-soon>
-                    <lib-sentinel-coming-soon *ngSwitchCase="'reports'" title="Reports"
-                        text="A clean audit report, in HTML or PDF, will bring together channels, network security and alerts.">
-                    </lib-sentinel-coming-soon>
+                    <lib-sentinel-reports *ngSwitchCase="'reports'" (open)="open($event)"></lib-sentinel-reports>
                 </div>
             </ng-template>
         </mat-tab>

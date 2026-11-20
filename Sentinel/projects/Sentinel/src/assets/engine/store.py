@@ -59,6 +59,12 @@ CREATE TABLE IF NOT EXISTS events (
     details TEXT, bssid TEXT, acknowledged INTEGER DEFAULT 0
 );
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT);
+CREATE TABLE IF NOT EXISTS daily (
+    day TEXT PRIMARY KEY, ts REAL,
+    my_score INTEGER, my_marked INTEGER, my_seen INTEGER, my_worst TEXT,
+    area_score INTEGER, area_networks INTEGER,
+    alerts INTEGER, alerts_serious INTEGER, deauth INTEGER
+);
 CREATE INDEX IF NOT EXISTS idx_aps_ssid ON aps(ssid);
 CREATE INDEX IF NOT EXISTS idx_events_ts ON events(ts);
 CREATE INDEX IF NOT EXISTS idx_chan_minute ON channel_stats(minute);
@@ -400,5 +406,6 @@ def apply_retention(conn, hours_stats=48, days_devices=30, max_events=5000, now=
         conn.execute('DELETE FROM probes WHERE last_seen < ?', (cutoff,))
         conn.execute('DELETE FROM ap_fingerprints WHERE last_seen < ?', (cutoff,))
         conn.execute('DELETE FROM ap_channels WHERE last_seen < ?', (cutoff,))
+        conn.execute('DELETE FROM daily WHERE ts < ?', (now - 400 * 86400,))
         conn.execute('DELETE FROM events WHERE id NOT IN '
                      '(SELECT id FROM events ORDER BY id DESC LIMIT ?)', (max_events,))

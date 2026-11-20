@@ -55,6 +55,7 @@ RADIO_RETRY = 30.0           # seconds between two attempts to reopen a lost rad
 # dropped and counted. A flood then costs reading the socket, not decoding every frame.
 FRAME_BUDGET_SOFT = 800
 FRAME_BUDGET_HARD = 2000
+DAILY_INTERVAL = 3600.0       # seconds between two updates of today's report row (report.py)
 SUMMARY_INTERVAL = 60.0      # seconds between two dashboard summaries (summary.py)
 NICENESS = 10                # live capture runs below the web interface
 BAD_CHANNEL_RETRY = 300.0    # seconds before skipped channels are tried again
@@ -428,6 +429,14 @@ class Engine(object):
         with self.conn:
             store.set_meta(self.conn, {'engine': status})
 
+    def record_day(self, now):
+        """Today's row for the Reports tab. Never raises: it must not stop listening."""
+        try:
+            import report
+            report.record_day(self.conn, self.my_networks_path, now)
+        except Exception as e:
+            self._log_once('daily', 'daily report row not written: %s' % e)
+
     def write_summary(self):
         """The dashboard summary (summary.py). Never raises: it must not stop listening."""
         if not self.summary_path:
@@ -466,6 +475,7 @@ class Engine(object):
         last_flush = time.time()
         last_retention = 0.0
         last_summary = 0.0
+        last_daily = time.time() - DAILY_INTERVAL + 300   # first row 5 min after starting
         try:
             while self.running:
                 live = [r for r in self.radios if r.sock is not None]
@@ -509,6 +519,9 @@ class Engine(object):
                     if now - last_summary >= SUMMARY_INTERVAL:
                         last_summary = now
                         self.write_summary()
+                    if now - last_daily >= DAILY_INTERVAL:
+                        last_daily = now
+                        self.record_day(now)
                 except sqlite3.Error as e:
                     # Database full, locked or damaged: drop this batch and keep listening
                     # rather than stop the probe; the next cycle tries again.

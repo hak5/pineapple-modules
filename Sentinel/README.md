@@ -9,6 +9,9 @@ running at home as a sentinel for your Wi-Fi.
 - Passive intrusion detection: someone copying your network's name, deauthentication bursts, floods of fake
   access points, an access point answering for any name, and a few more
 
+A Reports tab sums up the last 24 hours, 7 or 30 days (scores day by day, what to change on your router, alerts,
+channels), and exports it as a designed HTML page, PDF, CSV or Markdown.
+
 A type of alert that is just noise for you (say, your router changing channel) can be muted: still recorded,
 but no longer counted as unread.
 
