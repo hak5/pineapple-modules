@@ -1,0 +1,28 @@
+<mat-card class="card notice" *ngIf="status && state !== 'ok'">
+    <ng-container [ngSwitch]="state">
+        <div *ngSwitchCase="'installing'">
+            <h2 class="card-title">Installing python3-sqlite3…</h2>
+            <p class="card-note">The Pineapple is downloading the package. This takes a minute.</p>
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        </div>
+        <div *ngSwitchCase="'failed'">
+            <h2 class="card-title">python3-sqlite3 could not be installed</h2>
+            <p class="card-note error">{{ deps.error }}</p>
+            <p class="card-note">No Internet on the Pineapple? Install it offline with install.sh or tools/fetch_ipk.py (see the README).</p>
+            <button mat-flat-button color="primary" (click)="install()">Try again</button>
+        </div>
+        <div *ngSwitchDefault>
+            <h2 class="card-title">A dependency is missing</h2>
+            <p class="card-note">
+                Sentinel stores what it observes with SQLite: it needs the python3-sqlite3 package. Installing it from
+                here needs Internet access on the Pineapple. Without Internet, use install.sh or tools/fetch_ipk.py (see the README).
+            </p>
+            <button mat-flat-button color="primary" (click)="install()">Install python3-sqlite3</button>
+        </div>
+    </ng-container>
+</mat-card>
+
+<div class="alert-line" *ngIf="deps.warning">
+    <mat-icon>warning</mat-icon>
+    <span>{{ deps.warning }}</span>
+</div>

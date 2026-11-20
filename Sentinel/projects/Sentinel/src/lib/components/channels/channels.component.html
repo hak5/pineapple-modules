@@ -1,0 +1,71 @@
+<div class="stack">
+    <p class="refresh-note">Updates every {{ every }} s<ng-container *ngIf="updated"> · last update {{ updated | date:'HH:mm:ss' }}</ng-container></p>
+    <div class="toolbar">
+        <mat-button-toggle-group [(ngModel)]="band" aria-label="Band">
+            <mat-button-toggle value="2.4">2.4 GHz</mat-button-toggle>
+            <mat-button-toggle value="5">5 GHz</mat-button-toggle>
+        </mat-button-toggle-group>
+        <mat-button-toggle-group [ngModel]="window" (ngModelChange)="setWindow($event)" aria-label="Time range">
+            <mat-button-toggle *ngFor="let w of windows" [value]="w.value">{{ w.label }}</mat-button-toggle>
+        </mat-button-toggle-group>
+    </div>
+
+    <mat-card class="card">
+        <div class="bench">
+            <lib-sentinel-spectrum [aps]="aps" [band]="band" [recommended]="best" [live]="live"
+                                   [height]="320" [labels]="9"></lib-sentinel-spectrum>
+        </div>
+    </mat-card>
+
+    <mat-card class="card verdict" *ngIf="best">
+        <div class="verdict-ch num">{{ best }}</div>
+        <div>
+            <h2 class="card-title">Channel {{ best }} is the quietest</h2>
+            <p class="card-note" *ngIf="band === '2.4'">
+                In 2.4 GHz only channels 1, 6 and 11 don't overlap: any other channel picks up
+                interference from two groups of neighbours instead of one.
+            </p>
+            <p class="card-note" *ngIf="band === '5'">
+                Non-DFS channels compared at 20 MHz width. If your router uses 80 MHz,
+                pick the group of four channels that contains this one.
+            </p>
+            <mat-chip-list aria-label="Interference per candidate channel">
+                <mat-chip *ngFor="let s of candidateScores()" [selected]="s.channel === best" color="primary" [disableRipple]="true">
+                    Channel {{ s.channel }}: interference {{ s.score }}
+                </mat-chip>
+            </mat-chip-list>
+        </div>
+    </mat-card>
+
+    <mat-card class="card" *ngIf="rows.length">
+        <h2 class="card-title">Channel usage</h2>
+        <div class="table">
+            <div class="row head">
+                <span>Channel</span>
+                <span>Access points</span>
+                <span class="r">Traffic</span>
+                <span class="r">Strongest signal</span>
+                <span class="nets">Networks</span>
+            </div>
+            <div class="row" *ngFor="let r of rows; trackBy: trackCh" [class.is-best]="r.channel === best">
+                <span class="ch num">{{ r.channel }}</span>
+                <span class="aps">
+                    <mat-progress-bar mode="determinate" [value]="100 * r.aps / maxAps"></mat-progress-bar>
+                    <span class="num">{{ r.aps }}</span>
+                </span>
+                <span class="r num">{{ r.utilization }} %</span>
+                <span class="r num">{{ r.strongest_rssi !== null ? r.strongest_rssi + ' dBm' : '—' }}</span>
+                <span class="nets soft">{{ r.ssids.join(', ') || '—' }}</span>
+            </div>
+        </div>
+        <p class="footnote soft">
+            Traffic is relative to the busiest channel in the period. A radio that hops between channels
+            shows trends, not absolute measurements.
+        </p>
+    </mat-card>
+
+    <mat-card class="card empty" *ngIf="report && !rows.length">
+        <strong>Nothing picked up on this band</strong>
+        <span>Check in Settings that a radio is scanning the {{ band }} GHz channels.</span>
+    </mat-card>
+</div>

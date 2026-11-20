@@ -1,0 +1,128 @@
+<div class="stack">
+    <div class="toolbar">
+        <mat-button-toggle-group [ngModel]="days" (ngModelChange)="setDays($event)" aria-label="Period">
+            <mat-button-toggle *ngFor="let p of periods" [value]="p.value">{{ p.label }}</mat-button-toggle>
+        </mat-button-toggle-group>
+        <span class="soft" *ngIf="data?.generated_at">Made {{ data.generated_at * 1000 | date:'MMM d, HH:mm' }}, Pineapple's clock</span>
+        <span class="spacer"></span>
+        <div class="exports">
+            <button mat-stroked-button [disabled]="!data || data.empty" (click)="print()">
+                <mat-icon>print</mat-icon> Print or PDF
+            </button>
+            <button mat-stroked-button [disabled]="!data || data.empty" (click)="downloadHtml()">
+                <mat-icon>web</mat-icon> HTML
+            </button>
+            <button mat-stroked-button [disabled]="!data || data.empty" (click)="downloadCsv()">
+                <mat-icon>table_chart</mat-icon> CSV
+            </button>
+            <button mat-stroked-button [disabled]="!data || data.empty" (click)="downloadMarkdown()">
+                <mat-icon>description</mat-icon> Markdown
+            </button>
+        </div>
+    </div>
+
+    <mat-card class="card empty" *ngIf="data?.empty">
+        <strong>No report yet</strong>
+        <span>Start monitoring: the report fills in as Sentinel listens.</span>
+    </mat-card>
+
+    <ng-container *ngIf="data && !data.empty">
+        <mat-card class="card">
+            <div class="card-title">Summary of {{ periodLabel }}</div>
+            <div class="figs">
+                <div class="fig">
+                    <span class="value num">{{ data.mine.score !== null ? data.mine.score : '–' }}<small>/100</small></span>
+                    <span class="label">your networks, {{ data.mine.seen }} of {{ data.mine.marked }} seen<ng-container *ngIf="data.mine.worst">,
+                        worst level <span [ngClass]="'t-' + data.mine.worst">{{ severityLabels[data.mine.worst] }}</span></ng-container></span>
+                </div>
+                <div class="fig">
+                    <span class="value num">{{ data.area.score !== null ? data.area.score : '–' }}<small>/100</small></span>
+                    <span class="label">neighbourhood, {{ data.area.total }} networks</span>
+                </div>
+                <div class="fig">
+                    <span class="value num" [class.t-high]="serious">{{ data.alerts.total }}</span>
+                    <span class="label">alerts, {{ serious }} serious</span>
+                </div>
+                <div class="fig">
+                    <span class="value num">{{ data.deauth.count }}</span>
+                    <span class="label">deauthentication frames, last {{ data.deauth.hours }} h</span>
+                </div>
+            </div>
+            <div class="trend" *ngIf="trendDays >= 2; else noTrend">
+                <span class="soft">Your networks' score, one point per day</span>
+                <div class="chart">
+                    <div class="scale soft num"><span>100</span><span>50</span><span>0</span></div>
+                    <svg viewBox="0 0 560 80" preserveAspectRatio="none" aria-hidden="true">
+                        <line x1="0" y1="0.5" x2="560" y2="0.5" class="grid"></line>
+                        <line x1="0" y1="40" x2="560" y2="40" class="grid"></line>
+                        <polyline [attr.points]="trendPoints('area_score')" class="area"></polyline>
+                        <polyline [attr.points]="trendPoints('my_score')" class="mine"></polyline>
+                    </svg>
+                    <span></span>
+                    <div class="days soft num"><span>{{ data.trend[0].day }}</span><span>{{ data.trend[data.trend.length - 1].day }}</span></div>
+                </div>
+                <span class="soft legend"><i class="k-mine"></i> your networks <i class="k-area"></i> neighbourhood</span>
+            </div>
+            <ng-template #noTrend>
+                <p class="soft">The trend shows up after two days of listening: Sentinel keeps one point per day.</p>
+            </ng-template>
+        </mat-card>
+
+        <mat-card class="card">
+            <div class="card-title">What to change</div>
+            <p class="soft" *ngIf="!data.mine.marked">Mark your own networks in the Security tab to get advice for them.
+                <button mat-button color="primary" (click)="open.emit('security')">Open Security</button></p>
+            <p class="soft" *ngIf="data.mine.marked && !data.mine.todo.length">Nothing to change on your networks.</p>
+            <div class="todo" *ngFor="let t of data.mine.todo">
+                <span class="grade" [ngClass]="'t-' + t.severity">{{ severityLabels[t.severity] }}</span>
+                <div><div>{{ t.advice }}</div><div class="soft">{{ t.networks.join(', ') }}</div></div>
+            </div>
+        </mat-card>
+
+        <mat-card class="card" *ngIf="data.mine.networks.length || data.mine.not_seen.length">
+            <div class="card-title">Your networks</div>
+            <div class="table">
+                <div class="tr head soft"><span>Network</span><span>Band</span><span>Security</span><span>PMF</span><span>WPS</span><span>Level</span></div>
+                <div class="tr" *ngFor="let n of data.mine.networks">
+                    <span>{{ n.ssid || '(hidden name)' }}<small class="soft num"> {{ n.bssid }}</small></span>
+                    <span>{{ bandLabel(n.band) }}, ch. {{ n.channel }}</span>
+                    <span>{{ n.security }}</span>
+                    <span>{{ n.pmf || 'none' }}</span>
+                    <span>{{ n.wps ? 'on' : 'off' }}</span>
+                    <span class="grade" [ngClass]="'t-' + n.grade">{{ severityLabels[n.grade] || n.grade }}</span>
+                </div>
+            </div>
+            <p class="soft" *ngIf="data.mine.not_seen.length">Not seen in this period:
+                <ng-container *ngFor="let x of data.mine.not_seen; let last = last">{{ x.ssid || x.bssid }}{{ last ? '.' : ', ' }}</ng-container></p>
+        </mat-card>
+
+        <mat-card class="card">
+            <div class="card-title">Alerts</div>
+            <p class="soft" *ngIf="!data.alerts.total">No alert in this period.</p>
+            <ng-container *ngIf="data.alerts.total">
+                <div class="kinds">
+                    <span *ngFor="let k of kinds"><b class="num">{{ k.count }}</b> {{ kindLabels[k.kind] || k.kind }}</span>
+                </div>
+                <div class="soft sub">The most serious</div>
+                <div class="alert" *ngFor="let a of data.alerts.top">
+                    <span class="grade" [ngClass]="'t-' + (a.severity === 'info' ? 'low' : a.severity)">{{ severityLabels[a.severity] }}</span>
+                    <span>{{ a.title }}</span>
+                    <span class="soft num">{{ a.ts * 1000 | date:'MMM d, HH:mm' }}</span>
+                </div>
+            </ng-container>
+        </mat-card>
+
+        <mat-card class="card">
+            <div class="card-title">Channels</div>
+            <div class="channels">
+                <div *ngFor="let b of ['2.4', '5']">
+                    <b>{{ bandLabel(b) }}</b>
+                    <span>best channel now: <span class="num">{{ best(b) !== null ? best(b) : 'not known yet' }}</span></span>
+                    <span class="soft">yours: {{ yours(b).length ? yours(b).join(', ') : 'none' }}</span>
+                </div>
+            </div>
+            <p class="soft">Based on the last hour. Sentinel only listens, and channels are sampled while hopping: a very
+                short event can be missed.</p>
+        </mat-card>
+    </ng-container>
+</div>

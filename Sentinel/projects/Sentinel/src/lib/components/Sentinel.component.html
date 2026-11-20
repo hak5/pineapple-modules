@@ -1,0 +1,91 @@
+<div class="sn" #root [class.sn-dark]="dark">
+    <!-- Hidden Material elements used to read the active Pineapple theme -->
+    <div class="probes" aria-hidden="true">
+        <mat-card #probeCard></mat-card>
+        <button mat-flat-button color="primary" #probePrimary tabindex="-1"></button>
+    </div>
+
+    <mat-card class="card status-card">
+        <div class="status-row">
+            <div class="identity">
+                <svg class="mark" viewBox="0 0 48 48" aria-hidden="true">
+                    <path class="shield" d="M24,3,7,9.6V22.4c0,10.6,7.2,20,17,22.6,9.8-2.6,17-12,17-22.6V9.6Z"></path>
+                    <path class="waves" d="M15.6,22.6a11.9,11.9,0,0,1,16.8,0M19.3,26.3a6.6,6.6,0,0,1,9.4,0"></path>
+                    <circle class="dot" cx="24" cy="31" r="2.4"></circle>
+                </svg>
+                <div>
+                    <div class="lamp" [ngClass]="'lamp-' + (degraded ? 'wait' : state)" role="status">
+                        <span class="bulb"></span>{{ stateLabel }}
+                    </div>
+                    <div class="radios" *ngIf="radios.length">
+                        <span *ngFor="let r of radios; let last = last" [class.radio-err]="r.error">
+                            {{ r.iface }}<ng-container *ngIf="r.current_channel"> on channel {{ r.current_channel }}</ng-container><ng-container *ngIf="r.error"> (error)</ng-container><ng-container *ngIf="!last">, </ng-container>
+                        </span>
+                        <span class="rate num">, {{ status.engine.frames_per_sec }} frames/s</span>
+                    </div>
+                    <div class="radios" *ngIf="!radios.length && status">{{ stateHint }}</div>
+                </div>
+            </div>
+
+            <button mat-flat-button [color]="status?.running ? undefined : 'primary'"
+                    [disabled]="busy || !canStart" (click)="toggleEngine()">
+                <mat-icon>{{ status?.running ? 'stop' : 'play_arrow' }}</mat-icon>
+                {{ status?.running ? 'Stop monitoring' : 'Start monitoring' }}
+            </button>
+        </div>
+
+        <div class="alert-line" *ngIf="status?.engine?.last_error && state !== 'wait'">
+            <mat-icon>error_outline</mat-icon>
+            <span>{{ status.engine.last_error }}</span>
+            <button mat-button color="warn" (click)="open('settings')">Open settings</button>
+        </div>
+        <div class="alert-line" *ngFor="let problem of radioProblems">
+            <mat-icon>error_outline</mat-icon>
+            <span>{{ problem }}</span>
+            <button mat-button color="warn" (click)="open('settings')">Open settings</button>
+        </div>
+    </mat-card>
+
+    <p class="recon-note" *ngIf="sharesRecon">
+        <mat-icon>warning</mat-icon>
+        <span>Don't run Recon while Sentinel is listening: both use the same radios, so Recon misses networks.
+        Stop monitoring before a Recon scan.</span>
+        <button mat-icon-button class="note-close" (click)="hideReconNote()"
+                aria-label="Hide this warning" title="Hide this warning">
+            <mat-icon>close</mat-icon>
+        </button>
+    </p>
+    <p class="clock-note" *ngIf="clockDrift">
+        The Pineapple's clock is {{ clockDrift }} this computer's (no Internet to set it).
+        Times are shown on the Pineapple's clock, so "x min ago" stays right.
+    </p>
+
+    <lib-sentinel-dependency-notice [status]="status" (changed)="refresh()"></lib-sentinel-dependency-notice>
+
+    <mat-tab-group [(selectedIndex)]="tabIndex" animationDuration="0ms" class="tabs">
+        <mat-tab *ngFor="let t of tabs">
+            <ng-template mat-tab-label>
+                <span [class.soon]="t.soon" *ngIf="t.id !== 'wids' || !unread">{{ t.label }}</span>
+                <span *ngIf="t.id === 'wids' && unread" [matBadge]="unread > 99 ? '99+' : unread" matBadgeOverlap="false"
+                      matBadgeColor="warn" matBadgeSize="small" [attr.aria-label]="'Detection, ' + unread + ' unread alerts'">{{ t.label }}</span>
+            </ng-template>
+            <ng-template matTabContent>
+                <div class="tab-body" [ngSwitch]="t.id">
+                    <lib-sentinel-overview *ngSwitchCase="'overview'" [status]="status" (open)="open($event)"></lib-sentinel-overview>
+                    <lib-sentinel-channels *ngSwitchCase="'channels'" [status]="status"></lib-sentinel-channels>
+                    <lib-sentinel-audit *ngSwitchCase="'security'" [status]="status"></lib-sentinel-audit>
+                    <lib-sentinel-settings *ngSwitchCase="'settings'" [status]="status" (changed)="refresh()"></lib-sentinel-settings>
+
+                    <lib-sentinel-detection *ngSwitchCase="'wids'" [status]="status" (open)="open($event)" (read)="refresh()"></lib-sentinel-detection>
+                    <lib-sentinel-coming-soon *ngSwitchCase="'notifications'" title="Notifications"
+                        text="Alerts will reach your phone through Discord, Telegram, ntfy or a webhook, filtered by severity.">
+                    </lib-sentinel-coming-soon>
+                    <lib-sentinel-coming-soon *ngSwitchCase="'drones'" title="Nearby drones"
+                        text="Drones broadcasting their Remote ID over Wi-Fi will show up here with their ID, position and altitude.">
+                    </lib-sentinel-coming-soon>
+                    <lib-sentinel-reports *ngSwitchCase="'reports'" (open)="open($event)"></lib-sentinel-reports>
+                </div>
+            </ng-template>
+        </mat-tab>
+    </mat-tab-group>
+</div>
