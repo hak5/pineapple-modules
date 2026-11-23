@@ -56,6 +56,7 @@ RADIO_RETRY = 30.0           # seconds between two attempts to reopen a lost rad
 FRAME_BUDGET_SOFT = 800
 FRAME_BUDGET_HARD = 2000
 DAILY_INTERVAL = 3600.0       # seconds between two updates of today's report row (report.py)
+TIMEOUT_NOTIFY_STOP = 3       # seconds to send the last message when listening stops (the module waits 5 s)
 SUMMARY_INTERVAL = 60.0      # seconds between two dashboard summaries (summary.py)
 NICENESS = 10                # live capture runs below the web interface
 BAD_CHANNEL_RETRY = 300.0    # seconds before skipped channels are tried again
@@ -262,6 +263,8 @@ class Engine(object):
         self.my_networks_path = (my_networks_path
                                  or os.path.join(os.path.dirname(db_path) or '.', 'my_networks.json'))
         self.summary_path = summary_path  # None: no summary file (pcap replay, tests)
+        self.notifier = None              # notify.Notifier while listening live, when notify=True
+        self.notify = summary_path is not None
 
         # Intrusion detection: reads each 5 s window before it is written
         self.detector = None
@@ -344,6 +347,9 @@ class Engine(object):
             radio.iface, error, RADIO_RETRY)
         radio.retry_at = now + RADIO_RETRY
         self._log_once('radio-' + radio.iface, radio.error)
+        if self.notifier:
+            self.notifier.status('%s stopped working (%s). Sentinel tries to reopen it every %d s.'
+                                 % (radio.iface, error, RADIO_RETRY))
 
     def _retry(self, radio, now):
         try:
@@ -357,6 +363,8 @@ class Engine(object):
         radio.error = None
         radio.retry_at = None
         self._log_once('radio-' + radio.iface, '%s is back' % radio.iface)
+        if self.notifier:
+            self.notifier.status('%s is working again.' % radio.iface)
         return True
 
     def _handle(self, buf, ts):
@@ -422,6 +430,7 @@ class Engine(object):
             'iface': first.get('iface'),
             'current_channel': first.get('current_channel'),
             'last_error': self.last_error,
+            'notify_error': self.notifier.last_error if self.notifier else None,
         }
         if extra:
             status.update(extra)
@@ -472,6 +481,14 @@ class Engine(object):
         self.last_error = ' ; '.join(errors) or None
 
         self.write_status()
+        if self.notify:
+            try:
+                import notify
+                self.notifier = notify.Notifier(self.db_path, os.path.dirname(self.my_networks_path) or '.')
+                self.notifier.start()
+            except Exception as e:  # notifications must never stop listening
+                self.notifier = None
+                self._log_once('notify', 'notifications not started: %s' % e)
         last_flush = time.time()
         last_retention = 0.0
         last_summary = 0.0
@@ -531,6 +548,12 @@ class Engine(object):
                     if self.db_errors <= 3:
                         print('database error: %s' % e, file=sys.stderr)
         finally:
+            # First the last message: the module kills the engine 5 s after asking it to stop,
+            # and the steps below (flush, status, summary) can take seconds on the Mark VII.
+            if self.notifier:
+                self.notifier.status('Sentinel stopped listening.')
+                self.notifier.stop(timeout=TIMEOUT_NOTIFY_STOP)
+                self.notifier = None
             for r in self.radios:
                 r.close()
             self.flush_window()

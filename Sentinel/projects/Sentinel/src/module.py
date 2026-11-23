@@ -823,6 +823,46 @@ def get_report(request: Request):
         'empty': True, 'days': days}
 
 
+def _notify_path():
+    import notify
+    return os.path.join(DATA_DIR, notify.FILENAME)
+
+
+@module.handles_action('get_notify')
+def get_notify(request: Request):
+    """The ntfy settings, without the access token."""
+    import notify
+    return notify.public(notify.load(_notify_path()))
+
+
+@module.handles_action('save_notify')
+def save_notify(request: Request):
+    import notify
+    cfg, error = notify.validate(getattr(request, 'settings', None), notify.load(_notify_path()))
+    if error:
+        return error, False
+    try:
+        _ensure_data_dir()
+        notify.save(_notify_path(), cfg)
+    except (IOError, OSError) as e:
+        return 'Could not save the settings: %s' % e, False
+    return notify.public(cfg)
+
+
+@module.handles_action('test_notify')
+def test_notify(request: Request):
+    """Send one test message with the saved settings."""
+    import notify
+    cfg = notify.load(_notify_path())
+    if not cfg['topic']:
+        return 'Save a server and a topic first', False
+    error = notify.send(cfg, 'Sentinel: test', 'Test message from Sentinel on your WiFi Pineapple. '
+                        'If you can read this, notifications work.', priority=3, tags='white_check_mark')
+    if error:
+        return error, False
+    return {'sent': True}
+
+
 def _muted_path():
     import muted
     return os.path.join(DATA_DIR, muted.FILENAME)

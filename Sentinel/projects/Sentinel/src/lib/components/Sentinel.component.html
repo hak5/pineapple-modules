@@ -77,9 +77,7 @@
                     <lib-sentinel-settings *ngSwitchCase="'settings'" [status]="status" (changed)="refresh()"></lib-sentinel-settings>
 
                     <lib-sentinel-detection *ngSwitchCase="'wids'" [status]="status" (open)="open($event)" (read)="refresh()"></lib-sentinel-detection>
-                    <lib-sentinel-coming-soon *ngSwitchCase="'notifications'" title="Notifications"
-                        text="Alerts will reach your phone through Discord, Telegram, ntfy or a webhook, filtered by severity.">
-                    </lib-sentinel-coming-soon>
+                    <lib-sentinel-notifications *ngSwitchCase="'notifications'" [status]="status"></lib-sentinel-notifications>
                     <lib-sentinel-coming-soon *ngSwitchCase="'drones'" title="Nearby drones"
                         text="Drones broadcasting their Remote ID over Wi-Fi will show up here with their ID, position and altitude.">
                     </lib-sentinel-coming-soon>

@@ -12,6 +12,9 @@ running at home as a sentinel for your Wi-Fi.
 A Reports tab sums up the last 24 hours, 7 or 30 days (scores day by day, what to change on your router, alerts,
 channels), and exports it as a designed HTML page, PDF, CSV or Markdown.
 
+The Notifications tab can send alerts to your phone through ntfy (ntfy.sh or your own server). The Pineapple needs
+a way to reach it: client mode on wlan2, not the MK7AC.
+
 A type of alert that is just noise for you (say, your router changing channel) can be muted: still recorded,
 but no longer counted as unread.
 

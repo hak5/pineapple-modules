@@ -1,0 +1,68 @@
+<div class="stack" *ngIf="form">
+    <mat-card class="card">
+        <div class="card-title">Alerts on your phone, through ntfy</div>
+        <p class="soft intro">Install the free <b>ntfy</b> app on your phone, subscribe to the topic below, and Sentinel sends
+            it the alerts you choose. It works with ntfy.sh or your own ntfy server.</p>
+
+        <div class="row">
+            <mat-slide-toggle color="primary" [(ngModel)]="form.enabled">{{ form.enabled ? 'Notifications on' : 'Notifications off' }}</mat-slide-toggle>
+        </div>
+
+        <div class="fields">
+            <mat-form-field>
+                <mat-label>Server</mat-label>
+                <input matInput [(ngModel)]="form.server" placeholder="https://ntfy.sh" maxlength="200">
+            </mat-form-field>
+            <mat-form-field>
+                <mat-label>Topic</mat-label>
+                <input matInput [(ngModel)]="form.topic" placeholder="sentinel-…" maxlength="64">
+                <button mat-button matSuffix type="button" (click)="randomTopic()">Random</button>
+                <mat-hint *ngIf="publicServer">On ntfy.sh anyone who knows the topic can read it: keep it hard to guess.</mat-hint>
+            </mat-form-field>
+            <mat-form-field>
+                <mat-label>Access token (optional)</mat-label>
+                <input matInput type="password" [(ngModel)]="token" autocomplete="off"
+                       [placeholder]="form.has_token ? 'Saved, leave empty to keep it' : 'Only for a protected topic'">
+                <mat-hint *ngIf="form.has_token">A token is saved. It is never shown again.</mat-hint>
+            </mat-form-field>
+            <mat-checkbox *ngIf="form.has_token" [(ngModel)]="clearToken">Remove the saved token</mat-checkbox>
+        </div>
+
+        <div class="fields">
+            <mat-form-field>
+                <mat-label>Send alerts of</mat-label>
+                <mat-select [(ngModel)]="form.min_severity">
+                    <mat-option *ngFor="let s of severities" [value]="s.value">{{ s.label }}</mat-option>
+                </mat-select>
+                <mat-hint>Muted alert types are never sent.</mat-hint>
+            </mat-form-field>
+            <mat-form-field>
+                <mat-label>At most, per hour</mat-label>
+                <input matInput type="number" min="1" max="60" [(ngModel)]="form.max_per_hour">
+                <mat-hint>Beyond that, one message tells how many were held back.</mat-hint>
+            </mat-form-field>
+        </div>
+        <mat-slide-toggle color="primary" [(ngModel)]="form.status_messages">
+            Also tell me when a radio stops working or listening stops
+        </mat-slide-toggle>
+
+        <div class="actions">
+            <button mat-flat-button color="primary" [disabled]="busy" (click)="save()">Save</button>
+            <button mat-stroked-button [disabled]="busy || !form.topic" (click)="test()">Save and send a test</button>
+        </div>
+        <p class="error-line" *ngIf="sendError"><mat-icon>error_outline</mat-icon>Last send failed: {{ sendError }}</p>
+    </mat-card>
+
+    <mat-card class="card notes">
+        <div class="card-title">Good to know</div>
+        <ul>
+            <li>The Pineapple needs a way to reach the server. Connect it to your Wi-Fi with client mode on
+                <b>wlan2</b> (Networking, WiFi Client Mode). Don't use the MK7AC for that: Sentinel needs it to listen
+                on 5 GHz. A server on your own network works too, without Internet.</li>
+            <li>Messages hold your network names and the addresses of your access points, and they leave the house.
+                Use your own ntfy server if you'd rather keep them home.</li>
+            <li>Alerts are sent while Sentinel is listening, within about 10 seconds. Nothing older than the moment you
+                turn notifications on is sent.</li>
+        </ul>
+    </mat-card>
+</div>

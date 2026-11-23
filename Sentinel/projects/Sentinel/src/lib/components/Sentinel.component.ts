@@ -32,7 +32,7 @@ export class SentinelComponent implements OnInit, AfterViewInit, OnDestroy {
         { id: 'channels', label: 'Channels' },
         { id: 'security', label: 'Security' },
         { id: 'wids', label: 'Detection' },
-        { id: 'notifications', label: 'Notifications', soon: true },
+        { id: 'notifications', label: 'Notifications' },
         { id: 'drones', label: 'Drones', soon: true },
         { id: 'reports', label: 'Reports' },
         { id: 'settings', label: 'Settings' },

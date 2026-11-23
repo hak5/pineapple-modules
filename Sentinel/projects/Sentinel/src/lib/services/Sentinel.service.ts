@@ -47,6 +47,10 @@ export class SentinelService {
 
     getReport(days: number): Promise<any> { return this.request('get_report', { days }); }
 
+    getNotify(): Promise<any> { return this.request('get_notify'); }
+    saveNotify(settings: any): Promise<any> { return this.request('save_notify', { settings }); }
+    testNotify(): Promise<any> { return this.request('test_notify'); }
+
     setAlertMuted(kind: string, muted: boolean): Promise<any> { return this.request('set_alert_muted', { kind, muted }); }
 
     getMyNetworks(): Promise<any> { return this.request('get_my_networks'); }
