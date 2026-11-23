@@ -1,0 +1,16 @@
+.ptak { max-width: 860px; }
+.msg { padding: 10px 14px; border-radius: 4px; background: rgba(76, 175, 80, .15); }
+.msg.bad { background: rgba(244, 67, 54, .15); }
+.state { display: flex; align-items: center; font-size: 16px; font-weight: 500; margin-bottom: 10px; }
+.dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 10px; background: #888; }
+.dot.ok { background: #4caf50; }
+.dot.wait { background: #ffb300; }
+.dot.bad { background: #f44336; }
+.kv td { padding: 2px 18px 2px 0; vertical-align: top; }
+.kv td:first-child { opacity: .7; white-space: nowrap; }
+.boot { margin-left: 12px; }
+.warn { color: #ffb300; }
+.small { font-size: 12px; opacity: .75; }
+.log { max-height: 260px; overflow: auto; font-size: 12px; white-space: pre-wrap; margin: 0; }
+mat-card-actions a, mat-card-actions button { margin-right: 8px; }
+.wide { min-width: 320px; }

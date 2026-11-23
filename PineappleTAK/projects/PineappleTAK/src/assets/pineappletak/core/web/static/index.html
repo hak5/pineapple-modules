@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>PagerTAK</title>
+<link rel="stylesheet" href="/static/leaflet/leaflet.css">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+
+<!-- login -->
+<div id="login" class="screen hidden">
+  <form id="login-form" class="login-card" autocomplete="on">
+    <div class="brand">Pager<b>TAK</b></div>
+    <div class="sub" id="login-sub">Web console</div>
+    <input type="password" id="login-pw" placeholder="Password" autocomplete="current-password" required>
+    <button type="submit" class="btn primary">Sign in</button>
+    <div id="login-err" class="err"></div>
+  </form>
+</div>
+
+<!-- app -->
+<div id="app" class="hidden">
+  <header class="topbar">
+    <div class="brand small">Pager<b>TAK</b></div>
+    <div class="who"><span id="t-callsign">-</span><span id="t-team" class="team-dot"></span></div>
+    <div class="pills">
+      <span id="p-tak" class="pill">TAK</span>
+      <span id="p-gps" class="pill">GPS</span>
+      <span id="p-batt" class="pill hidden"></span>
+      <span id="p-queue" class="pill warn hidden"></span>
+    </div>
+    <div class="actions">
+      <button id="b-sa" class="btn" title="Send position report now">Send position</button>
+      <button id="b-911" class="btn danger">SEND ALERT</button>
+      <button id="b-logout" class="btn ghost" title="Sign out">&#x23FB;</button>
+    </div>
+  </header>
+  <div id="banner-911" class="banner hidden"><span id="banner-911-text">EMERGENCY ACTIVE</span> <button id="b-911-cancel" class="btn">Cancel alert</button></div>
+  <div id="banner-setup" class="banner setup hidden"><span>PagerTAK setup: enter the TAK server, add a certificate (package, enroll or upload), set your callsign, test the connection, then</span> <button id="b-setup-done" class="btn">Finish setup</button></div>
+  <div id="banner-md" class="banner hidden"><span id="banner-md-text">MAN-DOWN CHECK</span> <button id="b-imok" class="btn">I'M OK</button></div>
+
+  <main class="layout">
+    <section id="map-wrap">
+      <div id="map"></div>
+      <div class="map-ctl">
+        <select id="m-source" title="Basemap"></select>
+        <button id="m-follow" class="btn small on" title="Keep me centered">Follow</button>
+        <button id="m-labels" class="btn small on" title="Show callsigns">Labels</button>
+        <select id="m-radius" title="Only show TAK items within this distance of you">
+          <option value="0">All ranges</option><option value="1">1 km</option><option value="2">2 km</option><option value="5">5 km</option>
+          <option value="10">10 km</option><option value="25">25 km</option><option value="50">50 km</option><option value="100">100 km</option></select>
+      </div>
+      <div class="map-tools">
+        <button id="t-measure" class="btn small" title="Measure distance and bearing (click points, double-click to finish)">Measure</button>
+        <button id="t-zone" class="btn small" title="Draw a geofence zone">Zone</button>
+        <button id="t-clear" class="btn small" title="Clear measurements and range rings">Clear</button>
+        <button id="t-layers" class="btn small" title="Trails and KML/KMZ overlays">Layers</button>
+        <button id="t-offline" class="btn small" title="Download the map on screen for offline use">Offline</button>
+      </div>
+      <div id="m-pick" class="pick-hint hidden"><span id="m-pick-text">Click the map to pick the location</span> <button class="btn small hidden" id="m-pick-done">Finish</button> <button class="btn small" id="m-pick-cancel">Cancel</button></div>
+      <div id="m-coord" class="coord"></div>
+      <div id="m-job" class="jobbar hidden"></div>
+    </section>
+
+    <aside id="panel">
+      <nav class="tabs">
+        <button data-tab="chat" class="on">Chat<span id="chat-badge" class="badge hidden"></span></button>
+        <button data-tab="contacts">Contacts</button>
+        <button data-tab="items">Items</button>
+        <button data-tab="reports">Reports</button>
+        <button data-tab="sensors">Sensors<span id="alert-badge" class="badge hidden"></span></button>
+        <button data-tab="sigint">SIGINT</button>
+        <button data-tab="settings">Settings</button>
+      </nav>
+
+      <!-- chat -->
+      <div class="tab" id="tab-chat">
+        <div id="chat-log" class="chat-log"></div>
+        <div class="quick" id="quick"></div>
+        <div class="row chat-tools"><span class="hint grow">&times; on a message deletes it (this Pager only).</span><button type="button" class="btn small" id="chat-clear">Clear chat history</button></div>
+        <form id="chat-form" class="chat-form">
+          <select id="chat-to" title="Send to"></select>
+          <input id="chat-text" maxlength="400" placeholder="Message" autocomplete="off">
+          <button type="button" class="btn" id="chat-file" title="Send a photo or file as a TAK data package">&#128206;</button>
+          <input type="file" id="chat-file-in" class="hidden">
+          <button class="btn primary">Send</button>
+        </form>
+      </div>
+
+      <!-- contacts -->
+      <div class="tab hidden" id="tab-contacts">
+        <div class="hint">TAK users, nearest first. Click one to show it on the map. Markers, aircraft and drones are under Items.</div>
+        <div id="contacts" class="list"></div>
+      </div>
+
+      <!-- items: everything on the map that is not a TAK user -->
+      <div class="tab hidden" id="tab-items">
+        <div class="card">
+          <div class="head"><span class="t">Show on the map</span></div>
+          <div id="cat-filters" class="checks"></div>
+          <div class="hint">Hidden items are also hidden on the Pager's map. To stop a feed reaching the Pager at all, untick its TAK channel (Settings).</div>
+          <div class="row"><button type="button" class="btn small" id="clear-recv">Clear received items</button></div>
+        </div>
+        <div id="items-list" class="list"></div>
+      </div>
+
+      <!-- reports -->
+      <div class="tab hidden" id="tab-reports">
+        <div class="seg" id="rep-kind">
+          <button data-k="salute" class="on">SALUTE</button><button data-k="sitrep">SITREP</button><button data-k="medevac">MEDEVAC</button><button data-k="damage">Damage</button>
+        </div>
+        <form id="rep-form" class="form"></form>
+        <h4>Sent reports</h4>
+        <div id="rep-history" class="list small"></div>
+      </div>
+
+      <!-- sensors -->
+      <div class="tab hidden" id="tab-sensors">
+        <div id="sensors" class="cards"></div>
+        <div id="md-card" class="card"></div>
+        <div id="geo-card" class="card"><div class="head"><span class="t">Geofences</span></div>
+          <div class="hint">Draw a zone with <b>Zone</b> on the map, or right-click the map for a circle. Alerts when people, drones or you enter or leave.</div>
+          <div id="geo-list" class="list small"></div></div>
+        <h4>Alerts</h4>
+        <div id="alerts" class="list small"></div>
+      </div>
+
+      <!-- sigint -->
+      <div class="tab hidden" id="tab-sigint">
+        <div class="hint">Receive-only. These views only run while this tab is open.</div>
+        <div id="radio-card" class="card"></div>
+        <div id="fox-card" class="card"></div>
+        <div class="card">
+          <div class="head"><span class="t">Wi-Fi</span>
+            <select id="wifi-mins" title="Time window"><option value="5">5 min</option><option value="15" selected>15 min</option><option value="60">60 min</option></select></div>
+          <div class="seg" id="wifi-kind"><button data-k="aps" class="on">Access points</button><button data-k="clients">Clients</button><button data-k="probes">Probes</button></div>
+          <input id="wifi-q" placeholder="Search SSID or MAC" autocomplete="off">
+          <div id="wifi-sum" class="hint"></div>
+          <div id="wifi-list" class="list small"></div>
+        </div>
+      </div>
+
+      <!-- settings -->
+      <div class="tab hidden" id="tab-settings">
+        <div id="status-card" class="card"></div>
+        <form id="set-server" class="form card">
+          <h4>TAK server</h4>
+          <label>Host <input name="host" maxlength="200" required></label>
+          <label>Protocol <select name="proto"><option value="tls">TLS (client certificate)</option><option value="tcp">TCP (no auth)</option><option value="udp">UDP (send only)</option></select></label>
+          <label>Port <input name="port" type="number" min="1" max="65535"></label>
+          <button class="btn primary">Save and reconnect</button>
+        </form>
+        <div id="conn-card" class="card">
+          <h4>Connection check</h4>
+          <div id="cert-info" class="hint"></div>
+          <div class="row"><button type="button" class="btn small" id="b-test">Test connection</button></div>
+          <div id="test-result" class="result hidden"></div>
+        </div>
+        <form id="set-pkg" class="form card">
+          <h4>Import a connection package</h4>
+          <div class="hint">The .zip your TAK admin gives ATAK users. It sets the server, port, protocol and certificates in one step.</div>
+          <label>Data package (.zip) <input type="file" name="pkg" accept=".zip"></label>
+          <button class="btn primary">Import</button>
+        </form>
+        <form id="set-enroll" class="form card" autocomplete="off">
+          <h4>Enroll with your TAK account</h4>
+          <div class="hint">The Pager gets its own certificate from the TAK Server with your TAK username and password, like ATAK's "Use Authentication".</div>
+          <label>Server <input name="host" maxlength="200" required title="Host name or IP address, without https:// or a port" placeholder="takserver.example.com" spellcheck="false" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-form-type="other"></label>
+          <label>Enrollment port <input name="port" type="number" min="1" max="65535" value="8446" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-form-type="other"></label>
+          <label>TAK username <input name="user" maxlength="100" spellcheck="false" autocomplete="off" data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-form-type="other" required></label>
+          <label>TAK password <input name="password" type="password" maxlength="200" autocomplete="new-password" data-lpignore="true" data-1p-ignore="true" data-bwignore="true" required></label>
+          <div class="hint">Your TAK account, not the web console password. Your browser may offer to fill these; check what it filled.</div>
+          <button class="btn primary">Enroll</button>
+          <div id="enroll-result" class="result hidden"></div>
+        </form>
+        <form id="set-cert" class="form card">
+          <h4>Upload a certificate</h4>
+          <div class="hint">A .p12 from your TAK Server, or an unencrypted PEM. The Pager converts .p12 files itself.</div>
+          <label>Client certificate (.p12 or .pem) <input type="file" name="client" accept=".p12,.pfx,.pem,.crt,.key,.txt"></label>
+          <label>TAK Server CA / truststore (.p12 or .pem) <input type="file" name="ca" accept=".p12,.pfx,.pem,.crt,.txt"></label>
+          <label>.p12 password <input type="password" name="password" placeholder="atakatak" autocomplete="off"></label>
+          <button class="btn primary">Upload</button>
+        </form>
+        <form id="set-identity" class="form card">
+          <h4>Identity</h4>
+          <label>Callsign <input name="callsign" maxlength="40" required></label>
+          <label>Team <select name="team"></select></label>
+          <label>Role <select name="role"></select></label>
+          <button class="btn primary">Save identity</button>
+        </form>
+        <form id="set-quick" class="form card">
+          <h4>Quick messages</h4>
+          <label>One per line, up to 10 (36 characters each). Used by the buttons in Chat and on the Pager. <textarea name="quick_text" rows="6"></textarea></label>
+          <div class="checks"><label><input type="checkbox" name="receipts"> Send delivered / read receipts for direct messages</label></div>
+          <div class="row"><button class="btn primary">Save quick messages</button><button type="button" class="btn small" id="quick-reset">Use defaults</button></div>
+          <div class="hint">Empty the list and save to go back to the defaults.</div>
+        </form>
+        <form id="set-position" class="form card">
+          <h4>Position</h4>
+          <label>Manual position (lat,lon) <input name="manual_pos" placeholder="used when there is no GPS fix"></label>
+          <div class="row"><button type="button" class="btn small" id="pos-pick">Pick on map</button><button type="button" class="btn small" id="pos-clear">Clear</button></div>
+          <label>Report interval (seconds) <input name="interval" type="number" min="5" max="3600"></label>
+          <button class="btn primary">Save position</button>
+        </form>
+        <div id="chan-card" class="card">
+          <h4>TAK channels</h4>
+          <div class="hint">The TAK Server groups this Pager is in. In = receive from, Out = send to.</div>
+          <div id="chan-list" class="list small"></div>
+          <div class="row"><button type="button" class="btn small" id="chan-load">Load channels</button><button type="button" class="btn small primary hidden" id="chan-save">Save channels</button></div>
+        </div>
+        <form id="set-map" class="form card">
+          <h4>Map</h4>
+          <label>Tiles <select name="tilemode"><option value="auto">Fastest: from the internet, the Pager keeps a copy</option><option value="device">Through the Pager (works when only the Pager is online)</option><option value="direct">Straight from the internet only (nothing cached)</option></select></label>
+          <label>Coordinates <select name="coords"><option value="mgrs">MGRS</option><option value="ll">Lat, lon</option></select></label>
+          <div class="hint">Saved in this browser.</div>
+        </form>
+        <form id="set-alerts" class="form card">
+          <h4>Alerts in this browser</h4>
+          <div class="checks"><label><input type="checkbox" name="sound"> Sound for chat, alerts, sensors and geofences</label></div>
+          <div class="row"><button type="button" class="btn small" id="notify-on">Allow pop-up notifications</button></div>
+          <div class="hint" id="notify-hint"></div>
+        </form>
+        <form id="set-access" class="form card">
+          <h4>Web console access</h4>
+          <label>Listen on <select name="mode"><option value="all">All interfaces: host name, IP and USB</option><option value="vpn">USB + VPN (NetBird / WireGuard)</option><option value="usb">USB address only</option></select></label>
+          <div class="hint" id="access-urls"></div>
+          <div class="hint">Saving restarts the console. If this page's address is no longer allowed, open one of the addresses above.</div>
+          <button class="btn primary">Save</button>
+        </form>
+        <form id="set-pw" class="form card">
+          <h4>Web console password</h4>
+          <label>Current <input type="password" name="old" autocomplete="current-password" required></label>
+          <label>New (8+ characters) <input type="password" name="new" minlength="8" autocomplete="new-password" required></label>
+          <button class="btn primary">Change password</button>
+        </form>
+      </div>
+    </aside>
+  </main>
+  <div id="toast" class="toast hidden"></div>
+  <div id="modal" class="modal hidden"><div class="modal-box" id="modal-box"></div></div>
+</div>
+
+<script src="/static/leaflet/leaflet.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
