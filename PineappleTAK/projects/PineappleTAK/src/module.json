@@ -1,0 +1,9 @@
+{
+    "name": "PineappleTAK",
+    "title": "PineappleTAK",
+    "description": "Connects the WiFi Pineapple to a TAK Server: position, GeoChat, alerts, reports, geofences and Wi-Fi / Bluetooth / drone sensors, with its own web console",
+    "version": "1.0.2",
+    "author": "SECT0101",
+    "firmware_required": "2.0.0",
+    "devices": ["wifipineapplemk7"]
+}

@@ -1,0 +1,87 @@
+<div class="ptak" fxLayout="column" fxLayoutGap="16px">
+    <mat-progress-bar *ngIf="busy" mode="indeterminate"></mat-progress-bar>
+    <div *ngIf="message" class="msg" [class.bad]="!messageOk">{{ message }}</div>
+
+    <mat-card>
+        <mat-card-title>PineappleTAK</mat-card-title>
+        <mat-card-subtitle>Connects this WiFi Pineapple to your TAK Server: position, GeoChat, alerts, reports and Wi-Fi sensors.</mat-card-subtitle>
+        <mat-card-content *ngIf="!status">Loading...</mat-card-content>
+        <mat-card-content *ngIf="status && !status.installed">
+            <p>PineappleTAK is not installed yet. Installing copies the service to <code>/root/pineappletak</code>
+                <span *ngIf="status.missing.length"> and installs {{ status.missing.join(', ') }} (internet needed)</span>.</p>
+        </mat-card-content>
+        <mat-card-content *ngIf="status && status.installed">
+            <div class="state"><span class="dot" [ngClass]="linkClass"></span>{{ linkText }}</div>
+            <table class="kv">
+                <tr *ngIf="status.callsign"><td>Callsign</td><td>{{ status.callsign }}</td></tr>
+                <tr *ngIf="status.server"><td>TAK Server</td><td>{{ status.server }}</td></tr>
+                <tr *ngIf="status.running && status.last_report"><td>Last position report</td><td>{{ status.last_report }}</td></tr>
+                <tr *ngIf="status.error"><td>Last error</td><td>{{ status.error }}</td></tr>
+                <tr><td>Position</td><td>{{ status.gps }}</td></tr>
+                <tr><td>Version</td><td>{{ status.service_version }}</td></tr>
+            </table>
+        </mat-card-content>
+        <mat-card-content *ngIf="status && status.installed && !status.password_set" class="warn">
+            <b>Next: set a console password</b> (below). You sign in to the PineappleTAK console with it, and it can only start once one is set.
+        </mat-card-content>
+        <mat-card-actions>
+            <button mat-flat-button color="accent" *ngIf="status && !status.installed" [disabled]="busy" (click)="install()">Install</button>
+            <ng-container *ngIf="status && status.installed">
+                <a mat-flat-button color="accent" *ngIf="status.running" [href]="openUrl" target="_blank" rel="noopener">Open PineappleTAK</a>
+                <button mat-stroked-button *ngIf="!status.running" [disabled]="busy || !status.password_set" (click)="service('start')"
+                        [matTooltip]="status.password_set ? '' : 'Set a console password first'">Start</button>
+                <button mat-stroked-button *ngIf="status.running" [disabled]="busy" (click)="service('restart')">Restart</button>
+                <button mat-stroked-button *ngIf="status.running" [disabled]="busy" (click)="service('stop')">Stop</button>
+                <mat-slide-toggle class="boot" [checked]="status.enabled" [disabled]="busy" (change)="toggleBoot($event.checked)">Start at boot</mat-slide-toggle>
+            </ng-container>
+        </mat-card-actions>
+        <mat-card-content *ngIf="status && status.installed && status.running && status.urls.length" class="small">
+            Console addresses: <span *ngFor="let u of status.urls"><a [href]="u" target="_blank" rel="noopener">{{ u }}</a> </span>
+        </mat-card-content>
+    </mat-card>
+
+    <mat-card *ngIf="updateAvailable">
+        <mat-card-title>Update available</mat-card-title>
+        <mat-card-content>This module has PineappleTAK {{ status.module_version }}; {{ status.service_version }} is installed.
+            Your settings, certificates, zones and markers are kept.</mat-card-content>
+        <mat-card-actions><button mat-flat-button color="accent" [disabled]="busy" (click)="install()">Update</button></mat-card-actions>
+    </mat-card>
+
+    <mat-card *ngIf="status && status.installed">
+        <mat-card-title>Console password</mat-card-title>
+        <mat-card-subtitle *ngIf="!status.password_set" class="warn">Set a password before the first start. You sign in to the console with it.</mat-card-subtitle>
+        <mat-card-subtitle *ngIf="status.password_set">A password is set. Enter a new one to change it.</mat-card-subtitle>
+        <mat-card-content fxLayout="row wrap" fxLayoutGap="12px">
+            <mat-form-field><input matInput type="password" placeholder="New password" [(ngModel)]="password" autocomplete="new-password"></mat-form-field>
+            <mat-form-field><input matInput type="password" placeholder="Repeat" [(ngModel)]="password2" autocomplete="new-password"></mat-form-field>
+        </mat-card-content>
+        <mat-card-actions><button mat-stroked-button [disabled]="busy || !password" (click)="setPassword()">Set password</button></mat-card-actions>
+    </mat-card>
+
+    <mat-card *ngIf="status && status.installed">
+        <mat-card-title>Console access</mat-card-title>
+        <mat-card-subtitle>Where the PineappleTAK console can be opened from. Saving restarts PineappleTAK if it is running.</mat-card-subtitle>
+        <mat-card-content>
+            <mat-form-field class="wide">
+                <mat-select placeholder="Listen on" [(ngModel)]="listen">
+                    <mat-option value="all">All interfaces: host name, IP and USB</mat-option>
+                    <mat-option value="vpn">USB + VPN (NetBird / WireGuard)</mat-option>
+                    <mat-option value="usb">USB address only</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <div class="small" *ngIf="listen === 'all'">Anyone on a network the Pineapple is on can reach the console's sign-in page.</div>
+        </mat-card-content>
+        <mat-card-actions><button mat-stroked-button [disabled]="busy || !listen || listen === status.listen" (click)="setListen()">Save</button></mat-card-actions>
+    </mat-card>
+
+    <mat-card *ngIf="status && status.installed">
+        <mat-card-title>Recent activity</mat-card-title>
+        <mat-card-content><pre class="log">{{ status.log.length ? status.log.join('\n') : 'Nothing yet.' }}</pre></mat-card-content>
+        <mat-card-actions>
+            <button mat-button [disabled]="busy" (click)="install()" matTooltip="Copy this module's PineappleTAK over the installed one again. Settings, certificates, zones and markers are kept.">Reinstall</button>
+            <button mat-button [disabled]="busy" (click)="uninstall()">Uninstall</button>
+        </mat-card-actions>
+    </mat-card>
+
+    <p class="small">Unofficial community module, not supported by Hak5 or the TAK Product Center. Full guide: github.com/SECT0101/PineappleTAK-MK7</p>
+</div>

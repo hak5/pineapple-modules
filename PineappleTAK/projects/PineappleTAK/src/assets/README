@@ -1,0 +1,3 @@
+pineappletak/ is the PineappleTAK service. tools/build-module.sh copies it here from the
+repository's pineappletak/ folder when the module is built; the module's Install button
+copies it to /root/pineappletak.

@@ -1,0 +1,83 @@
+#!/usr/bin/env python3
+"""PineappleTAK (Mark VII) - stand-in for the sqlite3 command, read-only.
+
+PagerTAK's sensors read the recon database with the sqlite3 command, in the
+Pager's layout (one "ssid" table with beacons as type 8 and probes as type 4).
+The Mark VII records recon differently (an "aps" table and a "clients" table), and
+its firmware's SQLite library is too old for the sqlite3-cli package. This tool
+runs the same queries with Python's sqlite3 module (python3-sqlite3, which works
+with the Mark VII's library), after adding temporary views in the Pager's layout
+to its own connection. The database is opened read-only and never changed.
+
+    sqlite3 [-readonly] [-separator SEP] [-cmd ".timeout MS"] DB [SQL]
+"""
+import sys
+
+PAGER_VIEWS = (
+    # beacons: one row per access point per scan; time = last seen
+    "CREATE TEMP VIEW ssid AS"
+    " SELECT 8 AS type, bssid, CASE WHEN hidden = 1 OR ssid = '' THEN NULL ELSE ssid END AS ssid,"
+    "  encryption, channel, signal, last_seen AS time, NULL AS wifi_device FROM aps"
+    " UNION ALL"
+    # client devices that sent probe requests (the Mark VII keeps counts, not the probed names)
+    " SELECT 4, '', NULL, 0, 0, NULL, last_seen, lower(mac) FROM clients"
+    "  WHERE IFNULL(broadcast_probes, 0) + IFNULL(direct_probes, 0) > 0",
+    "CREATE TEMP VIEW wifi_device AS SELECT DISTINCT lower(mac) AS hash, mac FROM clients",
+)
+
+
+def main(argv):
+    sep, timeout, rest = "|", 2.0, []
+    i = 0
+    while i < len(argv):
+        a = argv[i]
+        if a == "-separator" and i + 1 < len(argv):
+            sep = argv[i + 1]
+            i += 2
+        elif a == "-cmd" and i + 1 < len(argv):
+            parts = argv[i + 1].split()
+            if len(parts) == 2 and parts[0] == ".timeout" and parts[1].isdigit():
+                timeout = int(parts[1]) / 1000.0
+            i += 2
+        elif a.startswith("-"):
+            i += 1                                  # -readonly and others: always read-only here
+        else:
+            rest.append(a)
+            i += 1
+    if not rest:
+        sys.stderr.write("usage: sqlite3 [-separator SEP] DB [SQL]\n")
+        return 1
+    if rest[0] == "--version":
+        rest = rest[1:]
+    try:
+        import sqlite3
+    except ImportError:
+        sys.stderr.write("PineappleTAK: install python3-sqlite3 (opkg install python3-sqlite3)\n")
+        return 1
+    db, sql = rest[0], (rest[1] if len(rest) > 1 else sys.stdin.read())
+    try:
+        con = sqlite3.connect("file:%s?mode=ro" % db, uri=True, timeout=timeout)
+    except sqlite3.Error as e:
+        sys.stderr.write("Error: %s\n" % e)
+        return 1
+    tables = {r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type IN ('table', 'view')")}
+    if "ssid" not in tables and "aps" in tables:
+        for v in PAGER_VIEWS:
+            if "wifi_device" in v and "clients" not in tables:
+                continue
+            if "UNION ALL" in v and "clients" not in tables:
+                v = v.split(" UNION ALL")[0]
+            con.execute(v)
+    rc = 0
+    for stmt in [s for s in sql.split(";") if s.strip()]:
+        try:
+            for row in con.execute(stmt):
+                sys.stdout.write(sep.join("" if v is None else str(v) for v in row) + "\n")
+        except sqlite3.Error as e:
+            sys.stderr.write("Error: %s\n" % e)
+            rc = 1
+    return rc
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

@@ -1,0 +1,37 @@
+#!/bin/sh
+# PineappleTAK (Mark VII) - stand-in for the Pager's _pineap tool.
+# Answers the few _pineap commands PagerTAK's SIGINT tools use, with the Mark VII's
+# own tools: pineap (PineAP 5) for hopping, iw for the channel, tcpdump for signal.
+#   _pineap INTERFACE SET <if> CHANNEL <n> | HOP <fast|slow>
+#   _pineap INTERFACE LIST format=json
+#   _pineap MONITOR <mac> any rate=<ms> timeout=<s>     (prints one signal value per frame)
+#   _pineap EXAMINE CANCEL
+#   _pineap RECON CLIENTS ...                           (clients come from the recon database)
+IF=$(uci -q get pineap.@config[0].pineap_interface); IF=${IF:-wlan1mon}
+
+case "$1 $2" in
+    "INTERFACE SET")
+        case "$4" in
+            CHANNEL) pineap pause >/dev/null 2>&1; iw dev "$3" set channel "$5" ;;
+            HOP)     pineap unpause >/dev/null 2>&1 ;;
+            *)       exit 1 ;;
+        esac ;;
+    "INTERFACE LIST")
+        ch=$(iw dev "$IF" info 2>/dev/null | awk '/channel/ {print $2; exit}')
+        printf '[{"name":"%s","channel":%s}]\n' "$IF" "${ch:-0}" ;;
+    "EXAMINE CANCEL")
+        pineap unpause >/dev/null 2>&1 ;;
+    "RECON CLIENTS")
+        echo '[]' ;;
+    *)
+        if [ "$1" = MONITOR ]; then
+            mac=$2; t=3600
+            for a in "$@"; do case "$a" in timeout=*) t=${a#timeout=} ;; esac; done
+            # radiotap signal of every frame sent by <mac>
+            # OpenWrt's BusyBox may have no "timeout": then the hunt's own stop ends it
+            to=""; command -v timeout >/dev/null 2>&1 && to="timeout $t"
+            $to tcpdump -i "$IF" -l -n -e "wlan addr2 $mac" 2>/dev/null |
+                awk '{ if (match($0, /-[0-9]+dBm signal/)) { print substr($0, RSTART, RLENGTH - 10); fflush() } }'
+        fi
+        exit 1 ;;
+esac
