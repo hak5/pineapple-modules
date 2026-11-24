@@ -23,6 +23,7 @@ export class ReportsComponent implements OnInit {
         my_ap_downgrade: 'Weaker security', my_ap_changed: 'Access point changed',
         my_ap_channel: 'Channel change', deauth_flood: 'Deauthentication burst',
         beacon_flood: 'Forged access points', karma_ap: 'Answers for any network',
+        pmkid_attempt: 'Key collection attempt',
     };
 
     constructor(private sentinel: SentinelService, private snackBar: MatSnackBar) { }

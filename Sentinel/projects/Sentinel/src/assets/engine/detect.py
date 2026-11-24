@@ -18,14 +18,21 @@ Rules (constants below, no setting in the interface for this version):
   deauth_flood     a burst of deauthentication/disassociation frames on a BSSID
   beacon_flood     a burst of never-seen BSSIDs (forged beacons)
   karma_ap         one BSSID answers for many different network names
+  pmkid_attempt    abandoned handshakes on one of your access points: someone collecting
+                   the PMKID to crack the password offline (handshake.py; observation only
+                   while PMKID_MODE is 'observe')
+A deauth_flood on one of your access points also tells how many devices reconnected right
+after: that is how a handshake gets captured.
 
 Standard library only. `run` and `commit` never raise.
 """
 
 import collections
+import json
 import os
 
 import dot11
+import handshake
 import muted
 import mynets
 import store
@@ -41,6 +48,9 @@ FLOOD_HOLD_S = 60.0            # how long new BSSIDs are kept out of the databas
 KARMA_SSIDS = 5                # distinct names announced by one BSSID over 60 s
 DOWNGRADE_WINDOWS = 2
 CHANNEL_WINDOWS = 3
+# 'observe': PMKID attempts are recorded apart (source 'observe') and never alert, so their
+# false positives can be measured on a real network first; 'alert': they become alerts.
+PMKID_MODE = 'observe'
 
 MAX_KNOWN = 5000
 MAX_TRACKED = 256              # BSSIDs followed by the 60 s histories
@@ -48,12 +58,12 @@ MAX_SSIDS_PER_BSSID = 16
 MAX_COOLDOWN = 1024
 EVENTS_PER_HOUR = 60           # all rules together...
 PROTECTED_PER_HOUR = 20        # ...plus a reserve for attacks on your networks
-PROTECTED = ('evil_twin', 'my_ap_conflict', 'my_ap_downgrade')
+PROTECTED = ('evil_twin', 'my_ap_conflict', 'my_ap_downgrade', 'pmkid_attempt')
 
 COOLDOWN_S = {
     'evil_twin': 3600, 'my_ap_conflict': 3600, 'my_ap_downgrade': 3600,
     'my_ap_changed': 6 * 3600, 'my_ap_channel': 6 * 3600,
-    'deauth_flood': 600, 'beacon_flood': 600, 'karma_ap': 3600, 'suppressed': 0,
+    'deauth_flood': 600, 'beacon_flood': 600, 'karma_ap': 3600, 'pmkid_attempt': 1800, 'suppressed': 0,
 }
 
 STRENGTH = {
@@ -101,6 +111,9 @@ class Detector(object):
         self.local = set(local_bssids or ())
         self.track_clients = track_clients
         self.pending = []
+        self.observed = []             # PMKID attempts while PMKID_MODE is 'observe'
+        self.enrich = []               # (bssid, burst time, reconnections) for deauth alerts
+        self.watch = handshake.Watch()
         self.errors = 0
         self.flood_until = 0.0
 
@@ -148,6 +161,11 @@ class Detector(object):
             if name:
                 by_ssid.setdefault(name, []).append(e)
         self.mine_ssids = by_ssid
+        self.watch.set_mine(self.mine)
+
+    def frame(self, f, ts):
+        """Every parsed frame, for the rules that need frame-level timing. Never raises."""
+        self.watch.frame(f, ts)
 
     # -- events -----------------------------------------------------------
 
@@ -181,6 +199,7 @@ class Detector(object):
             self.errors += 1
 
     def _run(self, agg, now):
+        self._handshakes(now)
         self._reload_mine()
 
         # What each BSSID announced in this window
@@ -340,25 +359,61 @@ class Detector(object):
                     a = agg.aps.get(bssid) or {}
                     name = _name(((a.get('info') or {}).get('ssid')))
                 # Only the BSSID and counts: no device address, whatever the settings
-                self._emit(now, 'deauth_flood', 'high' if entry else 'medium', bssid,
+                if self._emit(now, 'deauth_flood', 'high' if entry else 'medium', bssid,
                            'Burst of %d deauthentication frames on "%s"' % (max(n, minute_total), name),
                            {'ssid': name, 'count': max(n, minute_total),
                             'window_s': WINDOW_S if n >= DEAUTH_WINDOW else 60,
                             'reasons': dict(sorted(reasons.get(bssid, {}).items())[:16]),
-                            'broadcast': agg.disc_broadcast.get(bssid, 0)})
+                            'broadcast': agg.disc_broadcast.get(bssid, 0)}):
+                    self.watch.deauth_burst(bssid, now)
+
+    def _handshakes(self, now):
+        self.watch.tick(now)
+        found, self.watch.found = self.watch.found, []
+        for ts, ap, attempts, pmkid in found:
+            entry = self.mine.get(ap) or {}
+            name = _name(entry.get('ssid'))
+            title = 'Someone is trying to collect the key of your network "%s"' % name
+            details = {'ssid': name, 'attempts': attempts, 'window_s': int(handshake.WINDOW_S),
+                       'pmkid': pmkid,
+                       'note': 'A device asked to join, got the first handshake message and never answered, '
+                               'several times. That is how the key (PMKID) is collected to crack the password '
+                               'offline. A long random password, or WPA3 only, protects you.'}
+            if PMKID_MODE == 'alert':
+                self._emit(ts, 'pmkid_attempt', 'high', ap, title, details)
+            else:
+                self.observed.append((ts, 'pmkid_attempt', 'high', ap, _title(title), details))
+        done, self.watch.reconnected = self.watch.reconnected, []
+        self.enrich.extend(done)
 
     # -- writing ----------------------------------------------------------
 
     def commit(self, conn):
         """Write the prepared events in one transaction. Never raises."""
-        if not self.pending:
+        if not (self.pending or self.observed or self.enrich):
             return
         pending, self.pending = self.pending, []
+        observed, self.observed = self.observed, []
+        enrich, self.enrich = self.enrich, []
         silenced = self.muted.get()
         try:
             with conn:
                 for ts, kind, severity, bssid, title, details in pending:
                     store.add_event(conn, 'wids', kind, severity, title, details=details,
                                     bssid=bssid, ts=ts, acknowledged=kind in silenced)
+                for ts, kind, severity, bssid, title, details in observed:
+                    store.add_event(conn, 'observe', kind, severity, title, details=details,
+                                    bssid=bssid, ts=ts, acknowledged=True)
+                for bssid, burst, count in enrich:
+                    row = conn.execute("SELECT id, details FROM events WHERE source = 'wids' AND "
+                                       "kind = 'deauth_flood' AND bssid = ? AND ts >= ? ORDER BY id "
+                                       "DESC LIMIT 1", (bssid, burst - 1)).fetchone()
+                    if row is not None:
+                        d = json.loads(row[1] or '{}')
+                        d['reconnections_after'] = count
+                        d['note'] = ('Devices reconnected right after the burst. That is how a handshake '
+                                     'is captured to crack the password offline. A long random password, '
+                                     'or WPA3 only, protects you.')
+                        conn.execute('UPDATE events SET details = ? WHERE id = ?', (json.dumps(d), row[0]))
         except Exception:
             self.errors += 1

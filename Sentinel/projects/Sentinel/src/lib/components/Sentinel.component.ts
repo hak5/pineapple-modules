@@ -109,8 +109,16 @@ export class SentinelComponent implements OnInit, AfterViewInit, OnDestroy {
 
         el.style.setProperty('--sn-card', cardBg);
         el.style.setProperty('--sn-text', card.color);
-        el.style.setProperty('--sn-primary', primary.backgroundColor);
-        el.style.setProperty('--sn-on-primary', primary.color);
+        // The Pineapple's dark theme has a primary colour almost the same as its cards: buttons,
+        // switches and checkboxes in that colour vanish. When the contrast with the card is too
+        // low, Sentinel uses the text colour instead (the "accent").
+        const readable = contrast(primary.backgroundColor, cardBg) >= 3;
+        const accent = readable ? primary.backgroundColor : card.color;
+        el.style.setProperty('--sn-primary', accent);
+        el.style.setProperty('--sn-accent', accent);
+        el.style.setProperty('--sn-accent-soft', withAlpha(accent, 0.45));
+        // Text on a coloured button: black or white, whichever reads on that colour
+        el.style.setProperty('--sn-on-primary', luminance(accent) > 0.45 ? '#111111' : '#ffffff');
     }
 
     toggleEngine(): void {
@@ -211,6 +219,24 @@ function readFlag(key: string): boolean {
 
 function writeFlag(key: string): void {
     try { window.localStorage.setItem(key, '1'); } catch (e) { /* not kept, nothing else to do */ }
+}
+
+/** WCAG contrast ratio (1 .. 21) between two CSS colours. */
+function contrast(a: string, b: string): number {
+    if (transparent(a) || transparent(b)) { return 1; }   // nothing to see: no contrast
+    const la = luminance(a), lb = luminance(b);
+    return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
+function transparent(color: string): boolean {
+    const m = (color || '').match(/[\d.]+/g);
+    return !m || (m.length >= 4 && parseFloat(m[3]) < 0.1);
+}
+
+/** The same colour with another opacity, as rgba(). */
+function withAlpha(color: string, alpha: number): string {
+    const m = (color || '').match(/[\d.]+/g);
+    return m && m.length >= 3 ? `rgba(${m[0]}, ${m[1]}, ${m[2]}, ${alpha})` : color;
 }
 
 /** Relative luminance (0 dark .. 1 light) of a CSS rgb()/rgba() colour. */

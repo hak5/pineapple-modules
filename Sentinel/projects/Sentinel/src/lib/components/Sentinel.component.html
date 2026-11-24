@@ -2,7 +2,7 @@
     <!-- Hidden Material elements used to read the active Pineapple theme -->
     <div class="probes" aria-hidden="true">
         <mat-card #probeCard></mat-card>
-        <button mat-flat-button color="primary" #probePrimary tabindex="-1"></button>
+        <button mat-flat-button color="primary" class="sn-probe" #probePrimary tabindex="-1"></button>
     </div>
 
     <mat-card class="card status-card">
@@ -27,7 +27,8 @@
                 </div>
             </div>
 
-            <button mat-flat-button [color]="status?.running ? undefined : 'primary'"
+            <button mat-flat-button class="engine-button" [class.is-running]="status?.running"
+                    [color]="status?.running ? undefined : 'primary'"
                     [disabled]="busy || !canStart" (click)="toggleEngine()">
                 <mat-icon>{{ status?.running ? 'stop' : 'play_arrow' }}</mat-icon>
                 {{ status?.running ? 'Stop monitoring' : 'Start monitoring' }}

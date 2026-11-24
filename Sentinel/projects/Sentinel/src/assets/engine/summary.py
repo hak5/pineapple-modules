@@ -38,6 +38,10 @@ def build(conn, status, my_networks_path, now=None):
     recent = [{'ts': r[0], 'severity': r[1], 'kind': r[2], 'title': r[3], 'bssid': r[4]}
               for r in conn.execute("SELECT ts, severity, kind, title, bssid FROM events "
                                     "WHERE source = 'wids' ORDER BY id DESC LIMIT ?", (RECENT_ALERTS,))]
+    # Rules still in observation (detect.PMKID_MODE): what they would have reported, last 7 days
+    observed = dict((kind, count) for kind, count in conn.execute(
+        "SELECT kind, COUNT(*) FROM events WHERE source = 'observe' AND ts >= ? GROUP BY kind",
+        (now - 7 * 86400,)))
     deauth = conn.execute('SELECT COALESCE(SUM(count), 0) FROM disconnections WHERE minute >= ?',
                           (now - 3660,)).fetchone()[0]
     my_summary = audit['my_summary']
@@ -61,6 +65,7 @@ def build(conn, status, my_networks_path, now=None):
         'neighbourhood': {'networks': audit['total'], 'score': audit['score']},
         'alerts': {'unread': unread, 'unread_total': sum(unread.values()), 'recent': recent},
         'deauth_last_hour': deauth,
+        'observed_7d': observed,
     }
 
 

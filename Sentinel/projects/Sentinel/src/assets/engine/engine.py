@@ -375,6 +375,8 @@ class Engine(object):
         if f is None:
             return
         self.frames_parsed += 1
+        if self.detector is not None:
+            self.detector.frame(f, ts)
 
         if f.channel:
             self.agg.channel(f, ts, dot11.band_of(f.freq, f.channel))

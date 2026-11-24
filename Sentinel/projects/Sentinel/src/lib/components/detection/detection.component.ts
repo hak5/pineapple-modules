@@ -26,12 +26,14 @@ export class DetectionComponent implements OnInit, OnDestroy {
         my_ap_downgrade: 'Weaker security', my_ap_changed: 'Access point changed',
         my_ap_channel: 'Channel change', deauth_flood: 'Deauthentication burst',
         beacon_flood: 'Forged access points', karma_ap: 'Answers for any network',
+        pmkid_attempt: 'Key collection attempt',
         suppressed: 'Alerts suppressed',
     };
     readonly fieldLabels = {
         ssid: 'Network', channel: 'Channel', band: 'Band', rssi: 'Signal (dBm)', count: 'Frames or names',
         window_s: 'Over (seconds)', expected: 'Reference', observed: 'Seen', reasons: 'Reason codes',
-        broadcast: 'Sent to everyone', ssids: 'Names announced',
+        broadcast: 'Sent to everyone', ssids: 'Names announced', attempts: 'Abandoned handshakes',
+        pmkid: 'PMKID in the message', reconnections_after: 'Reconnections right after', note: 'What it means',
     };
     /** Rules whose cause is often a router update or a planned change. */
     readonly rebaselineKinds = ['my_ap_changed', 'my_ap_channel'];
@@ -93,6 +95,7 @@ export class DetectionComponent implements OnInit, OnDestroy {
     }
 
     private text(v: any): string {
+        if (typeof v === 'boolean') { return v ? 'yes' : 'no'; }
         if (Array.isArray(v)) { return v.map((x) => this.text(x)).join(', '); }
         if (v && typeof v === 'object') {
             return Object.keys(v).filter((k) => v[k] !== null && v[k] !== undefined)

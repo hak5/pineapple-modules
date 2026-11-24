@@ -118,3 +118,37 @@ mat-card.card {
         transition: none !important;
     }
 }
+
+/*
+ * Controls stay visible whatever the Pineapple theme (see readHostTheme): --sn-accent is the
+ * theme's primary colour, or the text colour when that primary would vanish on the cards.
+ */
+.mat-flat-button.mat-primary:not([disabled]):not(.sn-probe) {
+    background-color: var(--sn-accent);
+    color: var(--sn-on-primary);
+}
+
+.mat-stroked-button.mat-primary:not([disabled]),
+.mat-button.mat-primary:not([disabled]) {
+    color: var(--sn-accent);
+}
+
+.mat-stroked-button.mat-primary:not([disabled]) {
+    border-color: var(--sn-accent-soft);
+}
+
+:host ::ng-deep .mat-slide-toggle.mat-primary.mat-checked .mat-slide-toggle-thumb {
+    background-color: var(--sn-accent);
+}
+
+:host ::ng-deep .mat-slide-toggle.mat-primary.mat-checked .mat-slide-toggle-bar {
+    background-color: var(--sn-accent-soft);
+}
+
+:host ::ng-deep .mat-checkbox-checked.mat-primary .mat-checkbox-background {
+    background-color: var(--sn-accent);
+}
+
+:host ::ng-deep .mat-checkbox-checked.mat-primary .mat-checkbox-checkmark-path {
+    stroke: var(--sn-on-primary) !important;
+}

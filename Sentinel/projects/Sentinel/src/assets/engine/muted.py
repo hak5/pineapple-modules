@@ -13,7 +13,7 @@ FILENAME = 'muted_alerts.json'
 
 # Alert types that can be muted (the intrusion detection rules, see detect.py)
 KINDS = ('evil_twin', 'my_ap_conflict', 'my_ap_downgrade', 'my_ap_changed', 'my_ap_channel',
-         'deauth_flood', 'beacon_flood', 'karma_ap')
+         'deauth_flood', 'beacon_flood', 'karma_ap', 'pmkid_attempt')
 
 
 def load(path):

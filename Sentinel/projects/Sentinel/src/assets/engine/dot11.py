@@ -417,6 +417,46 @@ def cached_beacon_info(bssid, body, subtype):
     return info
 
 
+LLC_EAPOL = b'\xaa\xaa\x03\x00\x00\x00\x88\x8e'
+PMKID_KDE = b'\xdd\x14\x00\x0f\xac\x04'
+
+
+def parse_eapol_key(body):
+    """
+    One EAPOL-Key frame (the 4-way handshake), sent in clear before the keys are installed.
+    Returns {'msg': 1..4, 'pmkid': bool} for a pairwise key message, or None.
+    Only the Key Information bits are read, plus the key data of message 1 to see
+    whether it carries a PMKID. Never raises on a short or odd frame.
+    """
+    if len(body) < 99 or body[1] != 3 or body[4] not in (2, 254):   # EAPOL-Key, RSN or WPA
+        return None
+    info = (body[5] << 8) | body[6]
+    if not info & 0x0008:            # group key handshake: not the 4-way handshake
+        return None
+    ack, mic, install, secure = info & 0x0080, info & 0x0100, info & 0x0040, info & 0x0200
+    if ack and not mic:
+        msg = 1
+    elif ack and mic and install:
+        msg = 3
+    elif mic and not ack:
+        msg = 4 if secure else 2
+    else:
+        return None
+    pmkid = False
+    if msg == 1:
+        # Key data length sits after a 16-byte MIC (24 with the SHA-384 suites)
+        for mic_len in (16, 24):
+            at = 4 + 1 + 2 + 2 + 8 + 32 + 16 + 8 + 8 + mic_len
+            if len(body) >= at + 2:
+                n = (body[at] << 8) | body[at + 1]
+                data = body[at + 2:at + 2 + n]
+                if len(data) == n:
+                    i = data.find(PMKID_KDE)
+                    pmkid = i >= 0 and any(data[i + 6:i + 22])
+                    break
+    return {'msg': msg, 'pmkid': pmkid}
+
+
 def parse_frame(buf, want_data=True):
     """
     Parse one radiotap-encapsulated 802.11 frame.
@@ -488,6 +528,17 @@ def parse_frame(buf, want_data=True):
     if ftype == TYPE_DATA:
         if not want_data:
             return None
+        if not f.protected and not (f.to_ds and f.from_ds):
+            hl = 24
+            qos = bool(subtype & 0x08)
+            if qos:
+                hl += 2
+                if fc1 & 0x80:      # +HTC
+                    hl += 4
+            if buf[h + hl:h + hl + 8] == LLC_EAPOL:
+                key = parse_eapol_key(buf[h + hl + 8:end])
+                if key is not None:
+                    f.info = {'eapol': key}
         return f
 
     return None

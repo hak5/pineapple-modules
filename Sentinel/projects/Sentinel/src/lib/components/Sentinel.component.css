@@ -55,6 +55,16 @@
     pointer-events: none;
 }
 
+/*
+ * Buttons stay readable whatever the Pineapple theme: the coloured ones use the theme's colour
+ * with a text picked for contrast; "Stop monitoring" is an outlined button in the text colour.
+ */
+.sn .engine-button.is-running:not([disabled]) {
+    background-color: transparent;
+    color: var(--sn-text);
+    box-shadow: inset 0 0 0 1px var(--sn-line);
+}
+
 /* Status card */
 .status-row {
     display: flex;
