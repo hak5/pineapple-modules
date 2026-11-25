@@ -13,7 +13,6 @@ import { ScoreDialComponent } from './components/score-dial/score-dial.component
 import { ChannelsComponent } from './components/channels/channels.component';
 import { AuditComponent } from './components/audit/audit.component';
 import { SettingsComponent } from './components/settings/settings.component';
-import { ComingSoonComponent } from './components/coming-soon/coming-soon.component';
 import { DetectionComponent } from './components/detection/detection.component';
 import { ReportsComponent } from './components/reports/reports.component';
 import { NotificationsComponent } from './components/notifications/notifications.component';
@@ -32,7 +31,6 @@ const routes: Routes = [
         ChannelsComponent,
         AuditComponent,
         SettingsComponent,
-        ComingSoonComponent,
         DetectionComponent,
         ReportsComponent,
         NotificationsComponent,

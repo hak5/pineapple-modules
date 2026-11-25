@@ -79,9 +79,6 @@
 
                     <lib-sentinel-detection *ngSwitchCase="'wids'" [status]="status" (open)="open($event)" (read)="refresh()"></lib-sentinel-detection>
                     <lib-sentinel-notifications *ngSwitchCase="'notifications'" [status]="status"></lib-sentinel-notifications>
-                    <lib-sentinel-coming-soon *ngSwitchCase="'drones'" title="Nearby drones"
-                        text="Drones broadcasting their Remote ID over Wi-Fi will show up here with their ID, position and altitude.">
-                    </lib-sentinel-coming-soon>
                     <lib-sentinel-reports *ngSwitchCase="'reports'" (open)="open($event)"></lib-sentinel-reports>
                 </div>
             </ng-template>
