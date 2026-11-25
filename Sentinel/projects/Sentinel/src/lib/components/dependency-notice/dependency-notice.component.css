@@ -1,0 +1,27 @@
+:host {
+    display: block;
+}
+
+.notice {
+    margin-bottom: 16px;
+}
+
+.notice .card-note {
+    max-width: 72ch;
+}
+
+.notice .error {
+    color: var(--sn-critical-ink);
+}
+
+.notice mat-progress-bar {
+    margin-top: 12px;
+}
+
+.alert-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    color: var(--sn-high-ink);
+}

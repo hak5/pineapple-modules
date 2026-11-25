@@ -1,0 +1,154 @@
+/*
+ * Sentinel shared styles.
+ *
+ * Sentinel uses the Pineapple's own Angular Material components (cards, tabs,
+ * buttons, toggles, selects), so it automatically follows the active Pineapple
+ * theme. The few custom-drawn elements read their colours from CSS variables
+ * that Sentinel.component sets from the live theme (see readHostTheme()).
+ */
+
+:host {
+    display: block;
+}
+
+.stack {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 16px;
+}
+
+@media (max-width: 820px) {
+    .split {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+mat-card.card {
+    margin: 0;
+}
+
+.card-title {
+    margin: 0 0 12px;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.card-note {
+    margin: -6px 0 14px;
+    font-size: 14px;
+    opacity: 0.72;
+    max-width: 70ch;
+    line-height: 1.45;
+}
+
+.soft {
+    opacity: 0.68;
+}
+
+.num {
+    font-variant-numeric: tabular-nums;
+}
+
+.rule {
+    border-color: var(--sn-line);
+}
+
+/* Grade colours as text: tuned per theme by Sentinel.component */
+.t-critical { color: var(--sn-critical-ink); }
+.t-high { color: var(--sn-high-ink); }
+.t-medium { color: var(--sn-medium-ink); }
+.t-low { color: var(--sn-low-ink); }
+.t-good { color: var(--sn-good-ink); }
+.t-info { opacity: 0.7; }
+
+.grade {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.grade::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    background: currentColor;
+}
+
+.empty {
+    padding: 24px 8px;
+    text-align: center;
+    line-height: 1.5;
+}
+
+.empty strong {
+    display: block;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.empty span {
+    opacity: 0.7;
+}
+
+.full {
+    width: 100%;
+}
+
+/* Dark spectrum screen, like Recon's graphs */
+.bench {
+    background: var(--sn-bezel);
+    border-radius: 4px;
+    padding: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/*
+ * Controls stay visible whatever the Pineapple theme (see readHostTheme): --sn-accent is the
+ * theme's primary colour, or the text colour when that primary would vanish on the cards.
+ */
+.mat-flat-button.mat-primary:not([disabled]):not(.sn-probe) {
+    background-color: var(--sn-accent);
+    color: var(--sn-on-primary);
+}
+
+.mat-stroked-button.mat-primary:not([disabled]),
+.mat-button.mat-primary:not([disabled]) {
+    color: var(--sn-accent);
+}
+
+.mat-stroked-button.mat-primary:not([disabled]) {
+    border-color: var(--sn-accent-soft);
+}
+
+:host ::ng-deep .mat-slide-toggle.mat-primary.mat-checked .mat-slide-toggle-thumb {
+    background-color: var(--sn-accent);
+}
+
+:host ::ng-deep .mat-slide-toggle.mat-primary.mat-checked .mat-slide-toggle-bar {
+    background-color: var(--sn-accent-soft);
+}
+
+:host ::ng-deep .mat-checkbox-checked.mat-primary .mat-checkbox-background {
+    background-color: var(--sn-accent);
+}
+
+:host ::ng-deep .mat-checkbox-checked.mat-primary .mat-checkbox-checkmark-path {
+    stroke: var(--sn-on-primary) !important;
+}

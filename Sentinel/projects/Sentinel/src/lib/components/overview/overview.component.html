@@ -1,0 +1,126 @@
+<div class="stack">
+    <p class="refresh-note">Updates every {{ every }} s<ng-container *ngIf="updated"> · last update {{ updated | date:'HH:mm:ss' }}</ng-container></p>
+    <mat-card class="card">
+        <div class="bench">
+            <div class="bands">
+                <figure>
+                    <figcaption>
+                        <span class="band-name">2.4 GHz</span>
+                        <span class="band-count">{{ count('2.4') }} networks</span>
+                    </figcaption>
+                    <lib-sentinel-spectrum [aps]="data?.spectrum" band="2.4" [recommended]="best('2.4')"
+                                           [live]="live" [height]="250"></lib-sentinel-spectrum>
+                </figure>
+                <figure>
+                    <figcaption>
+                        <span class="band-name">5 GHz</span>
+                        <span class="band-count" *ngIf="listens5 || count('5')">{{ count('5') }} networks</span>
+                    </figcaption>
+                    <lib-sentinel-spectrum *ngIf="listens5 || count('5')" [aps]="data?.spectrum" band="5" [recommended]="best('5')"
+                                           [live]="live" [height]="250"></lib-sentinel-spectrum>
+                    <div class="no-radio" *ngIf="!listens5 && !count('5')">
+                        <ng-container *ngIf="!has5Radio">No radio here receives 5 GHz. Plug in an adapter such as the MK7AC to watch this band.</ng-container>
+                        <ng-container *ngIf="has5Radio">A radio can receive 5 GHz but none listens there yet: turn on Radio 2 in Settings.</ng-container>
+                        <button mat-stroked-button (click)="open.emit('settings')">Open Settings</button>
+                    </div>
+                </figure>
+            </div>
+        </div>
+        <div class="legend">
+            <span class="soft">Colour shows each network's security:</span>
+            <span *ngFor="let g of gradeOrder" class="key"><i [ngClass]="'k-' + g"></i>{{ gradeLabels[g] }}</span>
+            <span class="soft">Height shows signal strength.</span>
+        </div>
+    </mat-card>
+
+    <mat-card class="card readouts" *ngIf="data?.stats as s">
+        <div class="readout">
+            <span class="value num">{{ s.aps_last_hour }}</span>
+            <span class="label">access points seen in the last hour</span>
+        </div>
+        <div class="readout" [class.off]="!data.tracking?.clients">
+            <span class="value num">{{ data.tracking?.clients ? s.clients_last_hour : 'Off' }}</span>
+            <span class="label">{{ data.tracking?.clients ? 'connected devices' : 'connected devices are not tracked' }}</span>
+        </div>
+        <div class="readout" [class.off]="!data.tracking?.probes">
+            <span class="value num">{{ data.tracking?.probes ? s.probing_devices_last_hour : 'Off' }}</span>
+            <span class="label">{{ data.tracking?.probes ? 'devices looking for a network' : 'network searches are not tracked' }}</span>
+        </div>
+        <div class="readout" [class.hot]="s.disconnections_last_hour > 200">
+            <span class="value num">{{ s.disconnections_last_hour }}</span>
+            <span class="label">deauthentication frames</span>
+        </div>
+    </mat-card>
+
+    <mat-card class="card empty" *ngIf="data && !data.stats">
+        <strong>Nothing to show yet</strong>
+        <span>Pick your radios in Settings, then start monitoring. The first networks show up within seconds.</span>
+    </mat-card>
+
+    <mat-card class="card mine-card" *ngIf="data?.stats">
+        <div class="mine-body" *ngIf="data.security?.my_total; else noMine">
+            <mat-icon class="mine-star">star</mat-icon>
+            <div>
+                <h2 class="card-title">Your networks</h2>
+                <p class="soft">
+                    {{ data.security.my_total }} access point(s) seen in the last hour, score
+                    <strong class="num">{{ data.security.my_score }}/100</strong>,
+                    worst level <span class="grade" [ngClass]="'t-' + myWorst">{{ gradeLabels[myWorst] }}</span>.
+                </p>
+            </div>
+            <button mat-stroked-button color="primary" (click)="open.emit('security')">See them</button>
+        </div>
+        <ng-template #noMine>
+            <div class="mine-body">
+                <mat-icon class="mine-star">star_border</mat-icon>
+                <div>
+                    <h2 class="card-title">Your networks</h2>
+                    <p class="soft" *ngIf="!data.my_networks">Mark your own access points with the star in the Security tab: Sentinel then scores them separately and knows what to protect.</p>
+                    <p class="soft" *ngIf="data.my_networks">Your {{ data.my_networks }} marked access point(s) were not seen in the last hour.</p>
+                </div>
+                <button mat-stroked-button color="primary" (click)="open.emit('security')">Open Security</button>
+            </div>
+        </ng-template>
+    </mat-card>
+
+    <div class="split">
+        <mat-card class="card" *ngIf="data?.security?.total">
+            <h2 class="card-title">Neighbourhood security</h2>
+            <div class="security-body">
+                <lib-sentinel-score-dial [score]="data.security.score"></lib-sentinel-score-dial>
+                <div class="mix">
+                    <p class="soft">{{ data.security.total }} networks analysed in the last hour.</p>
+                    <div class="mix-bar">
+                        <span *ngFor="let g of gradeOrder" [ngClass]="'k-' + g" [style.width.%]="gradeShare(g)"></span>
+                    </div>
+                    <ul>
+                        <li *ngFor="let g of gradeOrder">
+                            <span class="grade" [ngClass]="'t-' + g">{{ gradeLabels[g] }}</span>
+                            <span class="num">{{ data.security.summary[g] || 0 }}</span>
+                        </li>
+                    </ul>
+                    <div>
+                        <button mat-stroked-button color="primary" (click)="open.emit('security')">See each network</button>
+                    </div>
+                </div>
+            </div>
+        </mat-card>
+
+        <mat-card class="card" *ngIf="data?.stats">
+            <h2 class="card-title">Recent alerts</h2>
+            <div class="alerts-link" *ngIf="data.events?.length">
+                <button mat-stroked-button color="primary" (click)="open.emit('wids')">See all alerts</button>
+            </div>
+            <p class="soft" *ngIf="!data.events?.length">
+                No alerts from intrusion detection.
+            </p>
+            <mat-list *ngIf="data.events?.length" class="events">
+                <mat-list-item *ngFor="let e of data.events">
+                    <mat-icon mat-list-icon [ngClass]="'t-' + e.severity">{{ e.severity === 'critical' ? 'error' : 'warning' }}</mat-icon>
+                    <h4 mat-line>{{ e.title }}</h4>
+                    <p mat-line class="soft">{{ ago(e.ts) }}</p>
+                </mat-list-item>
+            </mat-list>
+        </mat-card>
+    </div>
+</div>

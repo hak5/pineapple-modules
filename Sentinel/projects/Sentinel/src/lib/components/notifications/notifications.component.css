@@ -1,0 +1,44 @@
+.intro {
+    margin: 4px 0 16px;
+}
+
+.row {
+    margin-bottom: 12px;
+}
+
+.fields {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 20px;
+    margin-bottom: 8px;
+}
+
+.fields mat-form-field {
+    flex: 1 1 240px;
+    max-width: 360px;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.error-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 14px 0 0;
+    color: var(--sn-critical-ink);
+}
+
+.notes ul {
+    margin: 4px 0 0;
+    padding-left: 18px;
+}
+
+.notes li {
+    margin: 6px 0;
+}

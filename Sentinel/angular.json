@@ -1,0 +1,48 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "Sentinel": {
+      "projectType": "library",
+      "root": "projects/Sentinel",
+      "sourceRoot": "projects/Sentinel/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "projects/Sentinel/tsconfig.lib.json",
+            "project": "projects/Sentinel/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/Sentinel/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/Sentinel/src/test.ts",
+            "tsConfig": "projects/Sentinel/tsconfig.spec.json",
+            "karmaConfig": "projects/Sentinel/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/Sentinel/tsconfig.lib.json",
+              "projects/Sentinel/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "defaultProject": "Sentinel"
+}

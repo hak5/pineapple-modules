@@ -1,0 +1,142 @@
+<div class="stack">
+    <p class="refresh-note">Updates every {{ every }} s<ng-container *ngIf="updated"> · last update {{ updated | date:'HH:mm:ss' }}</ng-container></p>
+    <mat-card class="card empty" *ngIf="audit && !audit.total">
+        <strong>No networks to analyse</strong>
+        <span>Start monitoring and let the radios scan for a few minutes.</span>
+    </mat-card>
+
+    <ng-container *ngIf="audit?.total">
+        <mat-card class="card summary">
+            <div class="dial">
+                <lib-sentinel-score-dial [score]="dialScore"></lib-sentinel-score-dial>
+                <span class="dial-title">{{ dialTitle }}</span>
+            </div>
+
+            <div class="summary-body">
+                <h2 class="card-title">{{ audit.total }} networks analysed</h2>
+                <p class="card-note" *ngIf="audit.my_total">
+                    The gauge shows your {{ audit.my_total }} marked access point(s). Neighbourhood score: {{ audit.score }}/100.
+                </p>
+                <p class="card-note" *ngIf="!audit.my_total">
+                    The score is the share of networks without a major weakness. Mark your own access points with the star
+                    to get a score for them and let Sentinel know what to protect.
+                </p>
+
+                <div class="grade-filter" role="group" aria-label="Filter by level">
+                    <button mat-stroked-button class="mine-filter" [class.on]="gradeFilter === 'mine'"
+                            [disabled]="!audit.my_total" (click)="toggleGrade('mine')">
+                        <span class="gf-count num">{{ audit.my_total || 0 }}</span>
+                        <span class="gf-label">My networks</span>
+                    </button>
+                    <button *ngFor="let g of grades" mat-stroked-button [class.on]="gradeFilter === g"
+                            [disabled]="!audit.summary[g]" (click)="toggleGrade(g)">
+                        <span class="gf-count num" [ngClass]="'t-' + g">{{ audit.summary[g] || 0 }}</span>
+                        <span class="gf-label">{{ gradeLabels[g] }}</span>
+                    </button>
+                </div>
+
+                <div class="pmf">
+                    <div class="pmf-head">
+                        <span>Protected management frames (802.11w)</span>
+                        <span class="soft num">{{ audit.pmf.required }} required, {{ audit.pmf.capable }} optional, {{ audit.pmf.none }} missing</span>
+                    </div>
+                    <div class="pmf-bar">
+                        <span class="p-required" [style.width.%]="pmfShare('required')"></span>
+                        <span class="p-capable" [style.width.%]="pmfShare('capable')"></span>
+                        <span class="p-none" [style.width.%]="pmfShare('none')"></span>
+                    </div>
+                </div>
+            </div>
+        </mat-card>
+
+        <mat-card class="card suggestions" *ngIf="suggestions.length">
+            <h3 class="card-title">Other access points that may be yours, like "{{ suggestedFor }}"</h3>
+            <p class="card-note">Other networks of the same access point, and the same network on other access points.
+                All seen often in the last 24 hours. Tick only the ones you own.</p>
+            <div class="sugg" *ngFor="let s of suggestions">
+                <mat-checkbox [(ngModel)]="picked[s.bssid]">
+                    <span class="num">{{ s.bssid }}</span>
+                    <strong class="sugg-name">{{ s.ssid || '(hidden name)' }}</strong>
+                    <span class="soft">· channel {{ s.channel }} · {{ s.rssi }} dBm · {{ s.reason }}</span>
+                </mat-checkbox>
+            </div>
+            <div class="sugg-actions">
+                <button mat-button (click)="toggleAllPicked()">{{ allPicked ? 'Untick all' : 'Tick all' }}</button>
+                <button mat-stroked-button (click)="dismissSuggestions()">Not mine</button>
+                <button mat-flat-button color="primary" [disabled]="!pickedCount" (click)="addPicked()">Add {{ pickedCount || '' }} to my networks</button>
+            </div>
+        </mat-card>
+
+        <div class="toolbar">
+            <mat-form-field class="search">
+                <mat-label>Search a network or BSSID</mat-label>
+                <input matInput [(ngModel)]="search">
+                <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+            <mat-button-toggle-group [ngModel]="maxAge" (ngModelChange)="setAge($event)" aria-label="Seen in the last">
+                <mat-button-toggle *ngFor="let a of ages" [value]="a.value">{{ a.label }}</mat-button-toggle>
+            </mat-button-toggle-group>
+        </div>
+
+        <div class="list-head" *ngIf="networks.length">
+            <button mat-icon-button class="star master" [class.on]="masterIcon !== 'star_border'" (click)="toggleAllShown()"
+                    [attr.aria-label]="masterIcon === 'star' ? 'Unmark all networks shown' : 'Mark all networks shown as mine'"
+                    [matTooltip]="masterIcon === 'star' ? 'Unmark all shown' : 'Mark all shown as mine'">
+                <mat-icon>{{ masterIcon }}</mat-icon>
+            </button>
+            <span class="soft">{{ masterIcon === 'star' ? 'Unmark all shown' : 'Mark all shown' }}
+                <ng-container *ngIf="search || gradeFilter !== 'all'"> ({{ networks.length }})</ng-container></span>
+        </div>
+
+        <mat-accordion multi class="list">
+            <mat-expansion-panel *ngFor="let n of networks; trackBy: trackNet" [ngClass]="'edge-' + n.grade">
+                <mat-expansion-panel-header>
+                    <mat-panel-title>
+                        <button mat-icon-button class="star" [class.on]="n.mine" (click)="toggleMine(n, $event)"
+                                [attr.aria-label]="n.mine ? 'Remove from my networks' : 'Mark as my network'"
+                                [matTooltip]="n.mine ? 'Your network' : 'Mark as my network'">
+                            <mat-icon>{{ n.mine ? 'star' : 'star_border' }}</mat-icon>
+                        </button>
+                        <span class="grade" [ngClass]="'t-' + n.grade">{{ gradeLabels[n.grade] }}</span>
+                        <span class="name">{{ n.ssid || '(hidden name)' }}</span>
+                        <mat-icon *ngIf="n.hidden" class="small-icon" matTooltip="Hidden SSID">visibility_off</mat-icon>
+                    </mat-panel-title>
+                    <mat-panel-description>
+                        <span class="sec">{{ n.security }}</span>
+                        <span class="meta">PMF {{ pmfLabel(n.pmf) }}</span>
+                        <span class="meta num">channel {{ n.channel }}</span>
+                        <span class="signal" [attr.aria-label]="n.rssi + ' dBm'" [matTooltip]="n.rssi + ' dBm'">
+                            <i *ngFor="let b of [1, 2, 3, 4]" [class.lit]="b <= bars(n.rssi)"></i>
+                        </span>
+                    </mat-panel-description>
+                </mat-expansion-panel-header>
+
+                <div class="net-body">
+                    <dl class="facts">
+                        <dt>BSSID</dt><dd class="num">{{ n.bssid }}</dd>
+                        <dt>Authentication</dt><dd>{{ n.akm || 'none' }}</dd>
+                        <dt>Encryption</dt><dd>{{ n.pairwise || 'none' }}<span class="soft" *ngIf="n.group_cipher">, group {{ n.group_cipher }}</span></dd>
+                        <dt>WPS</dt><dd>{{ n.wps ? 'enabled' : 'no' }}</dd>
+                        <dt>Signal</dt><dd class="num">{{ n.rssi }} dBm</dd>
+                        <dt>Last seen</dt><dd>{{ ago(n.last_seen) }}</dd>
+                    </dl>
+                    <div class="mine-actions" *ngIf="n.mine">
+                        <button mat-stroked-button (click)="rebaseline(n)">Accept current settings as reference</button>
+                        <span class="soft">Use it after a router update or a planned channel change.</span>
+                    </div>
+                    <ul class="findings">
+                        <li *ngFor="let f of n.findings">
+                            <span class="grade" [ngClass]="'t-' + f.severity">{{ gradeLabels[f.severity] }}</span>
+                            <div>
+                                <div class="f-title">{{ f.title }}</div>
+                                <p class="f-detail">{{ f.detail }}</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </mat-expansion-panel>
+        </mat-accordion>
+
+        <p class="soft" *ngIf="!networks.length">No network matches this filter.</p>
+    </ng-container>
+</div>
